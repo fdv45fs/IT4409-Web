@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(cookieParser());
+  app.setGlobalPrefix('api');
 
   const clientOrigin = process.env.CLIENT_ORIGIN ?? 'http://localhost:5173';
   app.enableCors({
@@ -15,10 +16,10 @@ async function bootstrap() {
   });
 
   const config = new DocumentBuilder()
-    .setTitle('Auth API')
-    .setDescription('API đăng ký / đăng nhập')
+    .setTitle('Workspace + Auth API')
+    .setDescription('API quản lý Auth, Workspace')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

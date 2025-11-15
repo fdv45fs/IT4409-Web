@@ -30,11 +30,3 @@ export class UserResponseFullDto extends UserResponseBaseDto {
   @ApiProperty()
   updatedAt: Date;
 }
-
-export class AuthUserResponseDto {
-  @ApiProperty()
-  accessToken: string;
-
-  @ApiProperty({ type: UserResponseBaseDto })
-  user: UserResponseBaseDto;
-}

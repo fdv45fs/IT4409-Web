@@ -13,6 +13,8 @@ model Role {
   name        String   @unique
   description String?
   createdAt   DateTime @default(now())
+  workspaceMembers WorkspaceMember[]
+  channelMembers   ChannelMember[]
 }
 
 model User {
@@ -71,11 +73,12 @@ model WorkspaceMember {
   id          String    @id @default(uuid())
   workspaceId String
   userId      String
-  role        String
+  roleId        String
   joinedAt    DateTime  @default(now())
 
   workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role      @relation(fields: [roleId], references: [id])
 
   @@unique([workspaceId, userId])
 }
@@ -104,11 +107,12 @@ model ChannelMember {
   id        String   @id @default(uuid())
   channelId String
   userId    String
-  role      String
+  roleId      String
   joinedAt  DateTime @default(now())
 
   channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        Role      @relation(fields: [roleId], references: [id])
 
   @@unique([channelId, userId])
 }
