@@ -7,6 +7,8 @@ import {
   Param,
   Req,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -24,27 +26,47 @@ import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { ROLES } from '../common/constants/roles.constant';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadService } from '../upload/upload.service';
+import type { File as MulterFile } from 'multer';
 
 @ApiTags('Workspace')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('workspaces')
 export class WorkspaceController {
-  constructor(private workspaceService: WorkspaceService) {}
+  constructor(
+    private workspaceService: WorkspaceService,
+    private uploadService: UploadService,
+  ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Create a new workspace' })
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('avatar')) // tên field trong form-data
+  @ApiOperation({ summary: 'Create a new workspace with optional avatar file' })
   @ApiBody({ type: CreateWorkspaceDto })
   @ApiResponse({
     status: 201,
     description: 'Workspace successfully created',
     type: WorkspaceResponseDto,
   })
-  create(
+  async create(
     @Req() req,
     @Body() dto: CreateWorkspaceDto,
+    @UploadedFile() avatar?: MulterFile,
   ): Promise<WorkspaceResponseDto> {
-    return this.workspaceService.create(req.user.id, dto);
+    let avatarUrl: string | undefined;
+
+    if (avatar) {
+      const uploadResult = await this.uploadService.uploadSingle(
+        avatar,
+        `workspace/temp`,
+      );
+      avatarUrl = uploadResult.url;
+    }
+
+    // Truyền DTO + avatarUrl xuống service
+    return this.workspaceService.create(req.user.id, dto, avatarUrl);
   }
 
   @Get()

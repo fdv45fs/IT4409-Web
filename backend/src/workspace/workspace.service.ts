@@ -17,16 +17,21 @@ export class WorkspaceService {
   async create(
     userId: string,
     dto: CreateWorkspaceDto,
+    avatarUrl?: string, // thêm param avatarUrl
   ): Promise<WorkspaceResponseDto> {
-    const workspace = await this.prisma.workspace.create({ data: { ...dto } });
+    const workspace = await this.prisma.workspace.create({
+      data: {
+        name: dto.name,
+        description: dto.description,
+        avatarUrl: avatarUrl ?? null, // sử dụng param avatarUrl thay vì dto
+      },
+    });
 
-    let role = await this.prisma.role.findUnique({
+    const role = await this.prisma.role.findUnique({
       where: { name: ROLES.WORKSPACE_ADMIN },
     });
 
-    if (!role) {
-      throw new NotFoundException('Role WORKSPACE_ADMIN not found');
-    }
+    if (!role) throw new NotFoundException('Role WORKSPACE_ADMIN not found');
 
     await this.prisma.workspaceMember.create({
       data: { workspaceId: workspace.id, userId, roleId: role.id },

@@ -10,9 +10,4 @@ export class CreateWorkspaceDto {
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiProperty({ required: false })
-  @IsOptional()
-  @IsString()
-  avatarUrl?: string;
 }

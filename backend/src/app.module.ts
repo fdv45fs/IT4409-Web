@@ -6,6 +6,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { WorkspaceModule } from './workspace/workspace.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   controllers: [AppController],
@@ -18,6 +19,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
       isGlobal: true,
     }),
     WorkspaceModule,
+    UploadModule,
   ],
 })
 export class AppModule {}
