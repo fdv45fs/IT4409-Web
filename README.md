@@ -61,6 +61,9 @@ Nếu bạn đã có sẵn migration files và database online (có dữ liệu 
 cd prisma
 npx prisma migrate deploy
 ```
+```bash
+npx prisma studio
+```
 
 Lệnh này sẽ áp dụng tất cả migration đã có lên database mà không làm mất dữ liệu.
 

@@ -2,48 +2,24 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import AuthLayout from "../components/AuthLayout.jsx";
 import FormField from "../components/FormField.jsx";
-import useAuth from "../hooks/useAuth.js";
+import { forgotPassword } from "../api.js";
 
-const loginFields = [
-  {
-    name: "email",
-    label: "Email",
-    type: "email",
-    placeholder: "nhap-email@domain.com",
-  },
-  {
-    name: "password",
-    label: "Mật khẩu",
-    type: "password",
-    placeholder: "••••••••",
-  },
-];
-
-const initialState = { email: "", password: "" };
-
-function LoginPage() {
-  const [formState, setFormState] = useState(initialState);
+function ForgotPasswordPage() {
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(null);
-  const { login } = useAuth();
-
-  const handleChange = (field) => (event) => {
-    setFormState((prev) => ({ ...prev, [field]: event.target.value }));
-  };
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
-    setSuccess(null);
+    setSuccess(false);
     setIsLoading(true);
 
     try {
-      const result = await login(formState);
-      setSuccess({
-        message: "Đăng nhập thành công!",
-        user: result.user,
-      });
+      const result = await forgotPassword(email);
+      setSuccess(true);
+      setEmail(""); // Clear form
     } catch (err) {
       setError(err.message);
     } finally {
@@ -54,62 +30,72 @@ function LoginPage() {
   return (
     <AuthLayout
       previewVariant="hidden-scroll"
-      title="Đăng nhập"
-      subtitle="Sử dụng tài khoản đã đăng ký để truy cập ứng dụng."
+      title="Quên mật khẩu"
+      subtitle="Nhập email của bạn để nhận link đặt lại mật khẩu."
       footer={
         <span>
-          Bạn chưa có tài khoản?{" "}
-          <Link to="/register" className="text-indigo-300 underline-offset-2 hover:text-indigo-200">
-            Đăng ký ngay
+          Đã nhớ lại mật khẩu?{" "}
+          <Link 
+            to="/login" 
+            className="text-indigo-300 underline-offset-2 hover:text-indigo-200"
+          >
+            Đăng nhập
           </Link>
         </span>
       }
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
-        {loginFields.map((field) => (
-          <FormField
-            key={field.name}
-            {...field}
-            value={formState[field.name]}
-            onChange={handleChange(field.name)}
-          />
-        ))}
-        <div className="flex justify-end">
-          <Link 
-            to="/forgot-password" 
-            className="text-sm text-indigo-300 hover:text-indigo-200 underline-offset-2"
-          >
-            Quên mật khẩu?
-          </Link>
-        </div>
+        <FormField
+          name="email"
+          label="Email"
+          type="email"
+          placeholder="nhap-email@domain.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
         {error && (
           <p className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
             {error}
           </p>
         )}
+
         {success && (
           <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-4 text-sm text-emerald-100">
-            <p className="font-semibold">{success.message}</p>
-            <p className="text-xs text-emerald-200/80">
-              Xin chào {success.user?.fullName || success.user?.email}!
+            <p className="font-semibold">✓ Email đã được gửi!</p>
+            <p className="mt-1 text-xs text-emerald-200/80">
+              Vui lòng kiểm tra hộp thư của bạn và làm theo hướng dẫn để đặt lại mật khẩu.
+              Link sẽ hết hạn sau 15 phút.
             </p>
           </div>
         )}
+
         <button
           type="submit"
           className="group relative flex w-full items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900 disabled:cursor-not-allowed disabled:opacity-70"
-          disabled={isLoading}
+          disabled={isLoading || !email}
         >
           <span className="absolute inset-0 opacity-0 blur-2xl transition duration-500 group-hover:opacity-60">
             <span className="block h-full w-full bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400" />
           </span>
           <span className="relative flex items-center gap-2">
-            {isLoading ? "Đang xử lý..." : "Đăng nhập"}
+            {isLoading ? "Đang gửi..." : "Gửi link đặt lại mật khẩu"}
           </span>
         </button>
+
+        <div className="text-center">
+          <Link 
+            to="/register" 
+            className="text-sm text-slate-400 hover:text-slate-300"
+          >
+            Chưa có tài khoản? Đăng ký ngay
+          </Link>
+        </div>
       </form>
     </AuthLayout>
   );
 }
 
-export default LoginPage;
+export default ForgotPasswordPage;
+
