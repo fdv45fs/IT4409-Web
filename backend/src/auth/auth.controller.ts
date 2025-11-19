@@ -12,6 +12,8 @@ import { AuthService } from './auth.service';
 import { AuthUserResponseDto } from '../user/dtos/auth-response.dto';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { ApiTags, ApiResponse, ApiBody, ApiOperation } from '@nestjs/swagger';
 import { UseGuards } from '@nestjs/common';
@@ -109,5 +111,35 @@ export class AuthController {
     await this.authService.logout(userId);
     this.clearRefreshCookie(res);
     return { message: 'Logged out successfully' };
+  }
+
+  @Post('forgot-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Gửi link reset mật khẩu qua email' })
+  @ApiBody({ type: ForgotPasswordDto })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Email chứa link reset password đã được gửi' 
+  })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    return this.authService.forgotPassword(dto);
+  }
+
+  @Post('reset-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Đặt lại mật khẩu với token' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Mật khẩu đã được đặt lại thành công' 
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Token không hợp lệ hoặc đã hết hạn' 
+  })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto);
   }
 }

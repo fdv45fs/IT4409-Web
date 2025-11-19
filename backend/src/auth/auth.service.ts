@@ -2,14 +2,20 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from './dtos/register.dto';
 import { LoginDto } from './dtos/login.dto';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { ResetPasswordDto } from './dtos/reset-password.dto';
 import { JwtPayload } from '../common/types/jwt-payload.interface';
 import { UserResponseBaseDto } from '../user/dtos/user-response.dto';
+import { EmailService } from '../email/email.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -20,6 +26,8 @@ export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
+    private readonly emailService: EmailService,
+    private readonly prisma: PrismaService,
   ) {}
 
   private signAccessToken(payload: JwtPayload) {
@@ -117,5 +125,68 @@ export class AuthService {
 
   async logout(userId: string) {
     await this.userService.updateRefreshToken(userId, null);
+  }
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
+    const user = await this.userService.findByEmail(dto.email);
+    
+    if (!user) {
+      return { message: 'Email not found' };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    
+    // Lưu token vào database với thời hạn 15 phút
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15);
+
+    await this.prisma.otp.create({
+      data: {
+        userId: user.id,
+        otpCode: resetToken,
+        expiresAt,
+        isUsed: false,
+      },
+    });
+
+    await this.emailService.sendResetPasswordEmail(user.email, resetToken);
+
+    return { message: 'Nếu email tồn tại, link đặt lại mật khẩu đã được gửi' };
+  }
+
+  async resetPassword(dto: ResetPasswordDto): Promise<{ message: string }> {
+    const otpRecord = await this.prisma.otp.findFirst({
+      where: {
+        otpCode: dto.token,
+        isUsed: false,
+        expiresAt: {
+          gte: new Date(), // Token chưa hết hạn
+        },
+      },
+      include: {
+        user: true,
+      },
+    });
+
+    if (!otpRecord) {
+      throw new BadRequestException('Token không hợp lệ hoặc đã hết hạn');
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
+
+    await this.prisma.user.update({
+      where: { id: otpRecord.userId },
+      data: {
+        password: hashedPassword,
+        refreshToken: null, // Xóa refresh token cũ để force logout
+      },
+    });
+
+    await this.prisma.otp.update({
+      where: { id: otpRecord.id },
+      data: { isUsed: true },
+    });
+
+    return { message: 'Đặt lại mật khẩu thành công' };
   }
 }
