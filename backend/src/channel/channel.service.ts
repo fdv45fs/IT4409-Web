@@ -50,7 +50,7 @@ export class ChannelService {
     // 2. Kiểm tra role có quyền tạo channel không
     const allowedRoles = [
       ROLES.WORKSPACE_ADMIN,
-      ROLES.WORKSPACE_PRIVILEDGE_MEMBER,
+      ROLES.WORKSPACE_PRIVILEGE_MEMBER,
     ];
     if (!allowedRoles.includes(membership.role.name as ROLES)) {
       throw new ForbiddenException(
@@ -229,25 +229,47 @@ export class ChannelService {
       throw new ForbiddenException('Chỉ Channel Admin mới có quyền cập nhật');
     }
 
-    // 3. Cập nhật channel
-    const updatedChannel = await this.prisma.channel.update({
-      where: { id: channelId },
-      data: {
-        ...(dto.name && { name: dto.name }),
-        ...(dto.description !== undefined && { description: dto.description }),
-        ...(dto.isPrivate !== undefined && {
-          isPrivate: dto.isPrivate,
-          // Nếu chuyển sang private, tạo joinCode mới
-          ...(dto.isPrivate && !channel.joinCode && {
-            joinCode: this.generateJoinCode(),
-          }),
-          // Nếu chuyển sang public, xóa joinCode
-          ...(!dto.isPrivate && { joinCode: null }),
-        }),
-      },
-      include: {
-        members: true,
-      },
+    // 3. Cập nhật channel (atomic update to prevent race condition)
+    const updatedChannel = await this.prisma.$transaction(async (tx) => {
+      // Read current channel state inside transaction
+      const currentChannel = await tx.channel.findUnique({
+        where: { id: channelId },
+        include: { members: true },
+      });
+
+      if (!currentChannel) {
+        throw new NotFoundException('Channel không tồn tại');
+      }
+
+      // Determine joinCode update logic based on current state
+      let joinCodeUpdate: string | null | undefined = undefined;
+      
+      if (dto.isPrivate !== undefined) {
+        if (!currentChannel.isPrivate && dto.isPrivate) {
+          // Changing from public to private: always generate new joinCode
+          joinCodeUpdate = this.generateJoinCode();
+        } else if (currentChannel.isPrivate && !dto.isPrivate) {
+          // Changing from private to public: always remove joinCode
+          joinCodeUpdate = null;
+        }
+        // If privacy not changing, leave joinCode unchanged
+      }
+
+      // Perform atomic update
+      const updated = await tx.channel.update({
+        where: { id: channelId },
+        data: {
+          ...(dto.name && { name: dto.name }),
+          ...(dto.description !== undefined && { description: dto.description }),
+          ...(dto.isPrivate !== undefined && { isPrivate: dto.isPrivate }),
+          ...(joinCodeUpdate !== undefined && { joinCode: joinCodeUpdate }),
+        },
+        include: {
+          members: true,
+        },
+      });
+
+      return updated;
     });
 
     // 4. Trả về thông tin đã cập nhật
@@ -315,10 +337,7 @@ export class ChannelService {
     channelId: string,
     dto: AddChannelMemberDto,
   ): Promise<ChannelMemberResponseDto> {
-    // 1. Validate input - phải có ít nhất email hoặc userId
-    if (!dto.email && !dto.userId) {
-      throw new BadRequestException('Phải cung cấp email hoặc userId');
-    }
+    // Validation đã được xử lý ở DTO level với @ValidateIf
 
     // 2. Tìm channel
     const channel = await this.prisma.channel.findUnique({
