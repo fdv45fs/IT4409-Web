@@ -16,7 +16,7 @@ import { CreateChannelDto } from './dtos/create-channel.dto';
 import { UpdateChannelDto } from './dtos/update-channel.dto';
 import { AddChannelMemberDto } from './dtos/add-member.dto';
 import { JoinChannelDto } from './dtos/join-channel.dto';
-import { ReviewJoinRequestDto } from './dtos/review-join-request.dto';
+import { PromoteMemberDto } from './dtos/promote-member.dto';
 import {
   ChannelResponseDto,
   ChannelListItemDto,
@@ -225,6 +225,89 @@ export class ChannelController {
   }
 
   /**
+   * DELETE /api/channels/:channelId/members/me
+   * Rời khỏi channel (self-leave)
+   * Bất kỳ Channel Member nào
+   */
+  @Delete(':channelId/members/me')
+  @ApiOperation({
+    summary: 'Rời khỏi channel',
+    description:
+      'User tự rời khỏi channel. Nếu là Admin duy nhất thì phải chỉ định Admin mới trước.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Rời channel thành công',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Bạn đã rời khỏi channel thành công',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Là Admin duy nhất, phải transfer quyền trước',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Channel không tồn tại hoặc không phải member',
+  })
+  async leaveChannel(
+    @Req() req: any,
+    @Param('channelId') channelId: string,
+  ): Promise<{ message: string }> {
+    const userId = req.user.id;
+    return this.channelService.leaveChannel(userId, channelId);
+  }
+
+  /**
+   * PATCH /api/channels/:channelId/members/:memberId/role
+   * Thay đổi role của member (promote/demote)
+   * Chỉ Channel Admin hoặc Workspace Admin
+   */
+  @Patch(':channelId/members/:memberId/role')
+  @ApiOperation({
+    summary: 'Thay đổi role của member trong channel',
+    description:
+      'Chỉ Channel Admin hoặc Workspace Admin mới có quyền. Có thể promote thành Admin hoặc demote thành Member. Không thể demote Admin duy nhất.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Đã cập nhật role thành công',
+    type: ChannelMemberResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Không thể demote Admin duy nhất',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền (không phải admin)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Channel hoặc Member không tồn tại',
+  })
+  async updateMemberRole(
+    @Req() req: any,
+    @Param('channelId') channelId: string,
+    @Param('memberId') memberId: string,
+    @Body() promoteMemberDto: PromoteMemberDto,
+  ): Promise<ChannelMemberResponseDto> {
+    const userId = req.user.id;
+    return this.channelService.updateMemberRole(
+      userId,
+      channelId,
+      memberId,
+      promoteMemberDto,
+    );
+  }
+
+  /**
    * DELETE /api/channels/:channelId/members/:memberId
    * Xóa thành viên khỏi channel
    * Chỉ Channel Admin
@@ -368,18 +451,18 @@ export class ChannelController {
   }
 
   /**
-   * PATCH /api/channels/:channelId/join-requests/:requestId
-   * Duyệt hoặc từ chối join request
+   * PATCH /api/channels/:channelId/join-requests/:requestId/approve
+   * Chấp nhận yêu cầu tham gia
    * Chỉ Channel Admin hoặc Workspace Admin
    */
-  @Patch(':channelId/join-requests/:requestId')
+  @Patch(':channelId/join-requests/:requestId/approve')
   @ApiOperation({
-    summary: 'Duyệt hoặc từ chối join request',
+    summary: 'Chấp nhận yêu cầu tham gia channel',
     description: 'Chỉ Channel Admin hoặc Workspace Admin mới có quyền',
   })
   @ApiResponse({
     status: 200,
-    description: 'Request đã được xử lý',
+    description: 'Đã chấp nhận yêu cầu',
     schema: {
       type: 'object',
       properties: {
@@ -399,19 +482,54 @@ export class ChannelController {
     status: 404,
     description: 'Không tìm thấy request',
   })
-  async reviewJoinRequest(
+  async approveJoinRequest(
     @Req() req: any,
     @Param('channelId') channelId: string,
     @Param('requestId') requestId: string,
-    @Body() reviewDto: ReviewJoinRequestDto,
   ): Promise<{ message: string }> {
     const userId = req.user.id;
-    return this.channelService.reviewJoinRequest(
-      userId,
-      channelId,
-      requestId,
-      reviewDto,
-    );
+    return this.channelService.approveJoinRequest(userId, channelId, requestId);
+  }
+
+  /**
+   * PATCH /api/channels/:channelId/join-requests/:requestId/reject
+   * Từ chối yêu cầu tham gia
+   * Chỉ Channel Admin hoặc Workspace Admin
+   */
+  @Patch(':channelId/join-requests/:requestId/reject')
+  @ApiOperation({
+    summary: 'Từ chối yêu cầu tham gia channel',
+    description: 'Chỉ Channel Admin hoặc Workspace Admin mới có quyền',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Đã từ chối yêu cầu',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Request đã được xử lý trước đó',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền (không phải admin)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Không tìm thấy request',
+  })
+  async rejectJoinRequest(
+    @Req() req: any,
+    @Param('channelId') channelId: string,
+    @Param('requestId') requestId: string,
+  ): Promise<{ message: string }> {
+    const userId = req.user.id;
+    return this.channelService.rejectJoinRequest(userId, channelId, requestId);
   }
 }
 

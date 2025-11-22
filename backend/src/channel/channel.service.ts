@@ -9,7 +9,7 @@ import { CreateChannelDto } from './dtos/create-channel.dto';
 import { UpdateChannelDto } from './dtos/update-channel.dto';
 import { AddChannelMemberDto } from './dtos/add-member.dto';
 import { JoinChannelDto } from './dtos/join-channel.dto';
-import { ReviewJoinRequestDto } from './dtos/review-join-request.dto';
+import { PromoteMemberDto } from './dtos/promote-member.dto';
 import {
   ChannelResponseDto,
   ChannelListItemDto,
@@ -771,14 +771,13 @@ export class ChannelService {
   }
 
   /**
-   * Duyệt hoặc từ chối join request
+   * Chấp nhận join request
    * Chỉ Channel Admin hoặc Workspace Admin
    */
-  async reviewJoinRequest(
+  async approveJoinRequest(
     userId: string,
     channelId: string,
     requestId: string,
-    dto: ReviewJoinRequestDto,
   ): Promise<{ message: string }> {
     // 1. Kiểm tra quyền admin
     const hasAdminPermission = await this.isChannelAdmin(userId, channelId);
@@ -807,54 +806,241 @@ export class ChannelService {
       throw new BadRequestException('Request này đã được xử lý trước đó');
     }
 
-    // 3. Cập nhật request status
+    // 3. Cập nhật request status thành APPROVED
     await this.prisma.channelJoinRequest.update({
       where: { id: requestId },
       data: {
-        status: dto.status,
+        status: 'APPROVED',
         reviewedAt: new Date(),
         reviewedBy: userId,
       },
     });
 
-    // 4. Nếu APPROVED: Thêm user vào channel
-    if (dto.status === 'APPROVED') {
-      const memberRole = await this.prisma.role.findUnique({
-        where: { name: ROLES.CHANNEL_MEMBER },
+    // 4. Thêm user vào channel
+    const memberRole = await this.prisma.role.findUnique({
+      where: { name: ROLES.CHANNEL_MEMBER },
+    });
+
+    if (!memberRole) {
+      throw new NotFoundException('Role CHANNEL_MEMBER not found');
+    }
+
+    // Kiểm tra chưa phải member
+    const existingMember = await this.prisma.channelMember.findUnique({
+      where: {
+        channelId_userId: {
+          channelId,
+          userId: request.userId,
+        },
+      },
+    });
+
+    if (!existingMember) {
+      await this.prisma.channelMember.create({
+        data: {
+          channelId,
+          userId: request.userId,
+          roleId: memberRole.id,
+        },
       });
+    }
 
-      if (!memberRole) {
-        throw new NotFoundException('Role CHANNEL_MEMBER not found');
-      }
+    return {
+      message: `Đã chấp nhận yêu cầu của ${request.user.fullName}`,
+    };
+  }
 
-      // Kiểm tra chưa phải member
-      const existingMember = await this.prisma.channelMember.findUnique({
+  /**
+   * Từ chối join request
+   * Chỉ Channel Admin hoặc Workspace Admin
+   */
+  async rejectJoinRequest(
+    userId: string,
+    channelId: string,
+    requestId: string,
+  ): Promise<{ message: string }> {
+    // 1. Kiểm tra quyền admin
+    const hasAdminPermission = await this.isChannelAdmin(userId, channelId);
+
+    if (!hasAdminPermission) {
+      throw new ForbiddenException(
+        'Chỉ Channel Admin hoặc Workspace Admin mới có quyền duyệt join requests',
+      );
+    }
+
+    // 2. Tìm join request
+    const request = await this.prisma.channelJoinRequest.findUnique({
+      where: { id: requestId },
+      include: { user: true },
+    });
+
+    if (!request) {
+      throw new NotFoundException('Không tìm thấy join request');
+    }
+
+    if (request.channelId !== channelId) {
+      throw new BadRequestException('Request không thuộc channel này');
+    }
+
+    if (request.status !== 'PENDING') {
+      throw new BadRequestException('Request này đã được xử lý trước đó');
+    }
+
+    // 3. Cập nhật request status thành REJECTED
+    await this.prisma.channelJoinRequest.update({
+      where: { id: requestId },
+      data: {
+        status: 'REJECTED',
+        reviewedAt: new Date(),
+        reviewedBy: userId,
+      },
+    });
+
+    return {
+      message: `Đã từ chối yêu cầu của ${request.user.fullName}`,
+    };
+  }
+
+  /**
+   * Rời khỏi channel
+   * User tự rời channel
+   * Nếu là Channel Admin duy nhất → Phải transfer quyền trước
+   */
+  async leaveChannel(
+    userId: string,
+    channelId: string,
+  ): Promise<{ message: string }> {
+    // 1. Tìm channel và membership
+    const channel = await this.prisma.channel.findUnique({
+      where: { id: channelId },
+      include: {
+        members: {
+          include: { role: true },
+        },
+      },
+    });
+
+    if (!channel) {
+      throw new NotFoundException('Channel không tồn tại');
+    }
+
+    // 2. Kiểm tra user có phải member không
+    const membership = channel.members.find((m) => m.userId === userId);
+
+    if (!membership) {
+      throw new BadRequestException('Bạn không phải thành viên của channel này');
+    }
+
+    // 3. Kiểm tra nếu là Channel Admin duy nhất
+    const adminCount = channel.members.filter(
+      (m) => m.role.name === ROLES.CHANNEL_ADMIN,
+    ).length;
+
+    if (membership.role.name === ROLES.CHANNEL_ADMIN && adminCount === 1) {
+      throw new BadRequestException(
+        'Bạn là Admin duy nhất của channel. Vui lòng chỉ định Admin mới trước khi rời channel.',
+      );
+    }
+
+    // 4. Xóa membership
+    await this.prisma.channelMember.delete({
+      where: { id: membership.id },
+    });
+
+    return {
+      message: 'Bạn đã rời khỏi channel thành công',
+    };
+  }
+
+  /**
+   * Thay đổi role của member trong channel
+   * Promote thành Admin hoặc Demote thành Member
+   * Chỉ Channel Admin hoặc Workspace Admin
+   */
+  async updateMemberRole(
+    userId: string,
+    channelId: string,
+    memberId: string,
+    dto: PromoteMemberDto,
+  ): Promise<ChannelMemberResponseDto> {
+    // 1. Kiểm tra quyền admin
+    const hasAdminPermission = await this.isChannelAdmin(userId, channelId);
+
+    if (!hasAdminPermission) {
+      throw new ForbiddenException(
+        'Chỉ Channel Admin hoặc Workspace Admin mới có quyền thay đổi role',
+      );
+    }
+
+    // 2. Tìm member cần update
+    const member = await this.prisma.channelMember.findUnique({
+      where: { id: memberId },
+      include: {
+        role: true,
+        user: true,
+      },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Không tìm thấy member này');
+    }
+
+    if (member.channelId !== channelId) {
+      throw new BadRequestException('Member không thuộc channel này');
+    }
+
+    // 3. Kiểm tra không thể demote Admin duy nhất
+    if (member.role.name === ROLES.CHANNEL_ADMIN && dto.newRole === 'CHANNEL_MEMBER') {
+      const adminCount = await this.prisma.channelMember.count({
         where: {
-          channelId_userId: {
-            channelId,
-            userId: request.userId,
+          channelId,
+          role: {
+            name: ROLES.CHANNEL_ADMIN,
           },
         },
       });
 
-      if (!existingMember) {
-        await this.prisma.channelMember.create({
-          data: {
-            channelId,
-            userId: request.userId,
-            roleId: memberRole.id,
-          },
-        });
+      if (adminCount === 1) {
+        throw new BadRequestException(
+          'Không thể demote Admin duy nhất của channel. Hãy promote member khác trước.',
+        );
       }
-
-      return {
-        message: `Đã chấp nhận yêu cầu của ${request.user.fullName}`,
-      };
     }
 
-    // 5. REJECTED
+    // 4. Lấy role mới
+    const newRole = await this.prisma.role.findUnique({
+      where: { name: dto.newRole },
+    });
+
+    if (!newRole) {
+      throw new NotFoundException(`Role ${dto.newRole} not found`);
+    }
+
+    // 5. Cập nhật role
+    const updatedMember = await this.prisma.channelMember.update({
+      where: { id: memberId },
+      data: {
+        roleId: newRole.id,
+      },
+      include: {
+        role: true,
+        user: true,
+      },
+    });
+
     return {
-      message: `Đã từ chối yêu cầu của ${request.user.fullName}`,
+      id: updatedMember.id,
+      channelId: updatedMember.channelId,
+      userId: updatedMember.userId,
+      roleName: updatedMember.role.name,
+      joinedAt: updatedMember.joinedAt,
+      user: {
+        id: updatedMember.user.id,
+        email: updatedMember.user.email,
+        username: updatedMember.user.username,
+        fullName: updatedMember.user.fullName,
+        avatarUrl: updatedMember.user.avatarUrl ?? undefined,
+      },
     };
   }
 }
