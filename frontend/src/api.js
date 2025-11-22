@@ -76,40 +76,41 @@ export function resetPassword(token, newPassword) {
 }
 
 // Channel APIs
-export function getChannels(workspaceId) {
+// Allow passing a custom fetcher (like authFetch) to handle authentication headers
+export function getChannels(workspaceId, fetcher = request) {
   const queryString = workspaceId ? `?workspaceId=${workspaceId}` : "";
-  return request(`/api/channels${queryString}`);
+  return fetcher(`/api/channels${queryString}`);
 }
 
-export function getChannelDetails(channelId) {
-  return request(`/api/channels/${channelId}`);
+export function getChannelDetails(channelId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}`);
 }
 
-export function createChannel(data) {
-  return request("/api/channels", {
+export function createChannel(data, fetcher = request) {
+  return fetcher("/api/channels", {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export function updateChannel(channelId, data) {
-  return request(`/api/channels/${channelId}`, {
+export function updateChannel(channelId, data, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}`, {
     method: "PATCH",
     body: JSON.stringify(data),
   });
 }
 
-export function addChannelMember(channelId, data) {
-  return request(`/api/channels/${channelId}/members`, {
+export function addChannelMember(channelId, data, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/members`, {
     method: "POST",
     body: JSON.stringify(data),
   });
 }
 
-export function getChannelMembers(channelId) {
-  return request(`/api/channels/${channelId}/members`);
+export function getChannelMembers(channelId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/members`);
 }
 
-export function getWorkspaceMembers(workspaceId) {
-  return request(`/api/workspaces/${workspaceId}/members`);
+export function getWorkspaceMembers(workspaceId, fetcher = request) {
+  return fetcher(`/api/workspaces/${workspaceId}/members`);
 }

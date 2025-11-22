@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { addChannelMember, getWorkspaceMembers } from "../api";
+import useAuth from "../hooks/useAuth";
 
 function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
   const [query, setQuery] = useState("");
@@ -9,6 +10,7 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const { authFetch } = useAuth(); // Get authFetch
 
   useEffect(() => {
     fetchMembers();
@@ -31,7 +33,8 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
   const fetchMembers = async () => {
     setIsLoading(true);
     try {
-      const data = await getWorkspaceMembers(workspaceId);
+      // Pass authFetch
+      const data = await getWorkspaceMembers(workspaceId, authFetch);
       // data is WorkspaceMemberListResponseDto which contains { items: [...], meta: {...} } or just array?
       // Let's assume it returns array or object with items.
       // Based on controller it returns WorkspaceMemberListResponseDto.
@@ -52,7 +55,8 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
 
     try {
       const payload = userId ? { userId } : { email };
-      await addChannelMember(channelId, payload);
+      // Pass authFetch
+      await addChannelMember(channelId, payload, authFetch);
       setSuccessMsg(`Đã thêm thành viên thành công!`);
       setTimeout(() => {
         setSuccessMsg("");
@@ -198,4 +202,3 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
 }
 
 export default AddChannelMemberModal;
-

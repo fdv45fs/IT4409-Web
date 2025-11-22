@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { updateChannel } from "../api";
+import useAuth from "../hooks/useAuth";
 
 function UpdateChannelModal({ channel, onClose, onSuccess }) {
   const [formState, setFormState] = useState({
@@ -8,6 +9,7 @@ function UpdateChannelModal({ channel, onClose, onSuccess }) {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const { authFetch } = useAuth(); // Get authFetch
 
   useEffect(() => {
     if (channel) {
@@ -28,10 +30,15 @@ function UpdateChannelModal({ channel, onClose, onSuccess }) {
     setIsLoading(true);
 
     try {
-      const updatedChannel = await updateChannel(channel.id, {
-        name: formState.name,
-        description: formState.description || undefined,
-      });
+      // Pass authFetch to updateChannel
+      const updatedChannel = await updateChannel(
+        channel.id,
+        {
+          name: formState.name,
+          description: formState.description || undefined,
+        },
+        authFetch
+      );
       onSuccess(updatedChannel);
     } catch (err) {
       let errorMsg = err.message || "Không thể cập nhật channel";
@@ -152,4 +159,3 @@ function UpdateChannelModal({ channel, onClose, onSuccess }) {
 }
 
 export default UpdateChannelModal;
-
