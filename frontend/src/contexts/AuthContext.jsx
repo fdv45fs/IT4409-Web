@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
 
   const logout = useCallback(async () => {
     try {
-      await logoutApi();
+      await logoutApi(accessToken);
     } catch {
       // ignore
     } finally {
@@ -70,7 +70,7 @@ export function AuthProvider({ children }) {
       setCurrentUser(null);
       navigate("/login", { replace: true });
     }
-  }, [navigate]);
+  }, [navigate, accessToken]);
 
   const refreshWithRedirect = useCallback(async () => {
     try {

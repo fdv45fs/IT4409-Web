@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate, Outlet, useLocation } from "react-router-dom";
 import { getChannels } from "../api";
 import useAuth from "../hooks/useAuth";
+import { useToast } from "../contexts/ToastContext";
 import UserMenu from "./UserMenu";
 import CreateChannelModal from "./CreateChannelModal";
 
 function WorkspaceLayout() {
   const { workspaceId } = useParams();
   const { authFetch } = useAuth();
+  const { addToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
   const [workspace, setWorkspace] = useState(null);
@@ -15,6 +17,7 @@ function WorkspaceLayout() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
+  const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -78,19 +81,69 @@ function WorkspaceLayout() {
       {/* Sidebar */}
       <aside className="flex w-64 flex-col bg-slate-900 text-slate-300">
         {/* Workspace Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 px-4 py-3 transition hover:bg-slate-800">
-          <h1 className="truncate text-lg font-bold text-white">
-            {workspace.name}
-          </h1>
-          <button 
-            className="rounded p-1 hover:bg-slate-700"
-            onClick={() => navigate("/workspaces")}
-            title="Back to Workspaces"
+        <div className="relative border-b border-slate-800">
+          <button
+            onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
+            className="flex w-full items-center justify-between px-4 py-3 transition hover:bg-slate-800 focus:outline-none"
           >
-             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            <h1 className="truncate text-lg font-bold text-white">
+              {workspace.name}
+            </h1>
+            <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
+
+          {/* Workspace Menu Dropdown */}
+          {isWorkspaceMenuOpen && (
+            <>
+              <div 
+                className="fixed inset-0 z-10"
+                onClick={() => setIsWorkspaceMenuOpen(false)}
+              ></div>
+              <div className="absolute left-2 right-2 top-12 z-20 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-xs font-medium text-gray-500 uppercase">Current Workspace</p>
+                  <p className="text-sm font-bold text-gray-900 truncate">{workspace.name}</p>
+                </div>
+                
+                {workspace.joinCode && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(workspace.joinCode);
+                      setIsWorkspaceMenuOpen(false);
+                      addToast("Đã sao chép mã tham gia vào clipboard", "success");
+                    }}
+                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Sao chép mã tham gia
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    navigate(`/workspace/${workspaceId}/admin`);
+                    setIsWorkspaceMenuOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Quản lý Workspace
+                </button>
+
+                <div className="border-t border-gray-100 my-1"></div>
+
+                <button
+                  onClick={() => {
+                    navigate("/workspaces");
+                    setIsWorkspaceMenuOpen(false);
+                  }}
+                  className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  Chuyển Workspace
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Channels List */}
@@ -113,25 +166,27 @@ function WorkspaceLayout() {
               </svg>
               Channels
             </button>
-            <button
-              onClick={() => setIsCreateChannelOpen(true)}
-              className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
-              title="Create Channel"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+            {(workspace.myRole === 'WORKSPACE_ADMIN' || workspace.myRole === 'WORKSPACE_PRIVILEGE_MEMBER') && (
+              <button
+                onClick={() => setIsCreateChannelOpen(true)}
+                className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+                title="Create Channel"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-            </button>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4v16m8-8H4"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
 
           {/* Channel Items */}

@@ -33,6 +33,8 @@ import { ROLES } from '../common/constants/roles.constant';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadService } from '../upload/upload.service';
 import type { File as MulterFile } from 'multer';
+import { AddWorkspaceMemberDto } from './dtos/add-workspace-member.dto';
+import { UpdateMemberRoleDto } from './dtos/update-member-role.dto';
 
 @ApiTags('Workspace')
 @ApiBearerAuth()
@@ -113,7 +115,7 @@ export class WorkspaceController {
 
   @Get('/:workspaceId/members')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.WORKSPACE_MEMBER, ROLES.WORKSPACE_ADMIN)
+  @Roles(ROLES.WORKSPACE_MEMBER, ROLES.WORKSPACE_ADMIN, ROLES.WORKSPACE_PRIVILEGE_MEMBER)
   async getMembers(
     @Param('workspaceId') workspaceId: string,
     @Req() req,
@@ -139,7 +141,7 @@ export class WorkspaceController {
   // Get workspace details
   @Get(':workspaceId')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(ROLES.WORKSPACE_MEMBER, ROLES.WORKSPACE_ADMIN)
+  @Roles(ROLES.WORKSPACE_MEMBER, ROLES.WORKSPACE_ADMIN, ROLES.WORKSPACE_PRIVILEGE_MEMBER)
   @ApiOperation({ summary: 'Get workspace details by ID' })
   @ApiParam({ name: 'workspaceId', description: 'ID of the workspace' })
   @ApiResponse({
@@ -202,5 +204,73 @@ export class WorkspaceController {
     @Param('workspaceId') workspaceId: string,
   ): Promise<{ message: string }> {
     return this.workspaceService.remove(req.user.id, workspaceId);
+  }
+
+  // Add member to workspace
+  @Post(':workspaceId/members')
+  @UseGuards(RolesGuard, JwtAuthGuard)
+  @Roles(ROLES.WORKSPACE_ADMIN)
+  @ApiOperation({ summary: 'Add member to workspace (ADMIN only)' })
+  @ApiParam({ name: 'workspaceId', description: 'ID of the workspace' })
+  @ApiBody({ type: AddWorkspaceMemberDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Member added successfully',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'User not found',
+  })
+  addMember(
+    @Req() req,
+    @Param('workspaceId') workspaceId: string,
+    @Body() dto: AddWorkspaceMemberDto,
+  ) {
+    return this.workspaceService.addMember(req.user.id, workspaceId, dto.email);
+  }
+
+  // Remove member from workspace
+  @Delete(':workspaceId/members/:memberId')
+  @UseGuards(RolesGuard, JwtAuthGuard)
+  @Roles(ROLES.WORKSPACE_ADMIN)
+  @ApiOperation({ summary: 'Remove member from workspace (ADMIN only)' })
+  @ApiParam({ name: 'workspaceId', description: 'ID of the workspace' })
+  @ApiParam({ name: 'memberId', description: 'ID of the member to remove' })
+  @ApiResponse({
+    status: 200,
+    description: 'Member removed successfully',
+  })
+  removeMember(
+    @Req() req,
+    @Param('workspaceId') workspaceId: string,
+    @Param('memberId') memberId: string,
+  ) {
+    return this.workspaceService.removeMember(req.user.id, workspaceId, memberId);
+  }
+
+  // Update member role
+  @Patch(':workspaceId/members/:memberId/role')
+  @UseGuards(RolesGuard, JwtAuthGuard)
+  @Roles(ROLES.WORKSPACE_ADMIN)
+  @ApiOperation({ summary: 'Update member role (ADMIN only)' })
+  @ApiParam({ name: 'workspaceId', description: 'ID of the workspace' })
+  @ApiParam({ name: 'memberId', description: 'ID of the member to update' })
+  @ApiBody({ type: UpdateMemberRoleDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Member role updated successfully',
+  })
+  updateMemberRole(
+    @Req() req,
+    @Param('workspaceId') workspaceId: string,
+    @Param('memberId') memberId: string,
+    @Body() dto: UpdateMemberRoleDto,
+  ) {
+    return this.workspaceService.updateMemberRole(
+      req.user.id,
+      workspaceId,
+      memberId,
+      dto.role,
+    );
   }
 }

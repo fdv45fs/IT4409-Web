@@ -7,6 +7,7 @@ import WorkspaceList from "./pages/WorkspaceList.jsx";
 import WorkspaceAdmin from "./pages/WorkspaceAdmin.jsx";
 import Profile from "./pages/Profile.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
+import { ToastProvider } from "./contexts/ToastContext.jsx";
 import WorkspaceLayout from "./components/WorkspaceLayout.jsx";
 import ChannelDetail from "./components/ChannelDetail.jsx";
 import WorkspaceWelcome from "./components/WorkspaceWelcome.jsx";
@@ -14,24 +15,26 @@ import WorkspaceWelcome from "./components/WorkspaceWelcome.jsx";
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/workspaces" element={<WorkspaceList />} />
-          <Route path="/workspace/:workspaceId/admin" element={<WorkspaceAdmin />} />
-          
-          <Route path="/workspace/:workspaceId" element={<WorkspaceLayout />}>
-            <Route index element={<WorkspaceWelcome />} />
-            <Route path="channel/:channelId" element={<ChannelDetail />} />
-          </Route>
-          
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/workspaces" element={<WorkspaceList />} />
+            <Route path="/workspace/:workspaceId/admin" element={<WorkspaceAdmin />} />
+            
+            <Route path="/workspace/:workspaceId" element={<WorkspaceLayout />}>
+              <Route index element={<WorkspaceWelcome />} />
+              <Route path="channel/:channelId" element={<ChannelDetail />} />
+            </Route>
+            
+            <Route path="/profile" element={<Profile />} />
+          </Routes>
+        </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

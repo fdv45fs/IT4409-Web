@@ -173,7 +173,8 @@ export class WorkspaceService {
 
     return {
       members: members.map((m) => ({
-        id: m.user.id,
+        id: m.id,
+        userId: m.user.id,
         username: m.user.username,
         fullName: m.user.fullName,
         email: m.user.email,
@@ -346,5 +347,146 @@ export class WorkspaceService {
     });
 
     return { message: 'Xóa workspace thành công' };
+  }
+
+  // 10. Thêm thành viên vào workspace (bằng email)
+  async addMember(userId: string, workspaceId: string, email: string) {
+    // Check admin permission
+    const adminMembership = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
+      include: { role: true },
+    });
+
+    if (!adminMembership || adminMembership.role.name !== ROLES.WORKSPACE_ADMIN) {
+      throw new ForbiddenException('Bạn không có quyền thêm thành viên');
+    }
+
+    const userToAdd = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!userToAdd) {
+      throw new NotFoundException('Không tìm thấy người dùng với email này');
+    }
+
+    const existingMember = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId: userToAdd.id } },
+    });
+
+    if (existingMember) {
+      throw new BadRequestException('Người dùng này đã là thành viên của workspace');
+    }
+
+    const memberRole = await this.prisma.role.findUnique({
+      where: { name: ROLES.WORKSPACE_MEMBER },
+    });
+
+    if (!memberRole) throw new NotFoundException('Role WORKSPACE_MEMBER not found');
+
+    return this.prisma.workspaceMember.create({
+      data: {
+        workspaceId,
+        userId: userToAdd.id,
+        roleId: memberRole.id,
+      },
+    });
+  }
+
+  // 11. Xóa thành viên khỏi workspace
+  async removeMember(userId: string, workspaceId: string, memberId: string) {
+    // Check admin permission
+    const adminMembership = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
+      include: { role: true },
+    });
+
+    if (!adminMembership || adminMembership.role.name !== ROLES.WORKSPACE_ADMIN) {
+      throw new ForbiddenException('Bạn không có quyền xóa thành viên');
+    }
+
+    const memberToRemove = await this.prisma.workspaceMember.findUnique({
+      where: { id: memberId },
+      include: { role: true },
+    });
+
+    if (!memberToRemove) {
+      throw new NotFoundException('Thành viên không tồn tại');
+    }
+
+    if (memberToRemove.workspaceId !== workspaceId) {
+      throw new BadRequestException('Thành viên không thuộc workspace này');
+    }
+
+    if (memberToRemove.role.name === ROLES.WORKSPACE_ADMIN) {
+      throw new BadRequestException('Không thể xóa Admin của workspace');
+    }
+
+    // Xóa thành viên (Prisma cascade sẽ xóa channel memberships nếu được cấu hình,
+    // nhưng để chắc chắn ta nên xóa channel memberships trước hoặc dùng transaction)
+    // Ở đây giả sử cascade delete được cấu hình trong schema.prisma hoặc xóa thủ công
+    
+    // Xóa khỏi tất cả channel trong workspace
+    await this.prisma.channelMember.deleteMany({
+      where: {
+        userId: memberToRemove.userId,
+        channel: {
+          workspaceId: workspaceId
+        }
+      }
+    });
+
+    await this.prisma.workspaceMember.delete({
+      where: { id: memberId },
+    });
+
+    return { message: 'Đã xóa thành viên khỏi workspace' };
+  }
+
+  // 12. Cập nhật role thành viên
+  async updateMemberRole(
+    userId: string,
+    workspaceId: string,
+    memberId: string,
+    newRoleName: string,
+  ) {
+    // Check admin permission
+    const adminMembership = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
+      include: { role: true },
+    });
+
+    if (!adminMembership || adminMembership.role.name !== ROLES.WORKSPACE_ADMIN) {
+      throw new ForbiddenException('Bạn không có quyền cập nhật role');
+    }
+
+    const memberToUpdate = await this.prisma.workspaceMember.findUnique({
+      where: { id: memberId },
+      include: { role: true },
+    });
+
+    if (!memberToUpdate) {
+      throw new NotFoundException('Thành viên không tồn tại');
+    }
+
+    if (memberToUpdate.workspaceId !== workspaceId) {
+      throw new BadRequestException('Thành viên không thuộc workspace này');
+    }
+
+    if (memberToUpdate.role.name === ROLES.WORKSPACE_ADMIN) {
+      throw new BadRequestException('Không thể thay đổi role của Admin');
+    }
+
+    const newRole = await this.prisma.role.findUnique({
+      where: { name: newRoleName },
+    });
+
+    if (!newRole) {
+      throw new NotFoundException('Role không tồn tại');
+    }
+
+    return this.prisma.workspaceMember.update({
+      where: { id: memberId },
+      data: { roleId: newRole.id },
+    });
   }
 }

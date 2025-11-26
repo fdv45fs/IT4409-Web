@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
+import { useToast } from "../contexts/ToastContext";
 import WorkspaceMembers from "../components/WorkspaceMembers.jsx";
 import JoinRequests from "../components/JoinRequests.jsx";
 
@@ -13,6 +14,7 @@ function WorkspaceAdmin() {
   const [activeTab, setActiveTab] = useState("settings");
   const [copied, setCopied] = useState(false);
   const { authFetch } = useAuth();
+  const { addToast } = useToast();
 
   // Form states for settings
   const [formData, setFormData] = useState({
@@ -28,9 +30,11 @@ function WorkspaceAdmin() {
       try {
         await navigator.clipboard.writeText(workspace.joinCode);
         setCopied(true);
+        addToast("Đã sao chép mã tham gia vào clipboard", "success");
         setTimeout(() => setCopied(false), 2000);
       } catch (err) {
         console.error("Failed to copy:", err);
+        addToast("Không thể sao chép mã", "error");
       }
     }
   };
@@ -58,6 +62,12 @@ function WorkspaceAdmin() {
       fetchWorkspace();
     }
   }, [workspaceId]);
+
+  useEffect(() => {
+    if (workspace && workspace.myRole !== 'WORKSPACE_ADMIN') {
+      setActiveTab('members');
+    }
+  }, [workspace]);
 
   const handleUpdateWorkspace = async (e) => {
     e.preventDefault();
@@ -192,16 +202,18 @@ function WorkspaceAdmin() {
       <div className="border-b border-gray-200 bg-white">
         <div className="mx-auto max-w-7xl px-6">
           <nav className="flex gap-8">
-            <button
-              onClick={() => setActiveTab("settings")}
-              className={`border-b-2 py-4 text-sm font-medium transition ${
-                activeTab === "settings"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              }`}
-            >
-              Cài đặt chung
-            </button>
+            {workspace?.myRole === 'WORKSPACE_ADMIN' && (
+              <button
+                onClick={() => setActiveTab("settings")}
+                className={`border-b-2 py-4 text-sm font-medium transition ${
+                  activeTab === "settings"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                }`}
+              >
+                Cài đặt chung
+              </button>
+            )}
             <button
               onClick={() => setActiveTab("members")}
               className={`border-b-2 py-4 text-sm font-medium transition ${
@@ -212,23 +224,25 @@ function WorkspaceAdmin() {
             >
               Thành viên
             </button>
-            <button
-              onClick={() => setActiveTab("requests")}
-              className={`border-b-2 py-4 text-sm font-medium transition ${
-                activeTab === "requests"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-              }`}
-            >
-              Yêu cầu tham gia
-            </button>
+            {workspace?.myRole === 'WORKSPACE_ADMIN' && (
+              <button
+                onClick={() => setActiveTab("requests")}
+                className={`border-b-2 py-4 text-sm font-medium transition ${
+                  activeTab === "requests"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                }`}
+              >
+                Yêu cầu tham gia
+              </button>
+            )}
           </nav>
         </div>
       </div>
 
       {/* Content */}
       <main className="mx-auto max-w-7xl px-6 py-6">
-        {activeTab === "settings" && (
+        {activeTab === "settings" && workspace?.myRole === 'WORKSPACE_ADMIN' && (
           <div className="space-y-6">
             {/* Update Form */}
             <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
@@ -306,9 +320,12 @@ function WorkspaceAdmin() {
         )}
 
         {activeTab === "members" && (
-          <WorkspaceMembers workspaceId={workspaceId} />
+          <WorkspaceMembers 
+            workspaceId={workspaceId} 
+            isAdmin={workspace?.myRole === 'WORKSPACE_ADMIN'}
+          />
         )}
-        {activeTab === "requests" && (
+        {activeTab === "requests" && workspace?.myRole === 'WORKSPACE_ADMIN' && (
           <JoinRequests workspaceId={workspaceId} />
         )}
       </main>

@@ -55,9 +55,10 @@ export function refresh() {
   });
 }
 
-export function logout() {
+export function logout(token) {
   return request("/api/auth/logout", {
     method: "POST",
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
 }
 
