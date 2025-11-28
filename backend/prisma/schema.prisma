@@ -308,6 +308,11 @@ model File {
   uploadedBy String
   fileName   String
   fileUrl    String
+  s3Key      String
+  mimeType   String
+  fileSize   Int
+  extension  String
+  
   createdAt  DateTime @default(now())
 
   channel    Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
