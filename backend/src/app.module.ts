@@ -9,6 +9,7 @@ import { WorkspaceModule } from './workspace/workspace.module';
 import { UploadModule } from './upload/upload.module';
 import { ChannelModule } from './channel/channel.module';
 import { FileModule } from './file/file.module';
+import { MeetingModule } from './meeting/meeting.module';
 
 @Module({
   controllers: [AppController],
@@ -24,6 +25,7 @@ import { FileModule } from './file/file.module';
     UploadModule,
     ChannelModule,
     FileModule,
+    MeetingModule,
   ],
 })
 export class AppModule {}

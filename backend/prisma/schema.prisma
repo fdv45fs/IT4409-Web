@@ -37,6 +37,8 @@ model User {
   channelJoinRequestsReviewed ChannelJoinRequest[] @relation("ChannelJoinRequestReviewer")
   workspaceJoinRequestSent WorkspaceJoinRequest[] @relation("WorkspaceJoinRequestUser")
   workspaceJoinRequestReviewed WorkspaceJoinRequest[] @relation("WorkspaceJoinRequestReviewer")
+  meetingParticipants ChannelMeetingParticipant[] @relation("UserToMeetingParticipant") 
+
   conversations    ConversationParticipant[]
   messagesSent     Message[]       @relation("SenderMessages")
   messagesDeleted  Message[]       @relation("DeletedMessages")
@@ -121,6 +123,7 @@ model Channel {
 
   workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   members     ChannelMember[]
+  meetings    ChannelMeeting[] @relation("ChannelToMeeting")
   joinRequests ChannelJoinRequest[]
   conversations Conversation[]
   posts       Post[]
@@ -312,7 +315,6 @@ model File {
   mimeType   String
   fileSize   Int
   extension  String
-  
   createdAt  DateTime @default(now())
 
   channel    Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
@@ -332,6 +334,40 @@ model FileAttachment {
   reactable   Reactable @relation(fields: [reactableId], references: [id], onDelete: Cascade)
 
   @@index([reactableId])
+}
+
+model ChannelMeeting {
+  id           String                      @id @default(uuid())
+  channelId    String
+  hostId       String
+  title        String?
+  roomUrl      String
+  roomName     String?
+  isActive     Boolean   @default(true)
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+
+  participants ChannelMeetingParticipant[]
+
+  Channel      Channel    @relation("ChannelToMeeting", fields: [channelId], references: [id])
+
+  @@index([channelId])
+}
+
+model ChannelMeetingParticipant {
+  id        String            @id @default(uuid())
+  meetingId String
+  userId    String
+  sessionId String?   @default(cuid())
+
+  joinedAt  DateTime          @default(now())
+  leftAt    DateTime?
+
+  meeting   ChannelMeeting    @relation(fields: [meetingId], references: [id])
+  User      User              @relation("UserToMeetingParticipant", fields: [userId], references: [id])
+
+  @@index([meetingId])
+  @@index([userId])
 }
 
 model Otp {
