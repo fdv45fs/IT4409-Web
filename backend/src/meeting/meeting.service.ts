@@ -12,12 +12,18 @@ export class MeetingService {
 
   /** Daily API wrapper */
   private async createDailyRoom(channelId: string) {
+    const channel = await this.prisma.channel.findUnique({
+      where: { id: channelId },
+    });
+    if (!channel) {
+      throw new BadRequestException('Channel not found');
+    }
     try {
       const res = await axios.post(
         'https://api.daily.co/v1/rooms',
         {
           // NOTE: roomName Daily trả về bên dưới res.data.name
-          name: `channel-${channelId}-${Date.now()}`,
+          name: `channel-${channel.name}`,
           properties: {
             exp: Math.floor(Date.now() / 1000) + 3600, // expire in 1h
           },
@@ -94,46 +100,16 @@ export class MeetingService {
     return meeting;
   }
 
-  /** GET JOIN TOKEN ---------------------------------------- */
-  async getJoinToken(channelId: string, userId: string) {
-    const meeting = await this.prisma.channelMeeting.findFirst({
+  /** GET ---------------------------------------- */
+  async getMeeting(channelId: string) {
+    return this.prisma.channelMeeting.findFirst({
       where: { channelId, isActive: true },
-    });
-    if (!meeting) throw new BadRequestException('No active meeting');
-
-    // host or participant
-    const role = meeting.hostId === userId ? 'host' : 'participant';
-
-    try {
-      if (!meeting.roomName) {
-        throw new BadRequestException('Meeting has no roomName recorded');
-      }
-
-      // Daily API expects an `is_owner` boolean instead of a `role` string
-      const isOwner = role === 'host';
-      const res = await axios.post(
-        'https://api.daily.co/v1/meeting-tokens',
-        {
-          properties: {
-            room_name: meeting.roomName,
-            user_name: `User-${userId}`,
-            is_owner: isOwner,
-          },
+      include: {
+        participants: {
+          include: { User: true },
         },
-        { headers: { Authorization: `Bearer ${process.env.DAILY_API_KEY}` } },
-      );
-
-      return {
-        token: res.data?.token,
-        roomUrl: meeting.roomUrl,
-      };
-    } catch (err) {
-      const msg =
-        err?.response?.data || err?.message || 'Unknown error from Daily API';
-      throw new BadRequestException(
-        `Failed to create meeting token: ${JSON.stringify(msg)}`,
-      );
-    }
+      },
+    });
   }
 
   /** JOIN ---------------------------------------- */
@@ -161,6 +137,55 @@ export class MeetingService {
     }
 
     return { roomUrl: meeting.roomUrl };
+  }
+
+  /** GET JOIN TOKEN ---------------------------------------- */
+  async getJoinToken(channelId: string, userId: string) {
+    const meeting = await this.prisma.channelMeeting.findFirst({
+      where: { channelId, isActive: true },
+    });
+    if (!meeting) throw new BadRequestException('No active meeting');
+
+    // check participant
+    const participant = await this.prisma.channelMeetingParticipant.findFirst({
+      where: { meetingId: meeting.id, userId },
+    });
+    if (!participant)
+      throw new ForbiddenException('You must join the meeting first');
+
+    // lấy fullName user
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('User not found');
+
+    const isOwner = meeting.hostId === userId;
+
+    try {
+      if (!meeting.roomName)
+        throw new BadRequestException('Meeting has no roomName recorded');
+
+      const res = await axios.post(
+        'https://api.daily.co/v1/meeting-tokens',
+        {
+          properties: {
+            room_name: meeting.roomName,
+            user_name: user.fullName, // <-- sử dụng fullName
+            is_owner: isOwner,
+          },
+        },
+        { headers: { Authorization: `Bearer ${process.env.DAILY_API_KEY}` } },
+      );
+
+      return {
+        token: res.data?.token,
+        roomUrl: meeting.roomUrl,
+      };
+    } catch (err) {
+      const msg =
+        err?.response?.data || err?.message || 'Unknown error from Daily API';
+      throw new BadRequestException(
+        `Failed to create meeting token: ${JSON.stringify(msg)}`,
+      );
+    }
   }
 
   /** LEAVE -------------------------------------- */
@@ -203,23 +228,42 @@ export class MeetingService {
     if (meeting.hostId !== userId)
       throw new ForbiddenException('Only host can end meeting');
 
+    // Cập nhật trạng thái meeting
     await this.prisma.channelMeeting.update({
       where: { id: meeting.id },
       data: { isActive: false, endedAt: new Date() },
     });
 
+    // Cập nhật tất cả participant còn active
+    await this.prisma.channelMeetingParticipant.updateMany({
+      where: { meetingId: meeting.id, leftAt: null },
+      data: { leftAt: new Date() },
+    });
+
     return { message: 'Meeting ended' };
   }
 
-  /** GET ---------------------------------------- */
-  async getMeeting(channelId: string) {
-    return this.prisma.channelMeeting.findFirst({
-      where: { channelId, isActive: true },
-      include: {
-        participants: {
-          include: { User: true },
-        },
-      },
+  /** FORCE LEAVE (for webhook) ------------------ */
+  async forceLeave(roomName: string, userId: string) {
+    const meeting = await this.prisma.channelMeeting.findFirst({
+      where: { roomName, isActive: true },
     });
+    if (!meeting) return;
+
+    await this.prisma.channelMeetingParticipant.updateMany({
+      where: { meetingId: meeting.id, userId, leftAt: null },
+      data: { leftAt: new Date() },
+    });
+
+    const remaining = await this.prisma.channelMeetingParticipant.count({
+      where: { meetingId: meeting.id, leftAt: null },
+    });
+
+    if (remaining === 0) {
+      await this.prisma.channelMeeting.update({
+        where: { id: meeting.id },
+        data: { isActive: false, endedAt: new Date() },
+      });
+    }
   }
 }

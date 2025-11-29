@@ -358,7 +358,6 @@ model ChannelMeetingParticipant {
   id        String            @id @default(uuid())
   meetingId String
   userId    String
-  sessionId String?   @default(cuid())
 
   joinedAt  DateTime          @default(now())
   leftAt    DateTime?

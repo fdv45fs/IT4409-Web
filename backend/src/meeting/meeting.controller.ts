@@ -1,7 +1,7 @@
 import {
   Controller,
   Post,
-  Delete,
+  Patch,
   Get,
   Param,
   Body,
@@ -59,7 +59,7 @@ export class MeetingController {
   /** END */
   @UseGuards(RolesGuard, JwtAuthGuard)
   @Roles(ROLES.CHANNEL_ADMIN)
-  @Delete()
+  @Patch('end')
   end(@Req() req, @Param('channelId') channelId: string) {
     return this.meetingService.endMeeting(channelId, req.user.id);
   }
@@ -70,5 +70,21 @@ export class MeetingController {
   @Get()
   get(@Param('channelId') channelId: string) {
     return this.meetingService.getMeeting(channelId);
+  }
+
+  @Post('/daily/webhook')
+  async dailyWebhook(@Body() body) {
+    const event = body.event;
+
+    if (event === 'participant-left') {
+      const roomName = body?.payload?.room?.name;
+      const userId = body?.payload?.participant?.user_id;
+
+      if (roomName && userId) {
+        await this.meetingService.forceLeave(roomName, userId);
+      }
+    }
+
+    return { status: 'ok' };
   }
 }
