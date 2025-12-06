@@ -10,6 +10,8 @@ import { UploadModule } from './upload/upload.module';
 import { ChannelModule } from './channel/channel.module';
 import { FileModule } from './file/file.module';
 import { MeetingModule } from './meeting/meeting.module';
+import { PostModule } from './post/post.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   controllers: [AppController],
@@ -26,6 +28,8 @@ import { MeetingModule } from './meeting/meeting.module';
     ChannelModule,
     FileModule,
     MeetingModule,
+    PostModule,
+    CommentModule,
   ],
 })
 export class AppModule {}

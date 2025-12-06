@@ -17,7 +17,7 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Workspace + Auth API')
-    .setDescription('API quản lý Auth, Workspace')
+    .setDescription('API quản lý Auth, Workspace, Channels, Posts')
     .setVersion('1.0')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .build();

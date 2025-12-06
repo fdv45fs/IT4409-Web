@@ -163,3 +163,37 @@ export function updateChannelMemberRole(channelId, memberId, role, fetcher = req
     body: JSON.stringify({ newRole: role }),
   });
 }
+
+// Posts
+export function createPost(channelId, data, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/posts`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function getPosts(channelId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/posts`);
+}
+
+export function getPostDetail(channelId, postId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/posts/${postId}`);
+}
+
+export function getPostComments(channelId, postId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/posts/${postId}/comments`);
+}
+
+export function addPostComment(channelId, postId, content, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/posts/${postId}/comments`, {
+    method: "POST",
+    body: JSON.stringify({ content }),
+  });
+}
+
+export function deletePostComment(channelId, postId, commentId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/posts/${postId}/comments/${commentId}`, {
+    method: "DELETE",
+  });
+}
+

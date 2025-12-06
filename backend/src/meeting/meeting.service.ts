@@ -7,6 +7,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import axios from 'axios';
 import { Logger } from '@nestjs/common';
 
+// Daily API response types
+interface DailyRoomResponse {
+  name?: string;
+  id?: string;
+  url: string;
+}
+
+interface DailyTokenResponse {
+  token: string;
+}
+
 @Injectable()
 export class MeetingService {
   constructor(private prisma: PrismaService) {}
@@ -39,7 +50,7 @@ export class MeetingService {
       throw new BadRequestException('Channel not found');
     }
     try {
-      const res = await axios.post(
+      const res = await axios.post<DailyRoomResponse>(
         'https://api.daily.co/v1/rooms',
         {
           // NOTE: roomName Daily trả về bên dưới res.data.name
@@ -209,7 +220,7 @@ export class MeetingService {
       if (!meeting.roomName)
         throw new BadRequestException('Meeting has no roomName recorded');
 
-      const res = await axios.post(
+      const res = await axios.post<DailyTokenResponse>(
         'https://api.daily.co/v1/meeting-tokens',
         {
           properties: {
