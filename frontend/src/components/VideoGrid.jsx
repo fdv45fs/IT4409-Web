@@ -3,17 +3,21 @@ import VideoTile from "./VideoTile";
 function VideoGrid({ participants, localParticipant, screenShare }) {
   // If someone is screen sharing, show screen share prominently
   if (screenShare) {
+    // Check if the screen share is from the local participant
+    const isLocalScreenShare = screenShare.local ||
+                                screenShare.session_id === localParticipant?.session_id;
+
     return (
       <div className="flex-1 flex gap-4 p-4 overflow-hidden">
         {/* Main area - screen share */}
         <div className="flex-1 flex items-center justify-center">
-          <VideoTile participant={screenShare} isScreenShare={true} />
+          <VideoTile participant={screenShare} isScreenShare={true} isLocal={isLocalScreenShare} />
         </div>
 
         {/* Sidebar with participants */}
         <div className="w-64 flex flex-col gap-3 overflow-y-auto">
-          {/* Local participant */}
-          {localParticipant && (
+          {/* Local participant - only show if NOT screen sharing */}
+          {localParticipant && !isLocalScreenShare && (
             <VideoTile participant={localParticipant} isLocal={true} />
           )}
 

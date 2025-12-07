@@ -224,6 +224,14 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
         console.log("Track stopped:", event);
         updateParticipants();
       })
+      .on("started-screen-share", (event) => {
+        console.log("Screen share started:", event);
+        updateParticipants();
+      })
+      .on("stopped-screen-share", (event) => {
+        console.log("Screen share stopped:", event);
+        updateParticipants();
+      })
       .on("error", (error) => {
         console.error("Daily error:", error);
         showToast("Meeting error occurred", "error");
@@ -242,10 +250,42 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
     const remoteParticipants = {};
     let screenShareParticipant = null;
 
+    // Check if local participant is screen sharing
+    if (localP) {
+      const localIsScreenShare = localP.screen ||
+                                 localP.screenVideoTrack ||
+                                 localP.tracks?.screenVideo?.state === 'playable';
+
+      console.log('Local participant screen check:', {
+        screen: localP.screen,
+        screenVideoTrack: localP.screenVideoTrack,
+        screenVideoState: localP.tracks?.screenVideo?.state,
+        isScreenShare: localIsScreenShare
+      });
+
+      if (localIsScreenShare) {
+        screenShareParticipant = localP;
+      }
+    }
+
+    // Check remote participants
     Object.entries(allParticipants).forEach(([id, participant]) => {
       if (id === "local") return;
 
-      if (participant.screen) {
+      // Check if this is a screen share participant
+      // Daily.co screen share participants have screen: true or screenVideoTrack
+      const isScreenShare = participant.screen ||
+                           participant.screenVideoTrack ||
+                           participant.tracks?.screenVideo?.state === 'playable';
+
+      console.log(`Participant ${id} screen check:`, {
+        screen: participant.screen,
+        screenVideoTrack: participant.screenVideoTrack,
+        screenVideoState: participant.tracks?.screenVideo?.state,
+        isScreenShare
+      });
+
+      if (isScreenShare && !screenShareParticipant) {
         screenShareParticipant = participant;
       } else {
         remoteParticipants[id] = participant;
@@ -253,6 +293,7 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
     });
 
     console.log("Remote participants:", remoteParticipants);
+    console.log("Screen share participant:", screenShareParticipant);
 
     setLocalParticipant(localP);
     setParticipants(remoteParticipants);

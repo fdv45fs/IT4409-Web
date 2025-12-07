@@ -7,19 +7,31 @@ function VideoTile({ participant, isLocal = false, isScreenShare = false }) {
   useEffect(() => {
     if (!participant) return;
 
-    console.log("VideoTile participant:", participant);
+    console.log("VideoTile participant:", participant, "isScreenShare:", isScreenShare);
+    console.log("VideoTile tracks detail:", {
+      videoTrack: participant.tracks?.video,
+      screenVideoTrack: participant.tracks?.screenVideo,
+      allTracks: participant.tracks
+    });
 
     // Get video track from Daily.co participant object
-    // Daily.co uses tracks.video.persistentTrack or tracks.video.track
-    const videoTrack = participant.tracks?.video?.persistentTrack ||
-                       participant.tracks?.video?.track ||
-                       participant.videoTrack;
+    // For screen share, use screenVideo track instead of regular video
+    let videoTrack;
+    if (isScreenShare) {
+      videoTrack = participant.tracks?.screenVideo?.persistentTrack ||
+                   participant.tracks?.screenVideo?.track ||
+                   participant.screenVideoTrack;
+    } else {
+      videoTrack = participant.tracks?.video?.persistentTrack ||
+                   participant.tracks?.video?.track ||
+                   participant.videoTrack;
+    }
 
     const audioTrack = participant.tracks?.audio?.persistentTrack ||
                        participant.tracks?.audio?.track ||
                        participant.audioTrack;
 
-    console.log("Video track:", videoTrack, "Audio track:", audioTrack);
+    console.log("Video track selected:", videoTrack, "Audio track:", audioTrack, "isScreenShare:", isScreenShare);
 
     // Set video track
     if (videoTrack && videoRef.current) {
@@ -60,7 +72,10 @@ function VideoTile({ participant, isLocal = false, isScreenShare = false }) {
   }, [participant, isLocal]);
 
   const displayName = participant?.user_name || participant?.user_id || "Unknown";
-  const hasVideo = participant?.video;
+  // For screen share, check screenVideo track, otherwise check regular video
+  const hasVideo = isScreenShare
+    ? (participant?.screen || participant?.tracks?.screenVideo?.state === 'playable')
+    : participant?.video;
   const hasAudio = participant?.audio;
 
   return (
