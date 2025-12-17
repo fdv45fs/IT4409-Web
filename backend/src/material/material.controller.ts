@@ -27,7 +27,7 @@ export class MaterialController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.CHANNEL_MEMBER, ROLES.CHANNEL_ADMIN)
   async list(@Param('channelId') channelId: string) {
-    return this.materialService.listFiles(channelId, null);
+    return this.materialService.listRootMaterials(channelId);
   }
 
   @Get('folders/:folderId')

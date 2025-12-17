@@ -19,6 +19,52 @@ export class MaterialService {
   ) {}
 
   // ============================================================
+  // LIST ROOT MATERIALS (folders + files)
+  // ============================================================
+  async listRootMaterials(channelId: string) {
+    const folders = await this.prisma.folder.findMany({
+      where: { channelId, parentId: null },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    // Calculate total size for each folder
+    const foldersWithSize = await Promise.all(
+      folders.map(async (folder) => {
+        const totalSize = await this.calculateFolderSize(folder.id);
+        return { ...folder, totalSize };
+      }),
+    );
+
+    const files = await this.listFiles(channelId, null);
+
+    // Combine and return as array
+    return [...foldersWithSize, ...files];
+  }
+
+  // Helper to calculate total size of all files in a folder (recursive)
+  private async calculateFolderSize(folderId: string): Promise<number> {
+    // Get direct files in this folder
+    const files = await this.prisma.file.findMany({
+      where: { folderId },
+      select: { fileSize: true },
+    });
+
+    let totalSize = files.reduce((sum, file) => sum + (file.fileSize || 0), 0);
+
+    // Get subfolders and recursively calculate their sizes
+    const subfolders = await this.prisma.folder.findMany({
+      where: { parentId: folderId },
+      select: { id: true },
+    });
+
+    for (const subfolder of subfolders) {
+      totalSize += await this.calculateFolderSize(subfolder.id);
+    }
+
+    return totalSize;
+  }
+
+  // ============================================================
   // LIST FOLDER
   // ============================================================
   async listFolder(channelId: string, folderId: string) {
@@ -34,9 +80,17 @@ export class MaterialService {
       orderBy: { createdAt: 'desc' },
     });
 
+    // Calculate total size for each subfolder
+    const subfoldersWithSize = await Promise.all(
+      subfolders.map(async (subfolder) => {
+        const totalSize = await this.calculateFolderSize(subfolder.id);
+        return { ...subfolder, totalSize };
+      }),
+    );
+
     const files = await this.listFiles(channelId, folderId);
 
-    return { folder, subfolders, files };
+    return { folder, subfolders: subfoldersWithSize, files };
   }
 
   // ============================================================
@@ -47,7 +101,14 @@ export class MaterialService {
       where: { channelId, folderId },
       orderBy: { createdAt: 'desc' },
       include: {
-        uploader: { select: { id: true, username: true, avatarUrl: true } },
+        uploader: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+            avatarUrl: true,
+          },
+        },
       },
     });
   }

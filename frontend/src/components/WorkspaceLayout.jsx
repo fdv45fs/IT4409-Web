@@ -86,17 +86,28 @@ function WorkspaceLayout() {
       <aside className="flex w-64 flex-col bg-slate-900 text-slate-300">
         {/* Workspace Header */}
         <div className="relative border-b border-slate-800">
-          <button
-            onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
-            className="flex w-full items-center justify-between px-4 py-3 transition hover:bg-slate-800 focus:outline-none"
-          >
-            <h1 className="truncate text-lg font-bold text-white">
-              {workspace.name}
-            </h1>
-            <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+          <div className="flex items-center">
+            <button
+              onClick={() => navigate("/workspaces")}
+              className="px-3 py-3 text-slate-400 hover:text-white hover:bg-slate-800 transition"
+              title="Back to workspaces"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
+              className="flex flex-1 items-center justify-between px-2 py-3 transition hover:bg-slate-800 focus:outline-none"
+            >
+              <h1 className="truncate text-lg font-bold text-white">
+                {workspace.name}
+              </h1>
+              <svg className="h-4 w-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
 
           {/* Workspace Menu Dropdown */}
           {isWorkspaceMenuOpen && (

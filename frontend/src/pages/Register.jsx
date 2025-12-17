@@ -45,13 +45,6 @@ const registerFields = [
     label: "Ngày sinh",
     type: "date",
   },
-  {
-    name: "avatarUrl",
-    label: "Ảnh đại diện (URL)",
-    type: "url",
-    placeholder: "https://example.com/avatar.jpg",
-    optional: true,
-  },
 ];
 
 const initialState = {
@@ -62,7 +55,6 @@ const initialState = {
   confirmPassword: "",
   gender: "male",
   dateOfBirth: "",
-  avatarUrl: "",
 };
 
 function RegisterPage() {
