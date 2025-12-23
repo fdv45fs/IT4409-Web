@@ -197,3 +197,51 @@ export function deletePostComment(channelId, postId, commentId, fetcher = reques
   });
 }
 
+// Chat APIs
+export function getChatMessages(channelId, params = {}, fetcher = request) {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append("page", params.page);
+  if (params.limit) queryParams.append("limit", params.limit);
+  if (params.beforeId) queryParams.append("beforeId", params.beforeId);
+  if (params.afterId) queryParams.append("afterId", params.afterId);
+  
+  const queryString = queryParams.toString();
+  return fetcher(`/api/channels/${channelId}/chat/messages${queryString ? `?${queryString}` : ""}`);
+}
+
+export function sendChatMessage(channelId, data, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/chat/messages`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteChatMessage(channelId, messageId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/chat/messages/${messageId}`, {
+    method: "DELETE",
+  });
+}
+
+export function addMessageReaction(channelId, messageId, emoji, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/chat/messages/${messageId}/reactions`, {
+    method: "POST",
+    body: JSON.stringify({ emoji }),
+  });
+}
+
+export function removeMessageReaction(channelId, messageId, emoji, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/chat/messages/${messageId}/reactions/${encodeURIComponent(emoji)}`, {
+    method: "DELETE",
+  });
+}
+
+export function markChatAsRead(channelId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/chat/mark-read`, {
+    method: "POST",
+  });
+}
+
+export function getChatConversation(channelId, fetcher = request) {
+  return fetcher(`/api/channels/${channelId}/chat/conversation`);
+}
+

@@ -17,6 +17,7 @@ import ChannelMembersModal from "./ChannelMembersModal";
 import ChannelJoinRequestsModal from "./ChannelJoinRequestsModal";
 import ChannelFiles from "./ChannelFiles";
 import ChannelMeeting from "./ChannelMeeting";
+import ChannelChat from "./ChannelChat";
 
 function ChannelDetail() {
   const { channelId } = useParams();
@@ -345,16 +346,14 @@ function ChannelDetail() {
       <div className="flex-1 overflow-hidden relative">
         {/* Chat Tab */}
         <div
-          className="h-full overflow-y-auto absolute inset-0"
+          className="h-full absolute inset-0"
           style={{ display: activeTab === "chat" && !isInMeeting ? "block" : "none" }}
         >
-          <div className="flex h-full items-center justify-center p-6 text-gray-400">
-            <div className="text-center">
-              <h3 className="text-lg font-medium text-gray-900">Welcome to #{channel.name}!</h3>
-              <p>This is the start of the {channel.name} channel.</p>
-              <p className="mt-2 text-sm text-gray-500">{members.length} members</p>
-            </div>
-          </div>
+          <ChannelChat
+            channelId={channelId}
+            channelName={channel.name}
+            members={members}
+          />
         </div>
 
         {/* Meeting Tab - Always mounted to keep video state */}

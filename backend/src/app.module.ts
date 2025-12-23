@@ -12,6 +12,7 @@ import { MeetingModule } from './meeting/meeting.module';
 import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { MaterialModule } from './material/material.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   controllers: [AppController],
@@ -30,6 +31,7 @@ import { MaterialModule } from './material/material.module';
     PostModule,
     CommentModule,
     MaterialModule,
+    ChatModule,
   ],
 })
 export class AppModule {}
