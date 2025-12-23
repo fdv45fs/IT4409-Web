@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+ï»¿import { useState, useEffect, useCallback } from "react";
 import { useParams, useOutletContext, useNavigate } from "react-router-dom";
 import {
   leaveChannel,
@@ -61,7 +61,7 @@ function ChannelDetail() {
         setChannel(channelData);
         setMembers(membersData);
       } catch (err) {
-        addToast(err.message || "Kh+ªng t¯ª·i -µªª¯+·c th+ªng tin channel", "error");
+        addToast(err.message || "KhÃ´ng táº£i Ä‘Æ°á»£c thÃ´ng tin channel", "error");
       } finally {
         if (!silent) setIsLoading(false);
       }
@@ -75,7 +75,7 @@ function ChannelDetail() {
       const data = await getPosts(channelId, authFetch);
       setPosts(Array.isArray(data) ? data : []);
     } catch (err) {
-      addToast(err.message || "Kh+ªng t¯ª·i -µªª¯+·c danh s+fch b+ßi -µ-Gng", "error");
+      addToast(err.message || "KhÃ´ng táº£i Ä‘Æ°á»£c danh sÃ¡ch bÃ i Ä‘Äƒng", "error");
     } finally {
       setIsPostsLoading(false);
     }
@@ -89,7 +89,7 @@ function ChannelDetail() {
         setPostDetail(detail);
         setIsPostDetailOpen(true);
       } catch (err) {
-        addToast(err.message || "Kh+ªng t¯ª·i -µªª¯+·c chi ti¯ª+t b+ßi -µ-Gng", "error");
+        addToast(err.message || "KhÃ´ng táº£i Ä‘Æ°á»£c chi tiáº¿t bÃ i Ä‘Äƒng", "error");
       } finally {
         setIsPostDetailLoading(false);
       }
@@ -104,7 +104,7 @@ function ChannelDetail() {
         const data = await getPostComments(channelId, postId, authFetch);
         setPostComments(Array.isArray(data) ? data : []);
       } catch (err) {
-        addToast(err.message || "Kh+ªng t¯ª·i -µªª¯+·c b++nh lu¯ªín", "error");
+        addToast(err.message || "KhÃ´ng táº£i Ä‘Æ°á»£c bÃ¬nh luáº­n", "error");
       } finally {
         setIsCommentsLoading(false);
       }
@@ -134,30 +134,30 @@ function ChannelDetail() {
   };
 
   const handleLeaveChannel = async () => {
-    if (!window.confirm("B¯ªfn c+ª ch¯ª+c ch¯ª+n mu¯+µn r¯+Ñi kh¯++i channel n+ßy?")) return;
+    if (!window.confirm("Báº¡n cÃ³ cháº¯c cháº¯n muá»‘n rá»i khá»i channel nÃ y?")) return;
     try {
       await leaveChannel(channelId, authFetch);
       if (refreshChannels) refreshChannels();
       navigate(`/workspace/${workspace.id}`);
     } catch (err) {
-      addToast(err.message || "Kh+ªng th¯+G r¯+Ñi channel", "error");
+      addToast(err.message || "KhÃ´ng thá»ƒ rá»i channel", "error");
     }
   };
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
     if (!postContent.trim()) {
-      addToast("N¯++i dung kh+ªng -µªª¯+·c -µ¯+G tr¯+µng", "error");
+      addToast("Ná»™i dung khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng", "error");
       return;
     }
     setIsPosting(true);
     try {
       await createPost(channelId, { content: postContent.trim() }, authFetch);
-      addToast("-++· t¯ªfo b+ßi -µ-Gng", "success");
+      addToast("ÄÃ£ táº¡o bÃ i Ä‘Äƒng", "success");
       setPostContent("");
       fetchPosts();
     } catch (err) {
-      addToast(err.message || "Kh+ªng t¯ªfo -µªª¯+·c b+ßi -µ-Gng", "error");
+      addToast(err.message || "KhÃ´ng táº¡o Ä‘Æ°á»£c bÃ i Ä‘Äƒng", "error");
     } finally {
       setIsPosting(false);
     }
@@ -179,7 +179,7 @@ function ChannelDetail() {
       fetchComments(selectedPostId);
       fetchPostDetail(selectedPostId);
     } catch (err) {
-      addToast(err.message || "Kh+ªng g¯+íi -µªª¯+·c b++nh lu¯ªín", "error");
+      addToast(err.message || "KhÃ´ng gá»­i Ä‘Æ°á»£c bÃ¬nh luáº­n", "error");
     } finally {
       setIsCommenting(false);
     }
@@ -187,13 +187,13 @@ function ChannelDetail() {
 
   const handleDeleteComment = async (commentId) => {
     if (!selectedPostId) return;
-    if (!window.confirm("B¯ªfn c+ª ch¯ª+c mu¯+µn x+ªa b++nh lu¯ªín n+ßy?")) return;
+    if (!window.confirm("Báº¡n cÃ³ cháº¯c muá»‘n xÃ³a bÃ¬nh luáº­n nÃ y?")) return;
     try {
       await deletePostComment(channelId, selectedPostId, commentId, authFetch);
       fetchComments(selectedPostId);
       fetchPostDetail(selectedPostId);
     } catch (err) {
-      addToast(err.message || "Kh+ªng x+ªa -µªª¯+·c b++nh lu¯ªín", "error");
+      addToast(err.message || "KhÃ´ng xÃ³a Ä‘Æ°á»£c bÃ¬nh luáº­n", "error");
     }
   };
 
@@ -205,7 +205,7 @@ function ChannelDetail() {
     );
   }
 
-  if (!channel) return <div className="p-6">Channel kh+ªng t¯+(n t¯ªfi</div>;
+  if (!channel) return <div className="p-6">Channel khÃ´ng tá»“n táº¡i</div>;
 
   const isWorkspaceAdmin = workspace?.myRole === "WORKSPACE_ADMIN";
   const isChannelAdmin = channel?.myRole === "CHANNEL_ADMIN";
@@ -219,7 +219,7 @@ function ChannelDetail() {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl font-bold text-gray-900">
-                {channel.isPrivate ? "=â÷¦" : "#"} {channel.name}
+                {channel.isPrivate ? "ğŸ”’" : "#"} {channel.name}
               </h2>
             </div>
             {channel.description && (
@@ -230,10 +230,10 @@ function ChannelDetail() {
                 className="mt-1 cursor-pointer text-xs text-gray-400 hover:text-gray-600"
                 onClick={() => {
                   navigator.clipboard.writeText(channel.joinCode);
-                  addToast("-++· sao ch+¼p m+· tham gia channel", "success");
+                  addToast("ÄÃ£ sao chÃ©p mÃ£ tham gia channel", "success");
                 }}
               >
-                M+· tham gia: {channel.joinCode} (Sao ch+¼p)
+                MÃ£ tham gia: {channel.joinCode} (Sao chÃ©p)
               </p>
             )}
           </div>
@@ -242,7 +242,7 @@ function ChannelDetail() {
               onClick={() => setIsMembersModalOpen(true)}
               className="text-sm font-medium text-gray-600 hover:underline"
             >
-              {members.length} th+ßnh vi+¼n
+              {members.length} thÃ nh viÃªn
             </button>
 
             {canManage && (
@@ -252,7 +252,7 @@ function ChannelDetail() {
                     onClick={() => setIsRequestsModalOpen(true)}
                     className="text-sm font-medium text-indigo-600 hover:underline"
                   >
-                    Y+¼u c¯ª¦u tham gia
+                    YÃªu cáº§u tham gia
                   </button>
                 )}
 
@@ -260,12 +260,12 @@ function ChannelDetail() {
                   onClick={() => setIsAddMemberModalOpen(true)}
                   className="text-sm font-medium text-indigo-600 hover:underline"
                 >
-                  + Th+¼m th+ßnh vi+¼n
+                  + ThÃªm thÃ nh viÃªn
                 </button>
                 <button
                   onClick={() => setIsUpdateModalOpen(true)}
                   className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                  title="C+ßi -µ¯ª+t channel"
+                  title="CÃ i Ä‘áº·t channel"
                 >
                   <svg
                     className="h-5 w-5"
@@ -293,7 +293,7 @@ function ChannelDetail() {
             <button
               onClick={handleLeaveChannel}
               className="rounded-lg p-2 text-red-400 hover:bg-red-50 hover:text-red-600"
-              title="R¯+Ñi channel"
+              title="Rá»i channel"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -309,39 +309,43 @@ function ChannelDetail() {
           <nav className="flex -mb-px px-6">
             <button
               onClick={() => setActiveTab("posts")}
-              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === "posts"
-                ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "posts"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
             >
-              B+ßi -µ-Gng
+              BÃ i Ä‘Äƒng
             </button>
             <button
               onClick={() => setActiveTab("chat")}
-              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === "chat"
-                ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "chat"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
             >
-              =â¦+ Chat
+              ğŸ’¬ Chat
             </button>
             <button
               onClick={() => setActiveTab("meeting")}
-              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === "meeting"
-                ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "meeting"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
             >
-              =â-- Meeting
+              ğŸ¥ Meeting
             </button>
             <button
               onClick={() => setActiveTab("files")}
-              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${activeTab === "files"
-                ? "border-indigo-500 text-indigo-600"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                }`}
+              className={`py-4 px-6 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "files"
+                  ? "border-indigo-500 text-indigo-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
             >
-              =â(n Files & Materials
+              ğŸ“ Files & Materials
             </button>
           </nav>
         </div>
@@ -369,20 +373,20 @@ function ChannelDetail() {
                   <textarea
                     value={postContent}
                     onChange={(e) => setPostContent(e.target.value)}
-                    placeholder={`Chia s¯ª+ v¯+ói #${channel.name}...`}
+                    placeholder={`Chia sáº» vá»›i #${channel.name}...`}
                     className="w-full resize-none rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-800 shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                     rows={3}
                   />
                   <div className="flex items-center justify-between">
                     <p className="text-xs text-gray-500">
-                      B+ßi -µ-Gng s¯ª+ hi¯+Gn th¯+n cho t¯ª-t c¯ª· th+ßnh vi+¼n trong channel.
+                      BÃ i Ä‘Äƒng sáº½ hiá»ƒn thá»‹ cho táº¥t cáº£ thÃ nh viÃªn trong channel.
                     </p>
                     <button
                       type="submit"
                       disabled={isPosting}
                       className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-700 disabled:opacity-60"
                     >
-                      {isPosting ? "-+ang g¯+íi..." : "-+-Gng b+ßi"}
+                      {isPosting ? "Äang gá»­i..." : "ÄÄƒng bÃ i"}
                     </button>
                   </div>
                 </div>
@@ -391,18 +395,18 @@ function ChannelDetail() {
 
             <div className="rounded-xl border border-gray-200 bg-white">
               <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                <h3 className="text-sm font-semibold text-gray-900">Danh s+fch b+ßi -µ-Gng</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Danh sÃ¡ch bÃ i Ä‘Äƒng</h3>
                 {isPostsLoading && (
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span className="h-3 w-3 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent"></span>
-                    -+ang t¯ª·i...
+                    Äang táº£i...
                   </div>
                 )}
               </div>
 
               {posts.length === 0 && !isPostsLoading && (
                 <div className="px-4 py-6 text-center text-sm text-gray-500">
-                  Chªªa c+ª b+ßi -µ-Gng n+ßo trong channel n+ßy.
+                  ChÆ°a cÃ³ bÃ i Ä‘Äƒng nÃ o trong channel nÃ y.
                 </div>
               )}
 
@@ -423,7 +427,7 @@ function ChannelDetail() {
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2 text-sm">
                             <span className="font-semibold text-gray-900">
-                              {post.author?.fullName || post.author?.username || "¯ª+n danh"}
+                              {post.author?.fullName || post.author?.username || "áº¨n danh"}
                             </span>
                             {post.createdAt && (
                               <span className="text-xs text-gray-500">
@@ -431,7 +435,7 @@ function ChannelDetail() {
                               </span>
                             )}
                             <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-600">
-                              B+ßi -µ-Gng
+                              BÃ i Ä‘Äƒng
                             </span>
                           </div>
                           <p className="mt-2 line-clamp-3 whitespace-pre-wrap text-sm leading-relaxed text-gray-800">
@@ -440,7 +444,7 @@ function ChannelDetail() {
                           <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
                             <span className="inline-flex items-center gap-1">
                               <span className="h-1.5 w-1.5 rounded-full bg-indigo-400"></span>
-                              Nh¯ª-p -µ¯+G xem chi ti¯ª+t
+                              Nháº¥p Ä‘á»ƒ xem chi tiáº¿t
                             </span>
                           </div>
                         </div>
@@ -493,7 +497,7 @@ function ChannelDetail() {
         <div className="fixed inset-0 z-40 flex items-start justify-center bg-black/30 px-4 py-10 backdrop-blur-sm">
           <div className="w-full max-w-3xl rounded-2xl bg-white shadow-xl max-h-[85vh] overflow-hidden">
             <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
-              <h3 className="text-base font-semibold text-gray-900">Chi ti¯ª+t b+ßi -µ-Gng</h3>
+              <h3 className="text-base font-semibold text-gray-900">Chi tiáº¿t bÃ i Ä‘Äƒng</h3>
               <button onClick={() => setIsPostDetailOpen(false)} className="rounded-full p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -505,7 +509,7 @@ function ChannelDetail() {
               {isPostDetailLoading ? (
                 <div className="px-6 py-10 text-center text-sm text-gray-500">
                   <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-                  <p className="mt-3">-+ang t¯ª·i chi ti¯ª+t b+ßi -µ-Gng...</p>
+                  <p className="mt-3">Äang táº£i chi tiáº¿t bÃ i Ä‘Äƒng...</p>
                 </div>
               ) : postDetail ? (
                 <div className="space-y-6 px-6 py-5">
@@ -516,7 +520,7 @@ function ChannelDetail() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-semibold text-gray-900">
-                          {postDetail.author?.fullName || postDetail.author?.username || "¯ª+n danh"}
+                          {postDetail.author?.fullName || postDetail.author?.username || "áº¨n danh"}
                         </p>
                         {postDetail.createdAt && <span className="text-xs text-gray-500">{new Date(postDetail.createdAt).toLocaleString("vi-VN")}</span>}
                       </div>
@@ -526,8 +530,8 @@ function ChannelDetail() {
 
                   <div className="rounded-lg border border-gray-100 bg-gray-50">
                     <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                      <h4 className="text-sm font-semibold text-gray-900">B++nh lu¯ªín</h4>
-                      <span className="text-xs text-gray-500">{(postComments?.length ?? 0)} b++nh lu¯ªín</span>
+                      <h4 className="text-sm font-semibold text-gray-900">BÃ¬nh luáº­n</h4>
+                      <span className="text-xs text-gray-500">{(postComments?.length ?? 0)} bÃ¬nh luáº­n</span>
                     </div>
 
                     <div className="px-4 py-3">
@@ -539,7 +543,7 @@ function ChannelDetail() {
                           <textarea
                             value={commentContent}
                             onChange={(e) => setCommentContent(e.target.value)}
-                            placeholder="Vi¯ª+t b++nh lu¯ªín..."
+                            placeholder="Viáº¿t bÃ¬nh luáº­n..."
                             className="w-full resize-none rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-800 shadow-inner focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
                             rows={2}
                           />
@@ -549,7 +553,7 @@ function ChannelDetail() {
                               disabled={isCommenting}
                               className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
                             >
-                              {isCommenting ? "-+ang g¯+íi..." : "G¯+íi b++nh lu¯ªín"}
+                              {isCommenting ? "Äang gá»­i..." : "Gá»­i bÃ¬nh luáº­n"}
                             </button>
                           </div>
                         </div>
@@ -557,7 +561,7 @@ function ChannelDetail() {
                     </div>
 
                     {isCommentsLoading ? (
-                      <div className="px-4 py-4 text-sm text-gray-500">-+ang t¯ª·i b++nh lu¯ªín...</div>
+                      <div className="px-4 py-4 text-sm text-gray-500">Äang táº£i bÃ¬nh luáº­n...</div>
                     ) : postComments?.length ? (
                       <div className="divide-y divide-gray-100 max-h-80 overflow-y-auto pr-1">
                         {postComments.map((cmt) => (
@@ -569,7 +573,7 @@ function ChannelDetail() {
                               <div className="flex-1">
                                 <div className="flex items-center gap-2">
                                   <p className="text-sm font-semibold text-gray-900">
-                                    {cmt.author?.fullName || cmt.author?.username || "¯ª+n danh"}
+                                    {cmt.author?.fullName || cmt.author?.username || "áº¨n danh"}
                                   </p>
                                   {cmt.createdAt && <span className="text-xs text-gray-500">{new Date(cmt.createdAt).toLocaleString("vi-VN")}</span>}
                                   {(cmt.author?.id === currentUser?.id || cmt.authorId === currentUser?.id) && (
@@ -578,7 +582,7 @@ function ChannelDetail() {
                                       onClick={() => handleDeleteComment(cmt.id)}
                                       className="text-xs font-medium text-red-500 hover:text-red-600"
                                     >
-                                      X+ªa
+                                      XÃ³a
                                     </button>
                                   )}
                                 </div>
@@ -589,12 +593,12 @@ function ChannelDetail() {
                         ))}
                       </div>
                     ) : (
-                      <div className="px-4 py-5 text-sm text-gray-500">Chªªa c+ª b++nh lu¯ªín n+ßo.</div>
+                      <div className="px-4 py-5 text-sm text-gray-500">ChÆ°a cÃ³ bÃ¬nh luáº­n nÃ o.</div>
                     )}
                   </div>
                 </div>
               ) : (
-                <div className="px-6 py-6 text-sm text-red-500">Kh+ªng t¯ª·i -µªª¯+·c chi ti¯ª+t b+ßi -µ-Gng.</div>
+                <div className="px-6 py-6 text-sm text-red-500">KhÃ´ng táº£i Ä‘Æ°á»£c chi tiáº¿t bÃ i Ä‘Äƒng.</div>
               )}
             </div>
           </div>
