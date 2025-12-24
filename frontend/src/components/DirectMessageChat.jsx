@@ -108,7 +108,8 @@ function DirectMessageChat() {
     if (isJoined) {
       markAsRead();
     }
-  }, [isJoined, markAsRead]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isJoined]);
 
   // Handle scroll for loading more
   const handleScroll = () => {
