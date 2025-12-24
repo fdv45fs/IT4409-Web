@@ -1095,6 +1095,39 @@ export class ChatService {
 
     const workspaceMemberIds = new Set(workspaceMembers.map((m) => m.userId));
 
+    // 4. Fetch all unread messages in a single query
+    const conversationIds = participations.map((p) => p.conversation.id);
+    const allUnreadMessages = await this.prisma.message.findMany({
+      where: {
+        conversationId: { in: conversationIds },
+        senderId: { not: userId },
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        conversationId: true,
+        createdAt: true,
+      },
+    });
+
+    // Create a map of participation info for quick lookup
+    const participationMap = new Map<string, { lastReadAt: Date }>(
+      participations.map((p) => [
+        p.conversation.id,
+        { lastReadAt: p.lastReadAt ?? new Date(0) },
+      ]),
+    );
+
+    // Count unread messages for each conversation
+    const unreadCountMap = new Map<string, number>();
+    for (const message of allUnreadMessages) {
+      const participation = participationMap.get(message.conversationId);
+      if (participation && message.createdAt > participation.lastReadAt) {
+        const currentCount = unreadCountMap.get(message.conversationId) ?? 0;
+        unreadCountMap.set(message.conversationId, currentCount + 1);
+      }
+    }
+
     const filteredConversations: DirectConversationItemDto[] = [];
 
     for (const participation of participations) {
@@ -1110,19 +1143,8 @@ export class ChatService {
       // Kiểm tra other participant có trong workspace không
       if (!workspaceMemberIds.has(otherParticipant.userId)) continue;
 
-      // Tính số tin nhắn chưa đọc
-      const unreadCount = await this.prisma.message.count({
-        where: {
-          conversationId: conv.id,
-          createdAt: {
-            gt: participation.lastReadAt ?? new Date(0),
-          },
-          senderId: {
-            not: userId,
-          },
-          isDeleted: false,
-        },
-      });
+      // Get unread count from map
+      const unreadCount = unreadCountMap.get(conv.id) ?? 0;
 
       // Map last message
       let lastMessage: LastMessageDto | undefined;
