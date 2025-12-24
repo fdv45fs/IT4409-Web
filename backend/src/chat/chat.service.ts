@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateMessageDto } from './dtos/create-message.dto';
 import { AddReactionDto } from './dtos/add-reaction.dto';
@@ -1232,7 +1233,9 @@ export class ChatService {
     }
 
     // 3. Lấy hoặc tạo conversation
-    let conversation: any;
+    let conversation: Prisma.ConversationGetPayload<{
+      include: { participants: true };
+    }> | null;
     if (conversationId) {
       // Kiểm tra conversation tồn tại và user có quyền
       conversation = await this.prisma.conversation.findUnique({
