@@ -7,7 +7,6 @@ import ChatInput from "./ChatInput";
 
 function ChannelChat({ channelId, channelName, members = [] }) {
   const { accessToken, currentUser, authFetch } = useAuth();
-  const { addToast } = useToast();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
