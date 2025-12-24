@@ -34,8 +34,7 @@ interface OnlineUser {
   namespace: '/chat',
 })
 export class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -54,7 +53,7 @@ export class ChatGateway
     private jwtService: JwtService,
     private prisma: PrismaService,
     private chatService: ChatService,
-  ) {}
+  ) { }
 
   afterInit() {
     this.logger.log('Chat WebSocket Gateway initialized');
@@ -367,23 +366,35 @@ export class ChatGateway
     const user = client.user;
 
     try {
-      await this.chatService.addReaction(
+      const result = await this.chatService.addReaction(
         user.id,
         channelId,
         messageId,
         reaction,
       );
 
-      // Broadcast reaction to channel
-      this.server.to(`channel:${channelId}`).emit('reaction:added', {
-        channelId,
-        messageId,
-        emoji: reaction.emoji,
-        user: {
-          id: user.id,
-          username: user.username,
-        },
-      });
+      // Broadcast reaction to channel based on action
+      if (result.action === 'removed') {
+        this.server.to(`channel:${channelId}`).emit('reaction:removed', {
+          channelId,
+          messageId,
+          emoji: reaction.emoji,
+          user: {
+            id: user.id,
+            username: user.username,
+          },
+        });
+      } else {
+        this.server.to(`channel:${channelId}`).emit('reaction:added', {
+          channelId,
+          messageId,
+          emoji: reaction.emoji,
+          user: {
+            id: user.id,
+            username: user.username,
+          },
+        });
+      }
     } catch (error) {
       this.logger.error(`Error adding reaction: ${error.message}`);
       client.emit('error', {
@@ -888,23 +899,35 @@ export class ChatGateway
     const user = client.user;
 
     try {
-      await this.chatService.addDirectReaction(
+      const result = await this.chatService.addDirectReaction(
         user.id,
         conversationId,
         messageId,
         reaction,
       );
 
-      // Broadcast reaction to conversation
-      this.server.to(`dm:${conversationId}`).emit('dm:reaction:added', {
-        conversationId,
-        messageId,
-        emoji: reaction.emoji,
-        user: {
-          id: user.id,
-          username: user.username,
-        },
-      });
+      // Broadcast reaction to conversation based on action
+      if (result.action === 'removed') {
+        this.server.to(`dm:${conversationId}`).emit('dm:reaction:removed', {
+          conversationId,
+          messageId,
+          emoji: reaction.emoji,
+          user: {
+            id: user.id,
+            username: user.username,
+          },
+        });
+      } else {
+        this.server.to(`dm:${conversationId}`).emit('dm:reaction:added', {
+          conversationId,
+          messageId,
+          emoji: reaction.emoji,
+          user: {
+            id: user.id,
+            username: user.username,
+          },
+        });
+      }
     } catch (error) {
       this.logger.error(`Error adding direct reaction: ${error.message}`);
       client.emit('error', {

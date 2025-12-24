@@ -30,7 +30,7 @@ import { ROLES } from '../common/constants/roles.constant';
 
 @Injectable()
 export class ChatService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   /**
    * Kiểm tra user có phải là member của channel không
@@ -657,7 +657,7 @@ export class ChatService {
     channelId: string,
     messageId: string,
     dto: AddReactionDto,
-  ): Promise<{ message: string }> {
+  ): Promise<{ message: string; action: 'added' | 'removed' }> {
     // 1. Kiểm tra channel tồn tại
     const channel = await this.prisma.channel.findUnique({
       where: { id: channelId },
@@ -708,11 +708,19 @@ export class ChatService {
       },
     });
 
+    // 5. Toggle reaction: nếu đã tồn tại thì xóa, nếu chưa thì tạo mới
     if (existingReaction) {
-      throw new BadRequestException('Bạn đã reaction emoji này rồi');
+      await this.prisma.reaction.delete({
+        where: { id: existingReaction.id },
+      });
+
+      return {
+        message: 'Đã xóa reaction thành công',
+        action: 'removed',
+      };
     }
 
-    // 5. Tạo reaction
+    // Tạo reaction mới
     await this.prisma.reaction.create({
       data: {
         reactableId: message.reactableId,
@@ -723,6 +731,7 @@ export class ChatService {
 
     return {
       message: 'Đã thêm reaction thành công',
+      action: 'added',
     };
   }
 
@@ -1570,7 +1579,7 @@ export class ChatService {
     conversationId: string,
     messageId: string,
     dto: AddReactionDto,
-  ): Promise<{ message: string }> {
+  ): Promise<{ message: string; action: 'added' | 'removed' }> {
     // 1. Kiểm tra conversation tồn tại
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
@@ -1626,11 +1635,19 @@ export class ChatService {
       },
     });
 
+    // 5. Toggle reaction: nếu đã tồn tại thì xóa, nếu chưa thì tạo mới
     if (existingReaction) {
-      throw new BadRequestException('Bạn đã reaction emoji này rồi');
+      await this.prisma.reaction.delete({
+        where: { id: existingReaction.id },
+      });
+
+      return {
+        message: 'Đã xóa reaction thành công',
+        action: 'removed',
+      };
     }
 
-    // 5. Tạo reaction
+    // Tạo reaction mới
     await this.prisma.reaction.create({
       data: {
         reactableId: message.reactableId,
@@ -1641,6 +1658,7 @@ export class ChatService {
 
     return {
       message: 'Đã thêm reaction thành công',
+      action: 'added',
     };
   }
 
