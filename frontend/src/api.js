@@ -144,6 +144,11 @@ export function getWorkspaceMembers(workspaceId, fetcher = request) {
   return fetcher(`/api/workspaces/${workspaceId}/members`);
 }
 
+export function searchWorkspace(workspaceId, query, fetcher = request) {
+  const params = new URLSearchParams({ q: query });
+  return fetcher(`/api/workspaces/${workspaceId}/search?${params}`);
+}
+
 export function joinChannelByCode(code, fetcher = request) {
   return fetcher("/api/channels/join", {
     method: "POST",

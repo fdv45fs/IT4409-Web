@@ -7,6 +7,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   Req,
   UseGuards,
   UseInterceptors,
@@ -284,5 +285,27 @@ export class WorkspaceController {
       memberId,
       dto.role,
     );
+  }
+
+  // Search workspace (channels + members)
+  @Get(':workspaceId/search')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(
+    ROLES.WORKSPACE_MEMBER,
+    ROLES.WORKSPACE_ADMIN,
+    ROLES.WORKSPACE_PRIVILEGE_MEMBER,
+  )
+  @ApiOperation({ summary: 'Search channels and members in workspace' })
+  @ApiParam({ name: 'workspaceId', description: 'ID of the workspace' })
+  @ApiResponse({
+    status: 200,
+    description: 'Search results containing channels and members',
+  })
+  async search(
+    @Req() req,
+    @Param('workspaceId') workspaceId: string,
+    @Query('q') query: string,
+  ) {
+    return this.workspaceService.search(req.user.id, workspaceId, query || '');
   }
 }

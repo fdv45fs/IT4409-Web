@@ -504,4 +504,84 @@ export class WorkspaceService {
       data: { roleId: newRole.id },
     });
   }
+
+  // 13. Search workspace (channels + members)
+  async search(userId: string, workspaceId: string, query: string) {
+    // Verify membership
+    const membership = await this.prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
+    });
+
+    if (!membership) {
+      throw new ForbiddenException('Bạn không thuộc workspace này');
+    }
+
+    // Search channels (only channels user is member of or public channels)
+    const channels = await this.prisma.channel.findMany({
+      where: {
+        workspaceId,
+        AND: [
+          {
+            OR: [
+              { name: { contains: query } },
+              { description: { contains: query } },
+            ],
+          },
+          {
+            OR: [
+              { isPrivate: false },
+              {
+                members: {
+                  some: { userId },
+                },
+              },
+            ],
+          },
+        ],
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        isPrivate: true,
+      },
+      take: 10,
+    });
+
+    // Search workspace members
+    const members = await this.prisma.workspaceMember.findMany({
+      where: {
+        workspaceId,
+        user: {
+          OR: [
+            { fullName: { contains: query } },
+            { username: { contains: query } },
+            { email: { contains: query } },
+          ],
+        },
+      },
+      include: {
+        user: {
+          select: {
+            username: true,
+            fullName: true,
+            email: true,
+            avatarUrl: true,
+          },
+        },
+      },
+      take: 10,
+    });
+
+    return {
+      channels,
+      members: members.map((m) => ({
+        userId: m.userId,
+        username: m.user.username,
+        fullName: m.user.fullName,
+        email: m.user.email,
+        avatarUrl: m.user.avatarUrl,
+      })),
+    };
+  }
 }

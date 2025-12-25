@@ -6,6 +6,7 @@ import UserMenu from "./UserMenu";
 import CreateChannelModal from "./CreateChannelModal";
 import JoinChannelModal from "./JoinChannelModal";
 import DirectMessageList from "./DirectMessageList";
+import SearchBar from "./SearchBar";
 
 function WorkspaceLayout() {
   const { workspaceId } = useParams();
@@ -81,9 +82,18 @@ function WorkspaceLayout() {
   if (!workspace) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
-      {/* Sidebar */}
-      <aside className="flex w-64 flex-col bg-slate-900 text-slate-300">
+    <div className="flex h-screen flex-col overflow-hidden bg-white">
+      {/* Global Workspace Search Header - Full Width */}
+      <div className="flex items-center border-b border-slate-200 bg-white px-6 py-3 shadow-sm">
+        <div className="flex-1">
+          <SearchBar />
+        </div>
+      </div>
+
+      {/* Main Layout: Sidebar + Content */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <aside className="flex w-64 flex-col bg-slate-900 text-slate-300">
         {/* Workspace Header */}
         <div className="relative border-b border-slate-800">
           <div className="flex items-center">
@@ -281,6 +291,7 @@ function WorkspaceLayout() {
           }}
         />
       )}
+      </div>
     </div>
   );
 }
