@@ -1,0 +1,15 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      # deploy thì tạo file compose khác
+      # xóa context và dockerfile, thay bằng:
+      #image: 
+    container_name: nestjs_backend
+    restart: always
+    ports:
+      - "3000:3000"
+    
+    env_file:
+      - ./backend/.env #maybe sửa đường dẫn
