@@ -58,7 +58,12 @@ function ChannelChat({ channelId, channelName, members = [] }) {
 
         if (data?.messages) {
           if (prepend) {
-            setInitialMessages([...data.messages, ...messages]);
+            // IMPORTANT: Use functional update to avoid race condition with socket events
+            // This ensures we always merge with the latest messages state instead of overwriting
+            setInitialMessages((currentMessages) => [
+              ...data.messages,
+              ...currentMessages,
+            ]);
           } else {
             setInitialMessages(data.messages);
           }
@@ -72,7 +77,7 @@ function ChannelChat({ channelId, channelName, members = [] }) {
         setIsLoadingHistory(false);
       }
     },
-    [channelId, authFetch, setInitialMessages, messages]
+    [channelId, authFetch, setInitialMessages]
   );
 
   // Initial fetch

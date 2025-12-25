@@ -290,11 +290,6 @@ export function useChatSocket(token, channelId) {
     setMessages(initialMessages);
   }, []);
 
-  // Add message locally (for optimistic updates)
-  const addMessageLocally = useCallback((message) => {
-    setMessages((prev) => [...prev, message]);
-  }, []);
-
   return {
     isConnected,
     isJoined,
@@ -310,7 +305,6 @@ export function useChatSocket(token, channelId) {
     stopTyping,
     markAsRead,
     setInitialMessages,
-    addMessageLocally,
   };
 }
 

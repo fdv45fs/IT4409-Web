@@ -299,7 +299,12 @@ export function useDMSocket(token, conversationId, workspaceId) {
 
   // Set initial messages (from REST API)
   const setInitialMessages = useCallback((initialMessages) => {
-    setMessages(initialMessages);
+    // Support both direct set and functional update patterns
+    if (typeof initialMessages === "function") {
+      setMessages(initialMessages);
+    } else {
+      setMessages(initialMessages);
+    }
   }, []);
 
   return {
