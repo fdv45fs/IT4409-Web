@@ -82,16 +82,28 @@ function WorkspaceLayout() {
   if (!workspace) return null;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-white">
-      {/* Global Workspace Search Header - Full Width */}
-      <div className="flex items-center border-b border-slate-200 bg-white px-6 py-3 shadow-sm">
-        <div className="flex-1">
-          <SearchBar />
+    <>
+      {/* Global Header - HUST Collab Platform */}
+      <header className="border-b border-slate-800 bg-slate-900">
+        <div className="px-6 py-3">
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-xl font-bold text-white whitespace-nowrap">
+              HUST Collab Platform
+            </h1>
+
+            {/* Search Bar - Only in workspace */}
+            <div className="flex-1 max-w-2xl">
+              <SearchBar />
+            </div>
+
+            {/* User Menu */}
+            <UserMenu />
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Main Layout: Sidebar + Content */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex h-screen overflow-hidden">
         {/* Sidebar */}
         <aside className="flex w-64 flex-col bg-slate-900 text-slate-300">
         {/* Workspace Header */}
@@ -259,13 +271,6 @@ function WorkspaceLayout() {
             }}
           />
         </div>
-
-        {/* User Menu */}
-        <div className="border-t border-slate-800 bg-slate-900/50 px-4 py-3">
-          <div className="flex items-center justify-between">
-             <UserMenu />
-          </div>
-        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -292,7 +297,7 @@ function WorkspaceLayout() {
         />
       )}
       </div>
-    </div>
+    </>
   );
 }
 
