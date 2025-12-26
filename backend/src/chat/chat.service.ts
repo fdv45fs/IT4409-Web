@@ -1523,6 +1523,77 @@ export class ChatService {
   }
 
   /**
+   * Lấy chi tiết một tin nhắn trong direct conversation
+   */
+  async getDirectMessageById(
+    userId: string,
+    workspaceId: string,
+    conversationId: string,
+    messageId: string,
+  ): Promise<MessageResponseDto> {
+    // 1. Kiểm tra conversation tồn tại
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: true,
+      },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation không tồn tại');
+    }
+
+    // Ensure conversation belongs to this workspace
+    if (conversation.workspaceId !== workspaceId) {
+      throw new ForbiddenException('Conversation không thuộc workspace này');
+    }
+
+    // 2. Kiểm tra quyền
+    const participantIds = conversation.participants.map((p) => p.userId);
+    if (!participantIds.includes(userId)) {
+      throw new ForbiddenException(
+        'Bạn không phải thành viên của conversation này',
+      );
+    }
+
+    // 3. Tìm tin nhắn
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      include: {
+        conversation: true,
+        sender: true,
+        replyTo: {
+          include: {
+            sender: true,
+          },
+        },
+        mentions: {
+          include: {
+            mentionedUser: true,
+          },
+        },
+        reactable: {
+          include: {
+            reactions: true,
+            fileAttachments: true,
+          },
+        },
+      },
+    });
+
+    if (!message) {
+      throw new NotFoundException('Tin nhắn không tồn tại');
+    }
+
+    // 4. Kiểm tra tin nhắn thuộc conversation này
+    if (message.conversationId !== conversationId) {
+      throw new ForbiddenException('Tin nhắn không thuộc conversation này');
+    }
+
+    return this.mapMessageToDto(message);
+  }
+
+  /**
    * Đánh dấu đã đọc tin nhắn trong direct conversation
    */
   async markDirectConversationAsRead(
