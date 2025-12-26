@@ -1137,6 +1137,25 @@ export class ChatService {
       }
     }
 
+    // Fetch presence for other participants to set initial online status
+    const otherUserIds = participations
+      .map(
+        (p) =>
+          p.conversation.participants.find((pp) => pp.userId !== userId)
+            ?.userId,
+      )
+      .filter((id): id is string => Boolean(id));
+
+    const uniqueOtherUserIds = Array.from(new Set(otherUserIds));
+    const onlinePresences = await this.prisma.userPresence.findMany({
+      where: {
+        userId: { in: uniqueOtherUserIds },
+        status: 'online',
+      },
+      select: { userId: true },
+    });
+    const onlineSet = new Set(onlinePresences.map((p) => p.userId));
+
     const filteredConversations: DirectConversationItemDto[] = [];
 
     for (const participation of participations) {
@@ -1174,6 +1193,7 @@ export class ChatService {
         fullName: otherUser.fullName,
         email: otherUser.email,
         avatarUrl: otherUser.avatarUrl ?? undefined,
+        isOnline: onlineSet.has(otherUser.id),
       };
 
       filteredConversations.push({
@@ -1500,6 +1520,77 @@ export class ChatService {
       limit,
       hasMore: skip + messages.length < total,
     };
+  }
+
+  /**
+   * Lấy chi tiết một tin nhắn trong direct conversation
+   */
+  async getDirectMessageById(
+    userId: string,
+    workspaceId: string,
+    conversationId: string,
+    messageId: string,
+  ): Promise<MessageResponseDto> {
+    // 1. Kiểm tra conversation tồn tại
+    const conversation = await this.prisma.conversation.findUnique({
+      where: { id: conversationId },
+      include: {
+        participants: true,
+      },
+    });
+
+    if (!conversation) {
+      throw new NotFoundException('Conversation không tồn tại');
+    }
+
+    // Ensure conversation belongs to this workspace
+    if (conversation.workspaceId !== workspaceId) {
+      throw new ForbiddenException('Conversation không thuộc workspace này');
+    }
+
+    // 2. Kiểm tra quyền
+    const participantIds = conversation.participants.map((p) => p.userId);
+    if (!participantIds.includes(userId)) {
+      throw new ForbiddenException(
+        'Bạn không phải thành viên của conversation này',
+      );
+    }
+
+    // 3. Tìm tin nhắn
+    const message = await this.prisma.message.findUnique({
+      where: { id: messageId },
+      include: {
+        conversation: true,
+        sender: true,
+        replyTo: {
+          include: {
+            sender: true,
+          },
+        },
+        mentions: {
+          include: {
+            mentionedUser: true,
+          },
+        },
+        reactable: {
+          include: {
+            reactions: true,
+            fileAttachments: true,
+          },
+        },
+      },
+    });
+
+    if (!message) {
+      throw new NotFoundException('Tin nhắn không tồn tại');
+    }
+
+    // 4. Kiểm tra tin nhắn thuộc conversation này
+    if (message.conversationId !== conversationId) {
+      throw new ForbiddenException('Tin nhắn không thuộc conversation này');
+    }
+
+    return this.mapMessageToDto(message);
   }
 
   /**

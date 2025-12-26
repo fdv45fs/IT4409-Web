@@ -189,6 +189,34 @@ export function useDMSocket(token, conversationId, workspaceId) {
       console.log(`DM: ${user.username} read messages at ${readAt}`);
     });
 
+    // Global presence events (workspace-agnostic)
+    socket.on("presence:user:online", ({ userId }) => {
+      window.dispatchEvent(
+        new CustomEvent("presence:user:update", {
+          detail: { userId, isOnline: true },
+        })
+      );
+    });
+
+    socket.on("presence:user:offline", ({ userId }) => {
+      window.dispatchEvent(
+        new CustomEvent("presence:user:update", {
+          detail: { userId, isOnline: false },
+        })
+      );
+    });
+
+    socket.on("presence:user:list", ({ userIds }) => {
+      if (!Array.isArray(userIds)) return;
+      userIds.forEach((id) => {
+        window.dispatchEvent(
+          new CustomEvent("presence:user:update", {
+            detail: { userId: id, isOnline: true },
+          })
+        );
+      });
+    });
+
     // Cleanup
     return () => {
       socket.disconnect();

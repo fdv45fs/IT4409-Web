@@ -13,16 +13,21 @@ function DirectMessageChat() {
   const { accessToken, currentUser, authFetch } = useAuth();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const messageRefs = useRef({});
+  const highlightTimeoutRef = useRef(null);
 
   const [otherUser, setOtherUser] = useState(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isJumping, setIsJumping] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [deleteConfirmModal, setDeleteConfirmModal] = useState({
     isOpen: false,
     messageId: null,
   });
+  const [highlightMessageId, setHighlightMessageId] = useState(null);
 
   const {
     isConnected,
@@ -41,8 +46,32 @@ function DirectMessageChat() {
     setInitialMessages,
   } = useDMSocket(accessToken, conversationId, workspaceId);
 
+  // Presence state that can be updated via global presence events
+  const [presenceOnline, setPresenceOnline] = useState(false);
+
+  // Sync initial presence from socket join
+  useEffect(() => {
+    setPresenceOnline(otherParticipantOnline || false);
+  }, [otherParticipantOnline]);
+
+  // Listen to global presence events to update status even when user hasn't opened this DM
+  useEffect(() => {
+    const handler = (event) => {
+      if (!otherUser) return;
+      if (event.detail.userId === otherUser.id) {
+        setPresenceOnline(event.detail.isOnline);
+      }
+    };
+
+    window.addEventListener("presence:user:update", handler);
+    return () => window.removeEventListener("presence:user:update", handler);
+  }, [otherUser]);
+
   // Reset local state when switching conversations
   useEffect(() => {
+    // Clean up refs and state when switching conversations
+    messageRefs.current = {};
+    setPresenceOnline(false);
     setInitialMessages([]);
     setPage(1);
     setHasMore(true);
@@ -59,6 +88,10 @@ function DirectMessageChat() {
         const conv = data.conversations?.find((c) => c.id === conversationId);
         if (conv) {
           setOtherUser(conv.otherParticipant);
+          // Initialize presence from list data in case socket presence hasn't arrived yet
+          if (typeof conv.otherParticipant?.isOnline === "boolean") {
+            setPresenceOnline(conv.otherParticipant.isOnline);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch conversation:", err);
@@ -130,11 +163,25 @@ function DirectMessageChat() {
 
   // Handle scroll for loading more
   const handleScroll = () => {
-    if (!messagesContainerRef.current || isLoadingHistory || !hasMore) return;
+    if (!messagesContainerRef.current) return;
 
-    const { scrollTop } = messagesContainerRef.current;
-    if (scrollTop === 0) {
+    const { scrollTop, scrollHeight, clientHeight } =
+      messagesContainerRef.current;
+
+    // Load more messages when scrolled to top
+    if (scrollTop === 0 && !isLoadingHistory && hasMore) {
       fetchMessageHistory(page + 1, true);
+    }
+
+    // Show scroll-to-bottom button when user scrolls up (more than 200px from bottom)
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    setShowScrollButton(distanceFromBottom > 200);
+  };
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -161,6 +208,120 @@ function DirectMessageChat() {
   const handleReply = (message) => {
     setReplyTo(message);
   };
+
+  const handleJumpToMessage = async (messageId) => {
+    if (!messageId) return;
+
+    // Clear any existing highlight timeout before setting a new one
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+
+    const targetEl = messageRefs.current[messageId];
+
+    // If message exists in DOM, scroll to it immediately
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightMessageId(messageId);
+      highlightTimeoutRef.current = setTimeout(() => {
+        setHighlightMessageId(null);
+        highlightTimeoutRef.current = null;
+      }, 1500);
+      return;
+    }
+
+    // Message not in current list - fetch with context
+    try {
+      setIsJumping(true);
+      const { getDirectMessageById, getDirectMessages } = await import(
+        "../api"
+      );
+
+      // First verify the message exists
+      const targetMessage = await getDirectMessageById(
+        workspaceId,
+        conversationId,
+        messageId,
+        authFetch
+      );
+
+      if (!targetMessage) {
+        window.dispatchEvent(
+          new CustomEvent("show:toast", {
+            detail: {
+              message: "Không tìm thấy tin nhắn",
+              type: "error",
+            },
+          })
+        );
+        return;
+      }
+
+      // Fetch messages around the target (25 before + 25 after = ~50 total)
+      const beforeData = await getDirectMessages(
+        workspaceId,
+        conversationId,
+        { beforeId: messageId, limit: 25 },
+        authFetch
+      );
+      const afterData = await getDirectMessages(
+        workspaceId,
+        conversationId,
+        { afterId: messageId, limit: 25 },
+        authFetch
+      );
+
+      // Combine: before + target + after
+      const contextMessagesRaw = [
+        ...(beforeData?.messages || []),
+        targetMessage,
+        ...(afterData?.messages || []),
+      ];
+      // Sort by createdAt ascending to ensure proper chronological order
+      const contextMessages = contextMessagesRaw
+        .filter(Boolean)
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      // Replace current messages with context
+      setInitialMessages(contextMessages);
+      setPage(1);
+      setHasMore(false); // Disable pagination when jumping to specific message
+
+      // Wait for DOM to update, then scroll
+      setTimeout(() => {
+        const el = messageRefs.current[messageId];
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          setHighlightMessageId(messageId);
+          highlightTimeoutRef.current = setTimeout(() => {
+            setHighlightMessageId(null);
+            highlightTimeoutRef.current = null;
+          }, 1500);
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Failed to jump to message:", error);
+      window.dispatchEvent(
+        new CustomEvent("show:toast", {
+          detail: {
+            message: "Không thể tải tin nhắn. Vui lòng thử lại.",
+            type: "error",
+          },
+        })
+      );
+    } finally {
+      setIsJumping(false);
+    }
+  };
+
+  // Cleanup highlight timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Group messages by date
   const groupedMessages = messages.reduce((groups, message) => {
@@ -214,7 +375,7 @@ function DirectMessageChat() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-white relative">
       {/* Header with user info */}
       <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <div className="flex items-center gap-3">
@@ -242,19 +403,29 @@ function DirectMessageChat() {
           {otherUser && (
             <>
               <div className="relative">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white">
-                  {otherUser.fullName?.[0] || otherUser.username?.[0] || "?"}
-                </div>
-                {otherParticipantOnline && (
-                  <div className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-green-500" />
+                {otherUser.avatarUrl ? (
+                  <img
+                    src={otherUser.avatarUrl}
+                    alt={otherUser.fullName || otherUser.username}
+                    className="h-10 w-10 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white">
+                    {otherUser.fullName?.[0] || otherUser.username?.[0] || "?"}
+                  </div>
                 )}
+                <div
+                  className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${
+                    presenceOnline ? "bg-green-500" : "bg-gray-400"
+                  }`}
+                />
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900">
                   {otherUser.fullName || otherUser.username}
                 </h2>
                 <p className="text-xs text-gray-500">
-                  {otherParticipantOnline ? (
+                  {presenceOnline ? (
                     <span className="text-green-600">Đang hoạt động</span>
                   ) : (
                     "Không hoạt động"
@@ -263,16 +434,6 @@ function DirectMessageChat() {
               </div>
             </>
           )}
-        </div>
-
-        {/* Connection status */}
-        <div className="flex items-center gap-2">
-          <div
-            className={`h-2 w-2 rounded-full ${
-              isConnected ? "bg-green-500" : "bg-gray-300"
-            }`}
-            title={isConnected ? "Đã kết nối" : "Đang kết nối..."}
-          />
         </div>
       </div>
 
@@ -309,9 +470,17 @@ function DirectMessageChat() {
         {/* Empty state */}
         {!isLoadingHistory && messages.length === 0 && otherUser && (
           <div className="flex h-full flex-col items-center justify-center px-4 text-gray-400">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl font-bold text-white">
-              {otherUser.fullName?.[0] || otherUser.username?.[0] || "?"}
-            </div>
+            {otherUser.avatarUrl ? (
+              <img
+                src={otherUser.avatarUrl}
+                alt={otherUser.fullName || otherUser.username}
+                className="mb-4 h-20 w-20 rounded-full object-cover"
+              />
+            ) : (
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-2xl font-bold text-white">
+                {otherUser.fullName?.[0] || otherUser.username?.[0] || "?"}
+              </div>
+            )}
             <p className="text-lg font-medium text-gray-700">
               {otherUser.fullName || otherUser.username}
             </p>
@@ -334,16 +503,24 @@ function DirectMessageChat() {
 
             {/* Messages */}
             {dateMessages.map((message) => (
-              <ChatMessage
+              <div
                 key={message.id}
-                message={message}
-                currentUserId={currentUser?.id}
-                onDelete={handleDelete}
-                onAddReaction={addReaction}
-                onRemoveReaction={removeReaction}
-                onReply={handleReply}
-                members={[]}
-              />
+                ref={(el) => {
+                  if (el) messageRefs.current[message.id] = el;
+                }}
+              >
+                <ChatMessage
+                  message={message}
+                  currentUserId={currentUser?.id}
+                  onDelete={handleDelete}
+                  onAddReaction={addReaction}
+                  onRemoveReaction={removeReaction}
+                  onReply={handleReply}
+                  onJumpToMessage={handleJumpToMessage}
+                  isHighlighted={highlightMessageId === message.id}
+                  members={[]}
+                />
+              </div>
             ))}
           </div>
         ))}
@@ -375,6 +552,30 @@ function DirectMessageChat() {
 
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Scroll to bottom button */}
+      {showScrollButton && (
+        <button
+          onClick={scrollToBottom}
+          className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
+          title="Đi đến tin nhắn mới nhất"
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
+          <span>Tin nhắn mới</span>
+        </button>
+      )}
 
       {/* Input area */}
       <ChatInput

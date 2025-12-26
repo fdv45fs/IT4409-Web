@@ -32,6 +32,31 @@ function DirectMessageList({ workspaceId, onStartNewConversation }) {
     }
   }, [workspaceId, fetchConversations]);
 
+  // Update presence in conversation list when global presence events fire
+  useEffect(() => {
+    const handlePresenceUpdate = (event) => {
+      const { userId, isOnline } = event.detail;
+      setConversations((prev) =>
+        prev.map((conv) => {
+          if (conv.otherParticipant?.id === userId) {
+            return {
+              ...conv,
+              otherParticipant: {
+                ...conv.otherParticipant,
+                isOnline,
+              },
+            };
+          }
+          return conv;
+        })
+      );
+    };
+
+    window.addEventListener("presence:user:update", handlePresenceUpdate);
+    return () =>
+      window.removeEventListener("presence:user:update", handlePresenceUpdate);
+  }, []);
+
   // Listen for conversation updates (new message from someone not in list yet)
   useEffect(() => {
     const handleConversationUpdated = (event) => {
@@ -173,12 +198,22 @@ function DirectMessageList({ workspaceId, onStartNewConversation }) {
             >
               {/* Avatar with online indicator */}
               <div className="relative flex-shrink-0">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-medium text-white">
-                  {user.fullName?.[0] || user.username?.[0] || "?"}
-                </div>
-                {user.isOnline && (
-                  <div className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-slate-900 bg-green-500" />
+                {user.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.fullName || user.username}
+                    className="h-8 w-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-medium text-white">
+                    {user.fullName?.[0] || user.username?.[0] || "?"}
+                  </div>
                 )}
+                <div
+                  className={`absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-slate-900 ${
+                    user.isOnline ? "bg-green-500" : "bg-slate-500"
+                  }`}
+                />
               </div>
 
               {/* User info and last message */}

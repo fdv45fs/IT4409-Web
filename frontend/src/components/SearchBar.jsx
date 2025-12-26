@@ -22,7 +22,9 @@ export default function SearchBar() {
 
   // Load recent searches from localStorage
   useEffect(() => {
-    const stored = localStorage.getItem(`${RECENT_SEARCHES_KEY}_${workspaceId}`);
+    const stored = localStorage.getItem(
+      `${RECENT_SEARCHES_KEY}_${workspaceId}`
+    );
     if (stored) {
       try {
         setRecentSearches(JSON.parse(stored));
@@ -42,7 +44,10 @@ export default function SearchBar() {
     ].slice(0, MAX_RECENT_SEARCHES);
 
     setRecentSearches(updated);
-    localStorage.setItem(`${RECENT_SEARCHES_KEY}_${workspaceId}`, JSON.stringify(updated));
+    localStorage.setItem(
+      `${RECENT_SEARCHES_KEY}_${workspaceId}`,
+      JSON.stringify(updated)
+    );
   };
 
   // Clear recent searches
@@ -123,7 +128,7 @@ export default function SearchBar() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, selectedIndex, results]);
 
-  const handleSelectResult = (index) => {
+  const handleSelectResult = async (index) => {
     const channelsCount = results.channels.length;
 
     if (index < channelsCount) {
@@ -133,7 +138,19 @@ export default function SearchBar() {
     } else {
       // Navigate to direct message
       const member = results.members[index - channelsCount];
-      navigate(`/workspace/${workspaceId}/dm/${member.userId}`);
+      // Ensure a DM conversation exists, then navigate to its ID
+      try {
+        const { getOrCreateDirectConversation } = await import("../api");
+        const conversation = await getOrCreateDirectConversation(
+          workspaceId,
+          member.userId,
+          authFetch
+        );
+        navigate(`/workspace/${workspaceId}/dm/${conversation.id}`);
+      } catch (error) {
+        console.error("Failed to open direct message:", error);
+        return; // Do not proceed to save recent or close if failed
+      }
     }
 
     // Save to recent searches

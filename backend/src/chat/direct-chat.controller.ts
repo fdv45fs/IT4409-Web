@@ -202,6 +202,47 @@ export class DirectChatController {
   }
 
   /**
+   * GET /api/workspaces/:workspaceId/direct-messages/conversations/:conversationId/messages/:messageId
+   * Lấy chi tiết một tin nhắn
+   */
+  @Get('conversations/:conversationId/messages/:messageId')
+  @ApiOperation({
+    summary: 'Lấy chi tiết tin nhắn trong direct conversation',
+    description:
+      'Lấy thông tin chi tiết của một tin nhắn bao gồm reactions, mentions, attachments.',
+  })
+  @ApiParam({ name: 'workspaceId', description: 'ID của workspace' })
+  @ApiParam({ name: 'conversationId', description: 'ID của conversation' })
+  @ApiParam({ name: 'messageId', description: 'ID của tin nhắn' })
+  @ApiResponse({
+    status: 200,
+    description: 'Chi tiết tin nhắn',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Không có quyền xem tin nhắn (không phải participant)',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Conversation hoặc tin nhắn không tồn tại',
+  })
+  async getDirectMessageById(
+    @Req() req: any,
+    @Param('workspaceId') workspaceId: string,
+    @Param('conversationId') conversationId: string,
+    @Param('messageId') messageId: string,
+  ): Promise<MessageResponseDto> {
+    const userId = req.user.id;
+    return this.chatService.getDirectMessageById(
+      userId,
+      workspaceId,
+      conversationId,
+      messageId,
+    );
+  }
+
+  /**
    * DELETE /api/workspaces/:workspaceId/direct-messages/conversations/:conversationId/messages/:messageId
    * Xóa tin nhắn
    */

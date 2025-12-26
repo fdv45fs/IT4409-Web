@@ -99,6 +99,14 @@ export class ChatGateway
       }
       this.userSockets.get(user.id)!.add(client.id);
 
+      // Broadcast global presence online (workspace-agnostic)
+      this.server.emit('presence:user:online', { userId: user.id });
+
+      // Send current online list to this client
+      client.emit('presence:user:list', {
+        userIds: Array.from(this.userSockets.keys()),
+      });
+
       // Initialize socket channels tracking
       this.socketChannels.set(client.id, new Set());
 
@@ -141,6 +149,9 @@ export class ChatGateway
         // If user has no more sockets, mark as offline
         if (userSocketSet.size === 0) {
           this.userSockets.delete(user.id);
+
+          // Broadcast global presence offline (workspace-agnostic)
+          this.server.emit('presence:user:offline', { userId: user.id });
 
           // Update presence to offline
           await this.prisma.userPresence.upsert({

@@ -9,6 +9,8 @@ function ChannelChat({ channelId, channelName, members = [] }) {
   const { accessToken, currentUser, authFetch } = useAuth();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const messageRefs = useRef({});
+  const highlightTimeoutRef = useRef(null);
 
   // Debug: Log token status
   useEffect(() => {
@@ -18,9 +20,12 @@ function ChannelChat({ channelId, channelName, members = [] }) {
   }, [accessToken, currentUser, channelId]);
 
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+  const [isJumping, setIsJumping] = useState(false);
   const [replyTo, setReplyTo] = useState(null);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const [highlightMessageId, setHighlightMessageId] = useState(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   const {
     isConnected,
@@ -41,6 +46,8 @@ function ChannelChat({ channelId, channelName, members = [] }) {
 
   // Reset local pagination and message cache when switching channels
   useEffect(() => {
+    // Clean up refs and state when switching channels
+    messageRefs.current = {};
     setInitialMessages([]);
     setPage(1);
     setHasMore(true);
@@ -103,11 +110,25 @@ function ChannelChat({ channelId, channelName, members = [] }) {
 
   // Handle scroll for loading more
   const handleScroll = () => {
-    if (!messagesContainerRef.current || isLoadingHistory || !hasMore) return;
+    if (!messagesContainerRef.current) return;
 
-    const { scrollTop } = messagesContainerRef.current;
-    if (scrollTop === 0) {
+    const { scrollTop, scrollHeight, clientHeight } =
+      messagesContainerRef.current;
+
+    // Load more messages when scrolled to top
+    if (scrollTop === 0 && !isLoadingHistory && hasMore) {
       fetchMessageHistory(page + 1, true);
+    }
+
+    // Show scroll-to-bottom button when user scrolls up (more than 200px from bottom)
+    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+    setShowScrollButton(distanceFromBottom > 200);
+  };
+
+  // Scroll to bottom function
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
 
@@ -128,6 +149,111 @@ function ChannelChat({ channelId, channelName, members = [] }) {
   const handleReply = (message) => {
     setReplyTo(message);
   };
+
+  const handleJumpToMessage = async (messageId) => {
+    if (!messageId) return;
+
+    // Clear any existing highlight timeout before setting a new one
+    if (highlightTimeoutRef.current) {
+      clearTimeout(highlightTimeoutRef.current);
+    }
+
+    const targetEl = messageRefs.current[messageId];
+
+    // If message exists in DOM, scroll to it immediately
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      setHighlightMessageId(messageId);
+      highlightTimeoutRef.current = setTimeout(() => {
+        setHighlightMessageId(null);
+        highlightTimeoutRef.current = null;
+      }, 1500);
+      return;
+    }
+
+    // Message not in current list - fetch with context
+    try {
+      setIsJumping(true);
+      const { getChannelMessageById } = await import("../api");
+
+      // First verify the message exists
+      const targetMessage = await getChannelMessageById(
+        channelId,
+        messageId,
+        authFetch
+      );
+
+      if (!targetMessage) {
+        window.dispatchEvent(
+          new CustomEvent("show:toast", {
+            detail: {
+              message: "Không tìm thấy tin nhắn",
+              type: "error",
+            },
+          })
+        );
+        return;
+      }
+
+      // Fetch messages around the target (25 before + 25 after = ~50 total)
+      const beforeData = await authFetch(
+        `/api/channels/${channelId}/chat/messages?beforeId=${messageId}&limit=25`
+      );
+      const afterData = await authFetch(
+        `/api/channels/${channelId}/chat/messages?afterId=${messageId}&limit=25`
+      );
+
+      // Combine: before + target + after
+      const contextMessagesRaw = [
+        ...(beforeData?.messages || []),
+        targetMessage,
+        ...(afterData?.messages || []),
+      ];
+      // Sort by createdAt ascending to ensure proper chronological order
+      const contextMessages = contextMessagesRaw
+        .filter(Boolean)
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      // Replace current messages with context
+      setInitialMessages(contextMessages);
+      setPage(1);
+      setHasMore(false); // Disable pagination when jumping to specific message
+
+      // Wait for DOM to update, then scroll
+      setTimeout(() => {
+        const el = messageRefs.current[messageId];
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          setHighlightMessageId(messageId);
+          highlightTimeoutRef.current = setTimeout(() => {
+            setHighlightMessageId(null);
+            highlightTimeoutRef.current = null;
+          }, 1500);
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Failed to jump to message:", error);
+      window.dispatchEvent(
+        new CustomEvent("show:toast", {
+          detail: {
+            message: "Không thể tải tin nhắn. Vui lòng thử lại.",
+            type: "error",
+          },
+        })
+      );
+    } finally {
+      setIsJumping(false);
+    }
+  };
+
+  // Cleanup highlight timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Filter out current user from typing users
   const otherTypingUsers = typingUsers.filter((u) => u.id !== currentUser?.id);
@@ -162,7 +288,7 @@ function ChannelChat({ channelId, channelName, members = [] }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white">
+    <div className="flex h-full flex-col bg-white relative">
       {/* Header with online status */}
       <div className="flex items-center justify-between border-b border-gray-100 px-4 py-2">
         <div className="flex items-center gap-2">
@@ -266,16 +392,24 @@ function ChannelChat({ channelId, channelName, members = [] }) {
 
             {/* Messages */}
             {dateMessages.map((message) => (
-              <ChatMessage
+              <div
                 key={message.id}
-                message={message}
-                currentUserId={currentUser?.id}
-                onDelete={handleDelete}
-                onAddReaction={addReaction}
-                onRemoveReaction={removeReaction}
-                onReply={handleReply}
-                members={members}
-              />
+                ref={(el) => {
+                  if (el) messageRefs.current[message.id] = el;
+                }}
+              >
+                <ChatMessage
+                  message={message}
+                  currentUserId={currentUser?.id}
+                  onDelete={handleDelete}
+                  onAddReaction={addReaction}
+                  onRemoveReaction={removeReaction}
+                  onReply={handleReply}
+                  onJumpToMessage={handleJumpToMessage}
+                  isHighlighted={highlightMessageId === message.id}
+                  members={members}
+                />
+              </div>
             ))}
           </div>
         ))}
@@ -310,6 +444,30 @@ function ChannelChat({ channelId, channelName, members = [] }) {
 
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Scroll to bottom button */}
+      {showScrollButton && (
+        <button
+          onClick={scrollToBottom}
+          className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
+          title="Đi đến tin nhắn mới nhất"
+        >
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 14l-7 7m0 0l-7-7m7 7V3"
+            />
+          </svg>
+          <span>Tin nhắn mới</span>
+        </button>
+      )}
 
       {/* Input area */}
       <ChatInput

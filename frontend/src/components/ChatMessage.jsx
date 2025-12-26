@@ -9,6 +9,8 @@ function ChatMessage({
   onAddReaction,
   onRemoveReaction,
   onReply,
+  onJumpToMessage,
+  isHighlighted = false,
   members = [],
 }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -21,7 +23,10 @@ function ChatMessage({
   // Close emoji picker when clicking outside
   useEffect(() => {
     function handleClickOutside(event) {
-      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target)) {
+      if (
+        emojiPickerRef.current &&
+        !emojiPickerRef.current.contains(event.target)
+      ) {
         setShowEmojiPicker(false);
       }
     }
@@ -60,7 +65,9 @@ function ChatMessage({
       const regex = new RegExp(`@${mention.username}`, "g");
       result = result.replace(
         regex,
-        `<span class="bg-indigo-100 text-indigo-700 px-1 rounded">@${mention.fullName || mention.username}</span>`
+        `<span class="bg-indigo-100 text-indigo-700 px-1 rounded">@${
+          mention.fullName || mention.username
+        }</span>`
       );
     });
 
@@ -71,7 +78,7 @@ function ChatMessage({
     <div
       className={`group relative flex gap-3 px-4 py-2 hover:bg-gray-50 ${
         isDeleted ? "opacity-60" : ""
-      }`}
+      } ${isHighlighted ? "bg-amber-50" : ""}`}
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => {
         setShowActions(false);
@@ -109,19 +116,34 @@ function ChatMessage({
 
         {/* Reply reference */}
         {message.replyTo && (
-          <div className="mt-1 flex items-center gap-2 text-xs text-gray-500 border-l-2 border-gray-300 pl-2">
-            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+          <button
+            type="button"
+            onClick={() => onJumpToMessage?.(message.replyTo.id)}
+            className="mt-1 flex w-full items-center gap-2 text-left text-xs text-gray-500 border-l-2 border-gray-300 pl-2 hover:text-gray-700"
+          >
+            <svg
+              className="h-3 w-3"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+              />
             </svg>
             <span className="font-medium">
-              {message.replyTo.sender?.fullName || message.replyTo.sender?.username}
+              {message.replyTo.sender?.fullName ||
+                message.replyTo.sender?.username}
             </span>
             <span className="truncate max-w-xs">
               {message.replyTo.isDeleted
                 ? "Tin nhắn đã bị xóa"
                 : message.replyTo.content}
             </span>
-          </div>
+          </button>
         )}
 
         {/* Message content */}
@@ -146,8 +168,18 @@ function ChatMessage({
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                  />
                 </svg>
                 File đính kèm
               </a>
@@ -189,8 +221,18 @@ function ChatMessage({
               className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
               title="Thêm reaction"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
               </svg>
             </button>
 
@@ -216,8 +258,18 @@ function ChatMessage({
             className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             title="Trả lời"
           >
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
+              />
             </svg>
           </button>
 
@@ -228,8 +280,18 @@ function ChatMessage({
               className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
               title="Xóa tin nhắn"
             >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                />
               </svg>
             </button>
           )}
@@ -240,4 +302,3 @@ function ChatMessage({
 }
 
 export default ChatMessage;
-
