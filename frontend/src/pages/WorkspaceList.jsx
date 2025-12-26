@@ -3,7 +3,33 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
 import CreateWorkspaceModal from "../components/CreateWorkspaceModal.jsx";
 import JoinWorkspaceModal from "../components/JoinWorkspaceModal.jsx";
-import UserMenu from "../components/UserMenu.jsx";
+
+// Lucide icons
+import {
+  PartyPopper,
+  Star,
+  Users,
+  Plus,
+  UserPlus,
+  Settings,
+  ChevronRight,
+  CheckCircle2,
+  AlertCircle,
+} from "lucide-react";
+
+// Tet Theme Components
+import {
+  TetThemeWrapper,
+  TetHeader,
+  LanternIcon,
+  HorseIcon,
+  RedEnvelopeIcon,
+  ApricotBlossomIcon,
+  PeachBlossomIcon,
+  CoinIcon,
+  FireworkIcon,
+  SparkleDecor,
+} from "../components/tet";
 
 function WorkspaceList() {
   const [workspaces, setWorkspaces] = useState([]);
@@ -12,7 +38,7 @@ function WorkspaceList() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const { authFetch, logout, currentUser } = useAuth();
+  const { authFetch } = useAuth();
   const navigate = useNavigate();
 
   const fetchWorkspaces = async () => {
@@ -24,7 +50,6 @@ function WorkspaceList() {
     } catch (err) {
       let errorMsg = err.message || "Không thể tải danh sách workspace";
 
-      // Provide helpful error messages
       if (err.status === 401) {
         errorMsg = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.";
       } else if (err.status === 500) {
@@ -53,145 +78,191 @@ function WorkspaceList() {
   const handleJoinSuccess = (result) => {
     setIsJoinModalOpen(false);
     if (result.status === "APPROVED") {
-      // Refresh workspace list and show success message
       fetchWorkspaces();
       setSuccessMessage(`Đã tham gia workspace "${result.workspaceName}" thành công!`);
       setTimeout(() => setSuccessMessage(""), 5000);
     } else {
-      // Request is pending
       setSuccessMessage(`Yêu cầu tham gia workspace "${result.workspaceName}" đang chờ phê duyệt`);
       setTimeout(() => setSuccessMessage(""), 5000);
     }
   };
 
+  // Icon decorations for headers
+  const decorativeIcons = [
+    { Icon: RedEnvelopeIcon, color: 'text-red-500' },
+    { Icon: LanternIcon, color: 'text-red-500' },
+    { Icon: HorseIcon, color: 'text-amber-600' },
+    { Icon: ApricotBlossomIcon, color: 'text-yellow-500' },
+    { Icon: PeachBlossomIcon, color: 'text-pink-400' },
+    { Icon: CoinIcon, color: 'text-amber-500' },
+  ];
+
   return (
-    <div className="min-h-screen bg-white">
-      {/* Dark Header */}
-      <header className="border-b border-slate-800 bg-slate-900">
-        <div className="mx-auto max-w-7xl px-6 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-xl font-bold text-white">
-              HUST Collab Platform
-            </h1>
-            <UserMenu />
-          </div>
-        </div>
-      </header>
+    <TetThemeWrapper>
+      {/* Header */}
+      <TetHeader />
 
-      {/* Main Content - Centered like Slack */}
-      <main className="mx-auto max-w-4xl px-6 py-16">
-        {/* Header Section */}
-        <div className="mb-16 text-center">
-          <h1 className="mb-4 text-5xl font-bold text-gray-900">
-            Welcome back!
+      {/* Main Content */}
+      <main className="relative z-10 mx-auto max-w-6xl px-6 py-10 lg:px-20">
+        {/* Welcome Section */}
+        <div className="mb-12 text-center animate-zoom-bounce">
+          {/* Badge */}
+          <div className="mb-4 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-red-100 via-amber-100 to-yellow-100 px-6 py-3 text-sm font-medium text-red-700 ring-2 ring-red-200 shadow-lg shadow-red-100">
+            <LanternIcon className="h-5 w-5 animate-swing text-red-500" />
+            <span>Năm Bính Ngọ 2026</span>
+            <LanternIcon className="h-5 w-5 animate-swing text-red-500" style={{ animationDelay: '1.5s' }} />
+          </div>
+
+          {/* Title */}
+          <h1 className="mt-6 text-5xl font-bold lg:text-6xl">
+            <span className="animate-rainbow-text">
+              Chúc Mừng Năm Mới!
+            </span>
           </h1>
-          <p className="text-lg text-gray-600">
-            Choose a workspace to get back to working with your team.
+
+          {/* Subtitle */}
+          <p className="mx-auto mt-6 max-w-xl text-lg text-gray-600">
+            Chọn workspace để bắt đầu làm việc cùng team. 
+            <br />
+            Chúc bạn năm mới an khang thịnh vượng!
           </p>
+
+          {/* Decorative Icons */}
+          <div className="mt-6 flex justify-center gap-5">
+            {decorativeIcons.map(({ Icon, color }, i) => (
+              <Icon
+                key={i}
+                className={`h-7 w-7 ${color} animate-bounce`}
+                style={{ animationDelay: `${i * 0.15}s`, animationDuration: '2s' }}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Success Message */}
+        {/* Messages */}
         {successMessage && (
-          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
-            {successMessage}
-          </div>
-        )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-            {error}
-          </div>
-        )}
-
-        {/* Loading State */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-20">
-            <div className="text-center">
-              <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-purple-500 border-t-transparent"></div>
-              <p className="mt-4 text-gray-600">Đang tải workspaces...</p>
+          <div className="mx-auto mb-8 max-w-2xl rounded-2xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-green-50 px-5 py-4 text-emerald-700 shadow-xl shadow-emerald-100 animate-zoom-bounce">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="h-6 w-6 text-emerald-600 animate-heartbeat" />
+              <span className="font-medium">{successMessage}</span>
             </div>
           </div>
         )}
 
-        {/* Workspaces List - Slack style */}
-        {!isLoading && workspaces.length > 0 && (
-          <div className="space-y-3">
-            {workspaces.map((workspace) => (
-              <div
-                key={workspace.id}
-                className="group flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white px-6 py-5 transition hover:border-gray-300 hover:shadow-md"
-              >
-                <button
-                  onClick={() => handleWorkspaceClick(workspace.id)}
-                  className="flex flex-1 items-center gap-4 text-left"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-sky-500 text-2xl font-bold text-white">
-                    {workspace.avatarUrl ? (
-                      <img
-                        src={workspace.avatarUrl}
-                        alt={workspace.name}
-                        className="h-full w-full rounded-lg object-cover"
-                      />
-                    ) : (
-                      workspace.name.charAt(0).toUpperCase()
-                    )}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">
-                      {workspace.name}
-                    </h3>
-                    <p className="mt-0.5 text-sm text-gray-600">
-                      {workspace.memberCount} {workspace.memberCount === 1 ? 'member' : 'members'}
-                    </p>
-                  </div>
-                </button>
-                <div className="flex items-center gap-2">
-                  {/* Admin Settings Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/workspace/${workspace.id}/admin`);
-                    }}
-                    className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
-                    title="Quản lý workspace"
-                  >
-                    <svg
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                    </svg>
-                  </button>
-                  <svg
-                    className="h-6 w-6 text-gray-400 transition group-hover:translate-x-1"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
+        {error && (
+          <div className="mx-auto mb-8 max-w-2xl rounded-2xl border-2 border-red-300 bg-gradient-to-r from-red-50 to-pink-50 px-5 py-4 text-red-700 shadow-xl shadow-red-100 animate-zoom-bounce">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-6 w-6 text-red-600" />
+              <span className="font-medium">{error}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Loading */}
+        {isLoading && (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <div className="relative mx-auto h-24 w-24">
+                <div className="absolute inset-0 animate-spin rounded-full border-4 border-amber-200 border-t-red-500" style={{ animationDuration: '1s' }}></div>
+                <div className="absolute inset-3 animate-spin rounded-full border-4 border-yellow-200 border-t-amber-500" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <HorseIcon className="h-10 w-10 text-red-500 animate-heartbeat" />
                 </div>
               </div>
-            ))}
+              <p className="mt-8 text-xl font-medium text-gray-700">Đang tải workspaces...</p>
+              <div className="mt-4 flex justify-center gap-4">
+                <ApricotBlossomIcon className="h-6 w-6 text-yellow-500 animate-bloom" />
+                <LanternIcon className="h-6 w-6 text-red-500 animate-swing" />
+                <PeachBlossomIcon className="h-6 w-6 text-pink-400 animate-bloom" style={{ animationDelay: '0.5s' }} />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Workspaces Grid */}
+        {!isLoading && workspaces.length > 0 && (
+          <div className="mb-12">
+            <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-amber-700">
+              <ApricotBlossomIcon className="h-5 w-5 text-yellow-500 animate-bloom" />
+              <span>Workspaces của bạn ({workspaces.length})</span>
+              <PeachBlossomIcon className="h-5 w-5 text-pink-400 animate-bloom" style={{ animationDelay: '0.5s' }} />
+            </h2>
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {workspaces.map((workspace, index) => (
+                <div
+                  key={workspace.id}
+                  className="group relative overflow-hidden rounded-2xl border-2 border-amber-200/70 bg-white/80 backdrop-blur-sm shadow-lg transition-all duration-500 hover:border-red-400 hover:shadow-2xl hover:shadow-red-200 hover:-translate-y-2 animate-fade-in-up"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  {/* Top gradient */}
+                  <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500 animate-shimmer"></div>
+
+                  {/* Hover decorations */}
+                  <div className="absolute -right-4 -top-4 h-8 w-8 rotate-45 bg-gradient-to-br from-yellow-400 to-amber-500 opacity-0 transition-all duration-300 group-hover:opacity-100"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br from-red-100/0 to-amber-100/0 transition-all duration-300 group-hover:from-red-100/20 group-hover:to-amber-100/20"></div>
+
+                  <button
+                    onClick={() => handleWorkspaceClick(workspace.id)}
+                    className="relative flex w-full flex-col p-5 text-left"
+                  >
+                    <div className="mb-4 flex items-start justify-between">
+                      <div className="relative">
+                        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 via-amber-500 to-yellow-500 text-xl font-bold text-white shadow-lg shadow-amber-300 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                          {workspace.avatarUrl ? (
+                            <img src={workspace.avatarUrl} alt={workspace.name} className="h-full w-full rounded-xl object-cover" />
+                          ) : (
+                            workspace.name.charAt(0).toUpperCase()
+                          )}
+                        </div>
+                        <SparkleDecor className="-right-2 -top-2" />
+                      </div>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/workspace/${workspace.id}/admin`);
+                        }}
+                        className="rounded-lg p-2 text-amber-400 opacity-0 transition-all hover:bg-amber-50 hover:text-red-600 hover:rotate-90 group-hover:opacity-100"
+                        title="Quản lý workspace"
+                      >
+                        <Settings className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600">{workspace.name}</h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-amber-600/80">
+                      <Users className="h-4 w-4" />
+                      <span>{workspace.memberCount} thành viên</span>
+                    </p>
+
+                    <div className="mt-4 flex items-center gap-2 text-sm font-medium text-red-600 opacity-0 group-hover:opacity-100">
+                      <HorseIcon className="h-4 w-4 animate-bounce" />
+                      <span>Mở workspace</span>
+                      <ChevronRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
+                    </div>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && workspaces.length === 0 && !error && (
+          <div className="mx-auto mb-12 max-w-md overflow-hidden rounded-3xl border-2 border-amber-300 bg-white shadow-2xl animate-zoom-bounce">
+            <div className="relative bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500 px-8 py-8 text-center text-white overflow-hidden">
+              <PartyPopper className="relative mx-auto h-16 w-16 mb-3 animate-heartbeat" />
+              <h3 className="relative text-2xl font-bold">Chưa có workspace nào</h3>
+            </div>
+            <div className="p-8 text-center bg-gradient-to-b from-white to-amber-50">
+              <p className="text-gray-600 mb-4">Tạo workspace mới hoặc tham gia để bắt đầu năm mới!</p>
+              <div className="flex justify-center gap-4">
+                {[ApricotBlossomIcon, LanternIcon, HorseIcon, PeachBlossomIcon, CoinIcon].map((Icon, i) => (
+                  <Icon key={i} className={`h-7 w-7 ${i % 2 === 0 ? 'text-yellow-500' : 'text-red-500'} animate-bounce`} style={{ animationDelay: `${i * 0.15}s` }} />
+                ))}
+              </div>
+            </div>
           </div>
         )}
 
@@ -199,103 +270,93 @@ function WorkspaceList() {
         {!isLoading && workspaces.length > 0 && (
           <div className="relative my-12">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full border-t-2 border-amber-200"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-4 text-gray-500">OR</span>
+            <div className="relative flex justify-center">
+              <span className="bg-gradient-to-r from-red-50 via-amber-50 to-yellow-50 px-6 flex items-center gap-4">
+                <ApricotBlossomIcon className="h-5 w-5 text-yellow-500 animate-bloom" />
+                <span className="text-sm font-bold uppercase tracking-wider text-amber-700">HOẶC</span>
+                <PeachBlossomIcon className="h-5 w-5 text-pink-400 animate-bloom" />
+              </span>
             </div>
           </div>
         )}
 
-        {/* Create or Join Workspace Section */}
-        <div className="space-y-4">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Tạo hoặc tham gia workspace
+        {/* Create or Join */}
+        <div className={`${!isLoading && workspaces.length > 0 ? '' : 'mt-8'}`}>
+          <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-amber-700">
+            <RedEnvelopeIcon className="h-5 w-5 text-red-500 animate-bounce" style={{ animationDuration: '2s' }} />
+            <span>Tạo hoặc tham gia workspace</span>
           </h2>
 
-          {/* Create Workspace Button */}
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex w-full items-center justify-between rounded-lg border-2 border-dashed border-gray-200 bg-gray-50 px-6 py-5 text-left transition hover:border-gray-300 hover:bg-gray-100"
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white">
-                <svg
-                  className="h-8 w-8 text-gray-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 4v16m8-8H4"
-                  />
-                </svg>
-              </div>
-              <span className="text-base font-medium text-gray-900">
-                Tạo workspace mới
-              </span>
-            </div>
-            <svg
-              className="h-6 w-6 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Create Button */}
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-amber-300 bg-gradient-to-br from-white/80 to-amber-50/80 p-8 transition-all duration-500 hover:border-red-400 hover:from-red-50 hover:to-amber-100 hover:shadow-2xl hover:-translate-y-2"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
+              <div className="absolute -left-6 -top-6 h-12 w-12 rotate-45 bg-amber-200/50 group-hover:bg-red-200/50 group-hover:scale-150 transition-all"></div>
 
-          {/* Join Workspace Button */}
-          <button
-            onClick={() => setIsJoinModalOpen(true)}
-            className="flex w-full items-center justify-between rounded-lg border-2 border-dashed border-blue-200 bg-blue-50 px-6 py-5 text-left transition hover:border-blue-300 hover:bg-blue-100"
-          >
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-white">
-                <svg
-                  className="h-8 w-8 text-blue-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-                  />
-                </svg>
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-100 to-yellow-100 group-hover:from-red-100 group-hover:to-amber-100 group-hover:scale-110 transition-all">
+                <Plus className="h-10 w-10 text-amber-500 group-hover:text-red-600 transition-colors" />
+                <SparkleDecor className="-right-1 -top-1" />
               </div>
-              <span className="text-base font-medium text-gray-900">
-                Tham gia workspace bằng mã
+
+              <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">Tạo workspace mới</span>
+              <span className="mt-2 flex items-center gap-2 text-sm text-amber-600/80">
+                <span>Khởi tạo không gian làm việc</span>
+                <Star className="h-4 w-4 text-yellow-500 animate-sparkle" />
               </span>
-            </div>
-            <svg
-              className="h-6 w-6 text-gray-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+            </button>
+
+            {/* Join Button */}
+            <button
+              onClick={() => setIsJoinModalOpen(true)}
+              className="group relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-red-300 bg-gradient-to-br from-red-50/80 to-amber-50/80 p-8 transition-all duration-500 hover:border-red-500 hover:from-red-100 hover:to-amber-100 hover:shadow-2xl hover:-translate-y-2"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
+              <div className="absolute -right-6 -top-6 h-12 w-12 rotate-45 bg-red-200/50 group-hover:scale-150 transition-all"></div>
+
+              <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-red-100 to-amber-100 group-hover:from-red-200 group-hover:to-amber-200 group-hover:scale-110 transition-all">
+                <UserPlus className="h-10 w-10 text-red-500 group-hover:text-red-700 transition-colors" />
+                <SparkleDecor className="-left-1 -top-1" delay="0.5s" />
+              </div>
+
+              <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">Tham gia bằng mã</span>
+              <span className="mt-2 flex items-center gap-2 text-sm text-red-600/80">
+                <span>Nhập mã mời để tham gia</span>
+                <RedEnvelopeIcon className="h-4 w-4 text-red-500 animate-bounce" />
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Footer Greeting */}
+        <div className="mt-20 text-center">
+          <div className="mx-auto inline-block overflow-hidden rounded-3xl bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500 p-1 shadow-2xl shadow-amber-300 animate-glow-pulse">
+            <div className="rounded-[22px] bg-white/95 px-10 py-6">
+              <div className="flex items-center justify-center gap-4">
+                <LanternIcon className="h-10 w-10 text-red-500 animate-swing" />
+                <div>
+                  <p className="text-xl font-bold animate-rainbow-text">Chúc Mừng Năm Mới 2026</p>
+                  <p className="mt-1 flex items-center justify-center gap-2 text-sm text-amber-700 font-medium">
+                    <HorseIcon className="h-4 w-4" />
+                    <span>An Khang Thịnh Vượng - Vạn Sự Như Ý</span>
+                    <HorseIcon className="h-4 w-4" />
+                  </p>
+                </div>
+                <LanternIcon className="h-10 w-10 text-red-500 animate-swing" style={{ animationDelay: '1.5s' }} />
+              </div>
+              <div className="mt-4 flex justify-center gap-4">
+                {[ApricotBlossomIcon, RedEnvelopeIcon, CoinIcon, PeachBlossomIcon, FireworkIcon].map((Icon, i) => (
+                  <Icon key={i} className={`h-6 w-6 ${i % 2 === 0 ? 'text-yellow-500' : 'text-red-500'} animate-bounce`} style={{ animationDelay: `${i * 0.2}s`, animationDuration: '2s' }} />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </main>
 
-      {/* Create Workspace Modal */}
+      {/* Modals */}
       {isCreateModalOpen && (
         <CreateWorkspaceModal
           onClose={() => setIsCreateModalOpen(false)}
@@ -303,14 +364,13 @@ function WorkspaceList() {
         />
       )}
 
-      {/* Join Workspace Modal */}
       {isJoinModalOpen && (
         <JoinWorkspaceModal
           onClose={() => setIsJoinModalOpen(false)}
           onSuccess={handleJoinSuccess}
         />
       )}
-    </div>
+    </TetThemeWrapper>
   );
 }
 

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import AuthLayout from "../components/AuthLayout.jsx";
 import FormField from "../components/FormField.jsx";
 import useAuth from "../hooks/useAuth.js";
+import { TetAuthLayout, HorseIcon } from "../components/tet";
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 const loginFields = [
   {
@@ -57,20 +58,19 @@ function LoginPage() {
   };
 
   return (
-    <AuthLayout
-      previewVariant="hidden-scroll"
+    <TetAuthLayout
       title="Đăng nhập"
-      subtitle="Sử dụng tài khoản đã đăng ký để truy cập ứng dụng."
+      subtitle="Sử dụng tài khoản đã đăng ký để truy cập ứng dụng"
       footer={
         <span>
           Bạn chưa có tài khoản?{" "}
-          <Link to="/register" className="font-medium text-blue-600 underline-offset-2 hover:text-blue-700">
+          <Link to="/register" className="font-medium text-red-600 underline-offset-2 hover:text-red-700 transition-colors">
             Đăng ký ngay
           </Link>
         </span>
       }
     >
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form className="space-y-5" onSubmit={handleSubmit}>
         {loginFields.map((field) => (
           <FormField
             key={field.name}
@@ -79,36 +79,57 @@ function LoginPage() {
             onChange={handleChange(field.name)}
           />
         ))}
+
         <div className="flex justify-end">
           <Link
             to="/forgot-password"
-            className="text-sm text-blue-600 hover:text-blue-700 underline-offset-2"
+            className="text-sm text-amber-600 hover:text-red-600 underline-offset-2 transition-colors"
           >
             Quên mật khẩu?
           </Link>
         </div>
+
+        {/* Error Message */}
         {error && (
-          <p className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-            {error}
-          </p>
+          <div className="flex items-center gap-2 rounded-xl border-2 border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 animate-slide-in">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
         )}
+
+        {/* Success Message */}
         {success && (
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-700">
-            <p className="font-semibold">{success.message}</p>
-            <p className="text-xs text-emerald-600">
+          <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-700 animate-slide-in">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-emerald-600 animate-heartbeat" />
+              <span className="font-semibold">{success.message}</span>
+            </div>
+            <p className="mt-1 text-xs text-emerald-600 ml-7">
               Xin chào {success.user?.fullName || success.user?.email}!
             </p>
           </div>
         )}
+
+        {/* Submit Button */}
         <button
           type="submit"
-          className="flex w-full items-center justify-center rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-500 via-red-600 to-amber-500 px-6 py-3.5 font-semibold text-white shadow-lg shadow-red-200 transition-all hover:shadow-xl hover:shadow-red-300 hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
           disabled={isLoading}
         >
-          {isLoading ? "Đang xử lý..." : "Đăng nhập"}
+          {isLoading ? (
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>Đang xử lý...</span>
+            </>
+          ) : (
+            <>
+              <HorseIcon className="h-5 w-5" />
+              <span>Đăng nhập</span>
+            </>
+          )}
         </button>
       </form>
-    </AuthLayout>
+    </TetAuthLayout>
   );
 }
 

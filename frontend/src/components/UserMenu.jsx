@@ -1,6 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
+import { Home, User, LogOut, ChevronDown } from "lucide-react";
+import {
+  LanternIcon,
+  HorseIcon,
+  RedEnvelopeIcon,
+  ApricotBlossomIcon,
+  PeachBlossomIcon,
+} from "./tet/TetIcons";
 
 function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,27 +37,27 @@ function UserMenu() {
         <img
           src={currentUser.avatarUrl}
           alt={currentUser.fullName}
-          className="h-full w-full rounded-lg object-cover"
+          className="h-full w-full rounded-xl object-cover"
         />
       );
     }
 
-    // Generate color based on username
+    // Tet-themed avatar colors
     const username = currentUser?.username || "U";
     const colors = [
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-purple-500",
-      "bg-pink-500",
-      "bg-indigo-500",
-      "bg-red-500",
-      "bg-yellow-500",
-      "bg-teal-500",
+      "from-red-500 to-amber-500",
+      "from-amber-500 to-yellow-500",
+      "from-red-600 to-red-500",
+      "from-pink-500 to-red-500",
+      "from-amber-600 to-amber-500",
+      "from-red-500 to-pink-500",
+      "from-yellow-500 to-amber-500",
+      "from-orange-500 to-red-500",
     ];
     const colorIndex = username.charCodeAt(0) % colors.length;
 
     return (
-      <div className={`flex h-full w-full items-center justify-center rounded-lg ${colors[colorIndex]} text-sm font-semibold text-white`}>
+      <div className={`flex h-full w-full items-center justify-center rounded-xl bg-gradient-to-br ${colors[colorIndex]} text-sm font-bold text-white shadow-lg`}>
         {username.charAt(0).toUpperCase()}
       </div>
     );
@@ -77,87 +85,95 @@ function UserMenu() {
       {/* Avatar Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg transition hover:opacity-80 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+        className="group flex items-center gap-2 rounded-xl bg-white/50 p-1 pr-2 transition hover:bg-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2"
       >
-        {getAvatarContent()}
+        <div className="relative h-9 w-9 overflow-hidden rounded-lg">
+          {getAvatarContent()}
+        </div>
+        <ChevronDown className={`h-4 w-4 text-amber-600 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
-          {/* User Info */}
-          <div className="border-b border-slate-700 px-4 py-3">
-            <p className="text-sm font-semibold text-white">
-              {currentUser?.fullName || currentUser?.username}
-            </p>
-            <p className="mt-0.5 text-xs text-slate-400">
-              @{currentUser?.username}
-            </p>
+        <div className="absolute right-0 mt-2 w-64 origin-top-right overflow-hidden rounded-2xl border-2 border-amber-200 bg-white shadow-2xl shadow-amber-200/50 animate-slide-in z-50">
+          {/* Gradient top border */}
+          <div className="h-1.5 bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500"></div>
+
+          {/* User Info Section */}
+          <div className="relative border-b border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 px-4 py-4">
+            {/* Decorative icons */}
+            <div className="absolute right-2 top-2 opacity-20">
+              <ApricotBlossomIcon className="h-6 w-6 text-amber-500" />
+            </div>
+            <div className="absolute right-8 bottom-2 opacity-15">
+              <PeachBlossomIcon className="h-5 w-5 text-pink-400" />
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="relative h-12 w-12 overflow-hidden rounded-xl">
+                {getAvatarContent()}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="truncate font-bold text-gray-900">
+                  {currentUser?.fullName || currentUser?.username}
+                </p>
+                <p className="truncate text-sm text-amber-600">
+                  @{currentUser?.username}
+                </p>
+              </div>
+            </div>
+
+            {/* New Year greeting */}
+            <div className="mt-3 flex items-center gap-2 rounded-lg bg-white/70 px-3 py-2 text-xs">
+              <LanternIcon className="h-4 w-4 text-red-500 animate-swing" />
+              <span className="text-amber-700 font-medium">Chúc năm mới an khang!</span>
+            </div>
           </div>
 
           {/* Menu Items */}
-          <div className="py-1">
+          <div className="py-2">
             <button
               onClick={() => handleMenuClick("home")}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-300 transition hover:bg-slate-700 hover:text-white"
+              className="group flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-amber-50"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
-                />
-              </svg>
-              Trang chủ
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 transition group-hover:bg-gradient-to-br group-hover:from-red-500 group-hover:to-amber-500 group-hover:text-white">
+                <Home className="h-4 w-4" />
+              </div>
+              <span className="font-medium group-hover:text-red-600">Trang chủ</span>
             </button>
 
             <button
               onClick={() => handleMenuClick("profile")}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-300 transition hover:bg-slate-700 hover:text-white"
+              className="group flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-amber-50"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              Hồ sơ
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-600 transition group-hover:bg-gradient-to-br group-hover:from-red-500 group-hover:to-amber-500 group-hover:text-white">
+                <User className="h-4 w-4" />
+              </div>
+              <span className="font-medium group-hover:text-red-600">Hồ sơ cá nhân</span>
             </button>
 
-            <div className="my-1 border-t border-slate-700"></div>
+            <div className="my-2 border-t border-amber-100"></div>
 
             <button
               onClick={() => handleMenuClick("logout")}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-red-400 transition hover:bg-slate-700 hover:text-red-300"
+              className="group flex w-full items-center gap-3 px-4 py-3 text-left text-sm text-gray-700 transition hover:bg-red-50"
             >
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              Đăng xuất
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-500 transition group-hover:bg-red-500 group-hover:text-white">
+                <LogOut className="h-4 w-4" />
+              </div>
+              <span className="font-medium group-hover:text-red-600">Đăng xuất</span>
             </button>
+          </div>
+
+          {/* Footer decoration */}
+          <div className="flex items-center justify-center gap-3 border-t border-amber-100 bg-gradient-to-r from-amber-50 to-yellow-50 py-3">
+            {[RedEnvelopeIcon, LanternIcon, HorseIcon, ApricotBlossomIcon, PeachBlossomIcon].map((Icon, i) => (
+              <Icon
+                key={i}
+                className={`h-4 w-4 ${i % 2 === 0 ? 'text-red-500' : 'text-amber-500'} animate-bounce`}
+                style={{ animationDelay: `${i * 0.1}s`, animationDuration: '2s' }}
+              />
+            ))}
           </div>
         </div>
       )}

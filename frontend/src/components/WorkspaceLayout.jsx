@@ -88,9 +88,9 @@ function WorkspaceLayout() {
   if (!workspace) return null;
 
   return (
-    <>
+    <div className="flex flex-col h-screen overflow-hidden">
       {/* Global Header - HUST Collab Platform */}
-      <header className="border-b border-slate-800 bg-slate-900">
+      <header className="border-b border-slate-800 bg-slate-900 flex-shrink-0">
         <div className="px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-xl font-bold text-white whitespace-nowrap">
@@ -109,7 +109,7 @@ function WorkspaceLayout() {
       </header>
 
       {/* Main Layout: Sidebar + Content */}
-      <div className="flex h-screen overflow-hidden">
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <aside className="flex w-64 flex-col bg-slate-900 text-slate-300">
           {/* Workspace Header */}
@@ -258,26 +258,26 @@ function WorkspaceLayout() {
                 </button>
                 {(workspace.myRole === "WORKSPACE_ADMIN" ||
                   workspace.myRole === "WORKSPACE_PRIVILEGE_MEMBER") && (
-                  <button
-                    onClick={() => setIsCreateChannelOpen(true)}
-                    className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
-                    title="Create Channel"
-                  >
-                    <svg
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
+                    <button
+                      onClick={() => setIsCreateChannelOpen(true)}
+                      className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+                      title="Create Channel"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4v16m8-8H4"
-                      />
-                    </svg>
-                  </button>
-                )}
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 4v16m8-8H4"
+                        />
+                      </svg>
+                    </button>
+                  )}
               </div>
             </div>
 
@@ -291,11 +291,10 @@ function WorkspaceLayout() {
                   <Link
                     key={channel.id}
                     to={`/workspace/${workspaceId}/channel/${channel.id}`}
-                    className={`group flex items-center rounded px-2 py-1 transition ${
-                      isActive
-                        ? "bg-blue-700 text-white"
-                        : "hover:bg-slate-800 hover:text-slate-100"
-                    }`}
+                    className={`group flex items-center rounded px-2 py-1 transition ${isActive
+                      ? "bg-blue-700 text-white"
+                      : "hover:bg-slate-800 hover:text-slate-100"
+                      }`}
                   >
                     <span className="mr-2 text-slate-400 group-hover:text-slate-300">
                       {channel.isPrivate ? "🔒" : "#"}
@@ -345,7 +344,7 @@ function WorkspaceLayout() {
           />
         )}
       </div>
-    </>
+    </div>
   );
 }
 

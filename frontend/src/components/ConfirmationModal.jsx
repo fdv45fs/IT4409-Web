@@ -1,7 +1,7 @@
-function ConfirmationModal({ 
-  isOpen, 
-  onClose, 
-  onConfirm, 
+function ConfirmationModal({
+  isOpen,
+  onClose,
+  onConfirm,
   title = "Xác nhận",
   message = "Bạn có chắc chắn muốn thực hiện hành động này?",
   confirmText = "Xác nhận",

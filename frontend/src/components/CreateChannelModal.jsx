@@ -1,6 +1,13 @@
 import { useState } from "react";
-import { createChannel } from "../api";
 import useAuth from "../hooks/useAuth";
+import { X, Hash, Lock, Loader2, Plus, Globe } from "lucide-react";
+import {
+  LanternIcon,
+  HorseIcon,
+  ApricotBlossomIcon,
+  PeachBlossomIcon,
+  RedEnvelopeIcon,
+} from "./tet/TetIcons";
 
 function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
   const { authFetch } = useAuth();
@@ -42,167 +49,128 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 backdrop-blur-sm">
-      <div
-        className="fixed inset-0"
-        onClick={onClose}
-        aria-label="Close modal"
-      />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+      <div className="fixed inset-0" onClick={onClose} aria-label="Close modal" />
 
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+      <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 border-amber-200 bg-white shadow-2xl shadow-amber-200/30 animate-zoom-bounce">
+        {/* Gradient top border */}
+        <div className="h-1.5 bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500"></div>
+
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">
-            Tạo Channel Mới
-          </h2>
-          <button
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
-            aria-label="Close"
-          >
-            <svg
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+        <div className="relative flex items-center justify-between bg-gradient-to-r from-red-500 via-red-600 to-amber-500 px-5 py-4 text-white">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20">
+              <Hash className="h-5 w-5" />
+            </div>
+            <h2 className="text-lg font-bold">Tạo Channel Mới</h2>
+          </div>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-white/70 transition hover:bg-white/20 hover:text-white">
+            <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 space-y-4">
+          {/* Name */}
           <div>
-            <label
-              htmlFor="name"
-              className="mb-2 block text-sm font-medium text-slate-200"
-            >
-              Tên Channel <span className="text-red-400">*</span>
+            <label htmlFor="name" className="mb-1 block text-sm font-medium text-gray-700">
+              Tên Channel <span className="text-red-500">*</span>
             </label>
-            <input
-              id="name"
-              type="text"
-              value={formState.name}
-              onChange={handleChange("name")}
-              required
-              placeholder="VD: general, random..."
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-            />
+            <div className="relative">
+              <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2">
+                <Hash className="h-4 w-4 text-amber-500" />
+              </div>
+              <input
+                id="name"
+                type="text"
+                value={formState.name}
+                onChange={handleChange("name")}
+                required
+                placeholder="general, random..."
+                className="w-full rounded-lg border-2 border-amber-200 bg-white py-2.5 pl-9 pr-4 text-sm transition focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-100"
+              />
+            </div>
           </div>
 
+          {/* Description */}
           <div>
-            <label
-              htmlFor="description"
-              className="mb-2 block text-sm font-medium text-slate-200"
-            >
+            <label htmlFor="description" className="mb-1 block text-sm font-medium text-gray-700">
               Mô tả (tùy chọn)
             </label>
             <textarea
               id="description"
               value={formState.description}
               onChange={handleChange("description")}
-              rows={3}
-              placeholder="Mô tả mục đích của channel..."
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white placeholder-slate-500 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              rows={2}
+              placeholder="Mục đích của channel..."
+              className="w-full rounded-lg border-2 border-amber-200 bg-white px-3 py-2 text-sm transition focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-100"
             />
           </div>
 
-          {/* Privacy Setting */}
+          {/* Privacy */}
           <div>
-            <label className="mb-3 block text-sm font-medium text-slate-200">
-              Quyền riêng tư
-            </label>
-            <div className="space-y-3">
-              {/* Public Option */}
-              <label
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
-                  !formState.isPrivate
-                    ? "border-indigo-500 bg-indigo-500/10"
-                    : "border-slate-700 bg-slate-800 hover:border-slate-600"
-                }`}
-              >
+            <label className="mb-2 block text-sm font-medium text-gray-700">Quyền riêng tư</label>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Public */}
+              <label className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition ${!formState.isPrivate ? "border-emerald-400 bg-emerald-50" : "border-amber-200 hover:border-amber-300"}`}>
                 <input
                   type="radio"
                   name="privacy"
                   checked={!formState.isPrivate}
-                  onChange={() =>
-                    setFormState((prev) => ({ ...prev, isPrivate: false }))
-                  }
-                  className="mt-1 h-4 w-4 text-indigo-500 focus:ring-indigo-500"
+                  onChange={() => setFormState((prev) => ({ ...prev, isPrivate: false }))}
+                  className="h-4 w-4 text-emerald-500"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-white"># Public</span>
-                  </div>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Tất cả thành viên workspace đều có thể tham gia
-                  </p>
-                </div>
+                <Hash className="h-4 w-4 text-emerald-500" />
+                <span className="text-sm font-medium">Public</span>
               </label>
 
-              {/* Private Option */}
-              <label
-                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition ${
-                  formState.isPrivate
-                    ? "border-indigo-500 bg-indigo-500/10"
-                    : "border-slate-700 bg-slate-800 hover:border-slate-600"
-                }`}
-              >
+              {/* Private */}
+              <label className={`flex cursor-pointer items-center gap-2 rounded-lg border-2 p-3 transition ${formState.isPrivate ? "border-amber-400 bg-amber-50" : "border-amber-200 hover:border-amber-300"}`}>
                 <input
                   type="radio"
                   name="privacy"
                   checked={formState.isPrivate}
-                  onChange={() =>
-                    setFormState((prev) => ({ ...prev, isPrivate: true }))
-                  }
-                  className="mt-1 h-4 w-4 text-indigo-500 focus:ring-indigo-500"
+                  onChange={() => setFormState((prev) => ({ ...prev, isPrivate: true }))}
+                  className="h-4 w-4 text-amber-500"
                 />
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-white">🔒 Private</span>
-                  </div>
-                  <p className="mt-1 text-sm text-slate-400">
-                    Chỉ những người được mời mới có thể tham gia
-                  </p>
-                </div>
+                <Lock className="h-4 w-4 text-amber-500" />
+                <span className="text-sm font-medium">Private</span>
               </label>
             </div>
           </div>
 
+          {/* Error */}
           {error && (
-            <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">
               {error}
             </div>
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 rounded-xl border border-slate-700 px-6 py-3 font-medium text-slate-300 transition hover:bg-slate-800 hover:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-600"
-              disabled={isLoading}
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="group relative flex-1 overflow-hidden rounded-xl bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 px-6 py-3 font-semibold text-white transition hover:opacity-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 disabled:cursor-not-allowed disabled:opacity-70"
-              disabled={isLoading}
-            >
-              <span className="absolute inset-0 opacity-0 blur-xl transition duration-500 group-hover:opacity-60">
-                <span className="block h-full w-full bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400" />
-              </span>
-              <span className="relative">
-                {isLoading ? "Đang tạo..." : "Tạo Channel"}
-              </span>
-            </button>
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-2">
+              {[RedEnvelopeIcon, LanternIcon, HorseIcon].map((Icon, i) => (
+                <Icon key={i} className={`h-4 w-4 ${i === 1 ? 'text-red-400' : 'text-amber-400'} opacity-50`} />
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                disabled={isLoading}
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-red-500 to-amber-500 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-red-200 hover:shadow-lg disabled:opacity-70"
+                disabled={isLoading}
+              >
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                <span>{isLoading ? "Đang tạo..." : "Tạo Channel"}</span>
+              </button>
+            </div>
           </div>
         </form>
       </div>
