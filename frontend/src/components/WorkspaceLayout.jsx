@@ -13,6 +13,9 @@ import CreateChannelModal from "./CreateChannelModal";
 import JoinChannelModal from "./JoinChannelModal";
 import DirectMessageList from "./DirectMessageList";
 import SearchBar from "./SearchBar";
+import WorkspaceSettings from "./WorkspaceSettings";
+import WorkspaceMembers from "./WorkspaceMembers";
+import JoinRequests from "./JoinRequests";
 
 function WorkspaceLayout() {
   const { workspaceId } = useParams();
@@ -26,11 +29,21 @@ function WorkspaceLayout() {
   const [error, setError] = useState(null);
   const [isCreateChannelOpen, setIsCreateChannelOpen] = useState(false);
   const [isJoinChannelOpen, setIsJoinChannelOpen] = useState(false);
-  const [isWorkspaceMenuOpen, setIsWorkspaceMenuOpen] = useState(false);
+  const [adminPanelTab, setAdminPanelTab] = useState(null); // 'settings', 'members', 'requests', null
 
   useEffect(() => {
     fetchData();
   }, [workspaceId]);
+
+  // Auto close admin panel when navigating to channel or DM
+  useEffect(() => {
+    if (
+      location.pathname.includes("/channel/") ||
+      location.pathname.includes("/dm/")
+    ) {
+      setAdminPanelTab(null);
+    }
+  }, [location.pathname]);
 
   const fetchData = async (silent = false) => {
     if (!silent) {
@@ -90,7 +103,7 @@ function WorkspaceLayout() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Global Header - HUST Collab Platform */}
-      <header className="border-b border-slate-800 bg-slate-900 flex-shrink-0">
+      <header className="flex-shrink-0 border-b border-slate-800 bg-slate-900">
         <div className="px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-xl font-bold text-white whitespace-nowrap">
@@ -134,86 +147,12 @@ function WorkspaceLayout() {
                   />
                 </svg>
               </button>
-              <button
-                onClick={() => setIsWorkspaceMenuOpen(!isWorkspaceMenuOpen)}
-                className="flex flex-1 items-center justify-between px-2 py-3 transition hover:bg-slate-800 focus:outline-none"
-              >
+              <div className="flex flex-1 items-center justify-between px-2 py-3 transition hover:bg-slate-800 focus:outline-none">
                 <h1 className="truncate text-lg font-bold text-white">
                   {workspace.name}
                 </h1>
-                <svg
-                  className="h-4 w-4 text-slate-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
+              </div>
             </div>
-
-            {/* Workspace Menu Dropdown */}
-            {isWorkspaceMenuOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setIsWorkspaceMenuOpen(false)}
-                ></div>
-                <div className="absolute left-2 right-2 top-12 z-20 rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5">
-                  <div className="px-4 py-2 border-b border-gray-100">
-                    <p className="text-xs font-medium text-gray-500 uppercase">
-                      Current Workspace
-                    </p>
-                    <p className="text-sm font-bold text-gray-900 truncate">
-                      {workspace.name}
-                    </p>
-                  </div>
-
-                  {workspace.joinCode && (
-                    <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(workspace.joinCode);
-                        setIsWorkspaceMenuOpen(false);
-                        addToast(
-                          "Đã sao chép mã tham gia vào clipboard",
-                          "success"
-                        );
-                      }}
-                      className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Sao chép mã tham gia
-                    </button>
-                  )}
-
-                  <button
-                    onClick={() => {
-                      navigate(`/workspace/${workspaceId}/admin`);
-                      setIsWorkspaceMenuOpen(false);
-                    }}
-                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Quản lý Workspace
-                  </button>
-
-                  <div className="border-t border-gray-100 my-1"></div>
-
-                  <button
-                    onClick={() => {
-                      navigate("/workspaces");
-                      setIsWorkspaceMenuOpen(false);
-                    }}
-                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Chuyển Workspace
-                  </button>
-                </div>
-              </>
-            )}
           </div>
 
           {/* Channels List */}
@@ -258,26 +197,26 @@ function WorkspaceLayout() {
                 </button>
                 {(workspace.myRole === "WORKSPACE_ADMIN" ||
                   workspace.myRole === "WORKSPACE_PRIVILEGE_MEMBER") && (
-                    <button
-                      onClick={() => setIsCreateChannelOpen(true)}
-                      className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
-                      title="Create Channel"
+                  <button
+                    onClick={() => setIsCreateChannelOpen(true)}
+                    className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
+                    title="Create Channel"
+                  >
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <svg
-                        className="h-4 w-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 4v16m8-8H4"
-                        />
-                      </svg>
-                    </button>
-                  )}
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -291,10 +230,11 @@ function WorkspaceLayout() {
                   <Link
                     key={channel.id}
                     to={`/workspace/${workspaceId}/channel/${channel.id}`}
-                    className={`group flex items-center rounded px-2 py-1 transition ${isActive
-                      ? "bg-blue-700 text-white"
-                      : "hover:bg-slate-800 hover:text-slate-100"
-                      }`}
+                    className={`group flex items-center rounded px-2 py-1 transition ${
+                      isActive
+                        ? "bg-blue-700 text-white"
+                        : "hover:bg-slate-800 hover:text-slate-100"
+                    }`}
                   >
                     <span className="mr-2 text-slate-400 group-hover:text-slate-300">
                       {channel.isPrivate ? "🔒" : "#"}
@@ -316,34 +256,173 @@ function WorkspaceLayout() {
               }}
             />
           </div>
+
+          {/* Admin Buttons at Bottom - Horizontal Icons */}
+          <div className="border-t border-slate-800 flex items-center justify-around px-3 py-4">
+            <button
+              onClick={() => setAdminPanelTab("settings")}
+              title="Cài đặt chung"
+              className={`flex items-center justify-center w-10 h-10 rounded-lg transition ${
+                adminPanelTab === "settings"
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </button>
+
+            <button
+              onClick={() => setAdminPanelTab("members")}
+              title="Thành Viên"
+              className={`flex items-center justify-center w-10 h-10 rounded-lg transition ${
+                adminPanelTab === "members"
+                  ? "bg-blue-600 text-white shadow-lg"
+                  : "text-slate-400 hover:text-white hover:bg-slate-800"
+              }`}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+                />
+              </svg>
+            </button>
+
+            {workspace?.myRole === "WORKSPACE_ADMIN" && (
+              <button
+                onClick={() => setAdminPanelTab("requests")}
+                title="Yêu cầu tham gia"
+                className={`flex items-center justify-center w-10 h-10 rounded-lg transition ${
+                  adminPanelTab === "requests"
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "text-slate-400 hover:text-white hover:bg-slate-800"
+                }`}
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
         </aside>
 
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
-          <Outlet
-            context={{ workspace, refreshChannels: () => fetchData(true) }}
-          />
+          {adminPanelTab ? (
+            <div className="flex flex-col h-full overflow-hidden">
+              {/* Admin Panel Header */}
+              <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {adminPanelTab === "settings" &&
+                      "⚙️ Cài đặt thông tin chung"}
+                    {adminPanelTab === "members" && "👥 Thành Viên"}
+                    {adminPanelTab === "requests" && "📋 Yêu cầu tham gia"}
+                  </h2>
+                  <button
+                    onClick={() => setAdminPanelTab(null)}
+                    className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-200 hover:text-gray-700"
+                  >
+                    <svg
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Admin Panel Content */}
+              <div className="flex-1 overflow-y-auto px-6 py-6">
+                {adminPanelTab === "settings" && (
+                  <WorkspaceSettings
+                    workspace={workspace}
+                    workspaceId={workspaceId}
+                    isAdmin={workspace?.myRole === "WORKSPACE_ADMIN"}
+                    onClose={() => setAdminPanelTab(null)}
+                  />
+                )}
+                {adminPanelTab === "members" && (
+                  <WorkspaceMembers
+                    workspaceId={workspaceId}
+                    isAdmin={workspace?.myRole === "WORKSPACE_ADMIN"}
+                  />
+                )}
+                {adminPanelTab === "requests" &&
+                  workspace?.myRole === "WORKSPACE_ADMIN" && (
+                    <JoinRequests workspaceId={workspaceId} />
+                  )}
+              </div>
+            </div>
+          ) : (
+            <Outlet
+              context={{ workspace, refreshChannels: () => fetchData(true) }}
+            />
+          )}
         </main>
-
-        {/* Create Channel Modal */}
-        {isCreateChannelOpen && (
-          <CreateChannelModal
-            workspaceId={workspaceId}
-            onClose={() => setIsCreateChannelOpen(false)}
-            onSuccess={handleCreateChannelSuccess}
-          />
-        )}
-
-        {isJoinChannelOpen && (
-          <JoinChannelModal
-            onClose={() => setIsJoinChannelOpen(false)}
-            onSuccess={() => {
-              // Refresh channel list silently
-              fetchData(true);
-            }}
-          />
-        )}
       </div>
+
+      {/* Create Channel Modal */}
+      {isCreateChannelOpen && (
+        <CreateChannelModal
+          workspaceId={workspaceId}
+          onClose={() => setIsCreateChannelOpen(false)}
+          onSuccess={handleCreateChannelSuccess}
+        />
+      )}
+
+      {isJoinChannelOpen && (
+        <JoinChannelModal
+          onClose={() => setIsJoinChannelOpen(false)}
+          onSuccess={() => {
+            // Refresh channel list silently
+            fetchData(true);
+          }}
+        />
+      )}
     </div>
   );
 }

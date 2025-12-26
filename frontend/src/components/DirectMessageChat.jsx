@@ -15,6 +15,7 @@ function DirectMessageChat() {
   const messagesContainerRef = useRef(null);
   const messageRefs = useRef({});
   const highlightTimeoutRef = useRef(null);
+  const isInitialLoadRef = useRef(true);
 
   const [otherUser, setOtherUser] = useState(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
@@ -76,6 +77,8 @@ function DirectMessageChat() {
     setPage(1);
     setHasMore(true);
     setReplyTo(null);
+    // Next render should pin to bottom without animation
+    isInitialLoadRef.current = true;
   }, [conversationId, setInitialMessages]);
 
   // Fetch conversation details
@@ -120,10 +123,22 @@ function DirectMessageChat() {
         if (data?.messages) {
           if (prepend) {
             // Use functional update to access current messages without depending on them
+            const container = messagesContainerRef.current;
+            const prevScrollHeight = container?.scrollHeight || 0;
+            const prevScrollTop = container?.scrollTop || 0;
+
             setInitialMessages((currentMessages) => [
               ...data.messages,
               ...currentMessages,
             ]);
+
+            // Preserve viewport position after prepending older messages
+            setTimeout(() => {
+              if (!container) return;
+              const newScrollHeight = container.scrollHeight;
+              const heightDelta = newScrollHeight - prevScrollHeight;
+              container.scrollTop = prevScrollTop + heightDelta;
+            }, 0);
           } else {
             setInitialMessages(data.messages);
           }
@@ -148,7 +163,28 @@ function DirectMessageChat() {
 
   // Scroll to bottom on new messages
   useEffect(() => {
-    if (messagesEndRef.current && !isLoadingHistory) {
+    if (isLoadingHistory) return;
+
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const distanceFromBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight;
+    const isNearBottom = distanceFromBottom < 5;
+
+    // On initial load (after switching conversations), jump to bottom instantly
+    if (isInitialLoadRef.current) {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: "auto" });
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
+      isInitialLoadRef.current = false;
+      return;
+    }
+
+    // Only auto-scroll on new messages if user is already near the bottom
+    if (isNearBottom && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages, isLoadingHistory]);

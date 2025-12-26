@@ -50,6 +50,10 @@ export class ChatGateway
   // Track userId to socketIds: Map<userId, Set<socketId>>
   private userSockets = new Map<string, Set<string>>();
 
+  // Heartbeat tracking for robust presence
+  private userHeartbeats = new Map<string, number>();
+  private heartbeatChecker: NodeJS.Timeout | null = null;
+
   constructor(
     private jwtService: JwtService,
     private prisma: PrismaService,
@@ -58,6 +62,56 @@ export class ChatGateway
 
   afterInit() {
     this.logger.log('Chat WebSocket Gateway initialized');
+
+    // Start heartbeat checker: force offline if no heartbeat within 60s
+    if (!this.heartbeatChecker) {
+      this.heartbeatChecker = setInterval(() => {
+        const now = Date.now();
+        for (const [userId, socketIds] of this.userSockets.entries()) {
+          const last = this.userHeartbeats.get(userId) ?? 0;
+          if (now - last > 60_000) {
+            this.logger.warn(
+              `Heartbeat timeout for user ${userId}, forcing offline`,
+            );
+            // Disconnect all sockets for this user
+            for (const socketId of socketIds) {
+              try {
+                const s = this.server.sockets.sockets.get(socketId);
+                s?.disconnect(true);
+              } catch (e) {
+                this.logger.error(
+                  `Failed to disconnect socket ${socketId}: ${e}`,
+                );
+              }
+            }
+            // Update presence to offline and broadcast
+            this.server.emit('presence:user:offline', { userId });
+            this.prisma.userPresence
+              .upsert({
+                where: { userId },
+                update: {
+                  status: 'offline',
+                  lastSeen: new Date(),
+                  updatedAt: new Date(),
+                },
+                create: {
+                  userId,
+                  status: 'offline',
+                  lastSeen: new Date(),
+                },
+              })
+              .catch((err) =>
+                this.logger.error(
+                  `Failed to update presence offline for ${userId}: ${err.message}`,
+                ),
+              );
+            // Clean maps
+            this.userSockets.delete(userId);
+            this.userHeartbeats.delete(userId);
+          }
+        }
+      }, 30_000);
+    }
   }
 
   async handleConnection(client: Socket) {
@@ -98,6 +152,9 @@ export class ChatGateway
         this.userSockets.set(user.id, new Set());
       }
       this.userSockets.get(user.id)!.add(client.id);
+
+      // Initialize heartbeat timestamp
+      this.userHeartbeats.set(user.id, Date.now());
 
       // Broadcast global presence online (workspace-agnostic)
       this.server.emit('presence:user:online', { userId: user.id });
@@ -192,6 +249,18 @@ export class ChatGateway
       this.logger.log(
         `Client disconnected: ${client.id} (User: ${user.username})`,
       );
+    }
+  }
+
+  /**
+   * Presence heartbeat: clients ping periodically to confirm they are alive
+   */
+  @UseGuards(WsJwtGuard)
+  @SubscribeMessage('presence:heartbeat')
+  handlePresenceHeartbeat(@ConnectedSocket() client: AuthenticatedSocket) {
+    const user = client.user;
+    if (user) {
+      this.userHeartbeats.set(user.id, Date.now());
     }
   }
 

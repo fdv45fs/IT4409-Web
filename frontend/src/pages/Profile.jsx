@@ -1,26 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
-import {
-  TetThemeWrapper,
-  TetHeader,
-  HorseIcon,
-  LanternIcon,
-  ApricotBlossomIcon,
-  PeachBlossomIcon,
-  SparkleDecor,
-} from "../components/tet";
-import {
-  ArrowLeft,
-  User,
-  KeyRound,
-  Upload,
-  Save,
-  Loader2,
-  CheckCircle2,
-  AlertCircle,
-  Camera,
-} from "lucide-react";
 
 function Profile() {
   const { authFetch, updateCurrentUser } = useAuth();
@@ -88,7 +68,7 @@ function Profile() {
         body: JSON.stringify(profileForm),
       });
       setProfile(updatedProfile);
-      updateCurrentUser(updatedProfile);
+      updateCurrentUser(updatedProfile); // Update context
       setSuccess("Cập nhật hồ sơ thành công!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -127,7 +107,7 @@ function Profile() {
 
     try {
       const formData = new FormData();
-      formData.append("file", avatarFile);
+      formData.append("file", avatarFile); 
 
       const updatedProfile = await authFetch("/api/users/me/avatar", {
         method: "PATCH",
@@ -135,7 +115,7 @@ function Profile() {
       });
 
       setProfile(updatedProfile);
-      updateCurrentUser(updatedProfile);
+      updateCurrentUser(updatedProfile); 
       setAvatarFile(null);
       setAvatarPreview(null);
       setSuccess("Cập nhật avatar thành công!");
@@ -188,98 +168,110 @@ function Profile() {
     }
   };
 
-  // Loading state
   if (isLoading) {
     return (
-      <TetThemeWrapper showFireworksToggle={false}>
-        <TetHeader />
-        <div className="flex items-center justify-center py-32">
-          <div className="text-center">
-            <div className="relative mx-auto h-20 w-20">
-              <div className="absolute inset-0 animate-spin rounded-full border-4 border-amber-200 border-t-red-500"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <HorseIcon className="h-8 w-8 text-red-500 animate-heartbeat" />
-              </div>
-            </div>
-            <p className="mt-6 text-gray-600">Đang tải hồ sơ...</p>
-          </div>
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
+          <p className="mt-4 text-gray-600">Đang tải...</p>
         </div>
-      </TetThemeWrapper>
+      </div>
     );
   }
 
   return (
-    <TetThemeWrapper showFireworksToggle={false}>
-      <TetHeader />
-
-      {/* Content */}
-      <main className="relative z-10 mx-auto max-w-5xl px-6 py-8">
-        {/* Page Header */}
-        <div className="mb-8 flex items-center gap-4">
-          <button
-            onClick={() => navigate("/workspaces")}
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/80 text-gray-600 shadow-md transition hover:bg-white hover:text-red-600"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Hồ sơ cá nhân</h1>
-            <p className="text-sm text-amber-600">Quản lý thông tin tài khoản</p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto max-w-5xl px-6 py-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate("/workspaces")}
+              className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+            >
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+            <div>
+              <h1 className="text-xl font-bold text-gray-900">Hồ sơ cá nhân</h1>
+              <p className="text-sm text-gray-500">Quản lý thông tin tài khoản</p>
+            </div>
           </div>
         </div>
+      </header>
 
-        {/* Messages */}
+      {/* Content */}
+      <main className="mx-auto max-w-5xl px-6 py-6">
+        {/* Success/Error Messages */}
         {success && (
-          <div className="mb-6 flex items-center gap-2 rounded-xl border-2 border-emerald-300 bg-emerald-50 px-4 py-3 text-emerald-700 animate-slide-in">
-            <CheckCircle2 className="h-5 w-5" />
-            <span>{success}</span>
+          <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800">
+            {success}
           </div>
         )}
         {error && (
-          <div className="mb-6 flex items-center gap-2 rounded-xl border-2 border-red-300 bg-red-50 px-4 py-3 text-red-700 animate-slide-in">
-            <AlertCircle className="h-5 w-5" />
-            <span>{error}</span>
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            {error}
           </div>
         )}
 
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+        <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
           {/* Sidebar - Avatar */}
-          <div className="overflow-hidden rounded-2xl border-2 border-amber-200 bg-white/90 shadow-xl">
-            {/* Avatar header gradient */}
-            <div className="relative bg-gradient-to-r from-red-500 via-red-600 to-amber-500 px-6 py-8">
-              <div className="absolute left-4 top-4 opacity-30">
-                <ApricotBlossomIcon className="h-6 w-6 text-white animate-bloom" />
-              </div>
-              <div className="absolute right-4 top-4 opacity-30">
-                <PeachBlossomIcon className="h-6 w-6 text-white animate-bloom" />
+          <div className="rounded-lg border border-gray-200 bg-white p-6">
+            <div className="text-center">
+              {/* Avatar Display */}
+              <div className="mx-auto mb-4 h-32 w-32 overflow-hidden rounded-full bg-gradient-to-br from-blue-500 to-sky-400">
+                {avatarPreview || profile?.avatarUrl ? (
+                  <img
+                    src={avatarPreview || profile.avatarUrl}
+                    alt="Avatar"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-white">
+                    {(profile?.fullName || profile?.username || "U")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+                )}
               </div>
 
-              {/* Avatar */}
-              <div className="relative mx-auto h-28 w-28">
-                <div className="h-full w-full overflow-hidden rounded-full border-4 border-white/50 bg-gradient-to-br from-amber-400 to-yellow-500 shadow-lg">
-                  {avatarPreview || profile?.avatarUrl ? (
-                    <img
-                      src={avatarPreview || profile.avatarUrl}
-                      alt="Avatar"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-4xl font-bold text-white">
-                      {(profile?.fullName || profile?.username || "U")
-                        .charAt(0)
-                        .toUpperCase()}
-                    </div>
-                  )}
-                </div>
-                <SparkleDecor className="-right-1 top-0" />
-                <SparkleDecor className="-left-1 bottom-2" delay="0.5s" />
+              <h2 className="text-lg font-semibold text-gray-900">
+                {profile?.fullName}
+              </h2>
+              <p className="text-sm text-gray-500">@{profile?.username}</p>
+              <p className="mt-1 text-xs text-gray-400">{profile?.email}</p>
 
-                {/* Camera overlay */}
+              {/* Upload Avatar */}
+              <div className="mt-4">
                 <label
                   htmlFor="avatar-upload"
-                  className="absolute bottom-0 right-0 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-white shadow-md transition hover:bg-amber-50"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                 >
-                  <Camera className="h-4 w-4 text-amber-600" />
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                    />
+                  </svg>
+                  Chọn ảnh
                 </label>
                 <input
                   id="avatar-upload"
@@ -288,70 +280,53 @@ function Profile() {
                   onChange={handleAvatarChange}
                   className="hidden"
                 />
+                {avatarFile && (
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={handleUploadAvatar}
+                      disabled={isUploadingAvatar}
+                      className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {isUploadingAvatar ? "Đang tải..." : "Lưu"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setAvatarFile(null);
+                        setAvatarPreview(null);
+                      }}
+                      className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                    >
+                      Hủy
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
-
-            {/* User Info */}
-            <div className="p-6 text-center">
-              <h2 className="text-lg font-bold text-gray-900">{profile?.fullName}</h2>
-              <p className="text-sm text-amber-600">@{profile?.username}</p>
-              <p className="mt-1 text-xs text-gray-400">{profile?.email}</p>
-
-              {/* Upload buttons */}
-              {avatarFile && (
-                <div className="mt-4 flex gap-2">
-                  <button
-                    onClick={handleUploadAvatar}
-                    disabled={isUploadingAvatar}
-                    className="flex flex-1 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-red-500 to-amber-500 px-3 py-2 text-sm font-medium text-white transition hover:shadow-lg disabled:opacity-50"
-                  >
-                    {isUploadingAvatar ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Upload className="h-4 w-4" />
-                    )}
-                    <span>{isUploadingAvatar ? "Đang tải..." : "Lưu"}</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setAvatarFile(null);
-                      setAvatarPreview(null);
-                    }}
-                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-gray-50"
-                  >
-                    Hủy
-                  </button>
-                </div>
-              )}
             </div>
           </div>
 
           {/* Main Content - Tabs */}
-          <div className="overflow-hidden rounded-2xl border-2 border-amber-200 bg-white/90 shadow-xl">
-            {/* Top gradient */}
-            <div className="h-1.5 bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500"></div>
-
+          <div className="rounded-lg border border-gray-200 bg-white">
             {/* Tabs */}
-            <div className="border-b border-amber-100">
+            <div className="border-b border-gray-200">
               <nav className="flex">
                 <button
                   onClick={() => setActiveTab("info")}
-                  className={`flex items-center gap-2 border-b-2 px-6 py-4 text-sm font-medium transition ${activeTab === "info"
-                      ? "border-red-500 text-red-600"
-                      : "border-transparent text-gray-500 hover:border-amber-300 hover:text-amber-700"
-                    }`}
+                  className={`border-b-2 px-6 py-4 text-sm font-medium transition ${
+                    activeTab === "info"
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  }`}
                 >
-                  <User className="h-4 w-4" />
                   Thông tin cá nhân
                 </button>
                 <button
                   onClick={() => setActiveTab("password")}
-                  className={`flex items-center gap-2 border-b-2 px-6 py-4 text-sm font-medium transition ${activeTab === "password"
-                      ? "border-red-500 text-red-600"
-                      : "border-transparent text-gray-500 hover:border-amber-300 hover:text-amber-700"
-                    }`}
+                  className={`border-b-2 px-6 py-4 text-sm font-medium transition ${
+                    activeTab === "password"
+                      ? "border-blue-600 text-blue-600"
+                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  }`}
                 >
-                  <KeyRound className="h-4 w-4" />
                   Đổi mật khẩu
                 </button>
               </nav>
@@ -360,7 +335,7 @@ function Profile() {
             {/* Tab Content */}
             <div className="p-6">
               {activeTab === "info" && (
-                <form onSubmit={handleUpdateProfile} className="space-y-5">
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Họ và tên
@@ -369,9 +344,12 @@ function Profile() {
                       type="text"
                       value={profileForm.fullName}
                       onChange={(e) =>
-                        setProfileForm({ ...profileForm, fullName: e.target.value })
+                        setProfileForm({
+                          ...profileForm,
+                          fullName: e.target.value,
+                        })
                       }
-                      className="w-full rounded-xl border-2 border-amber-200 bg-white px-4 py-2.5 text-sm transition focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
@@ -382,9 +360,12 @@ function Profile() {
                     <select
                       value={profileForm.gender}
                       onChange={(e) =>
-                        setProfileForm({ ...profileForm, gender: e.target.value })
+                        setProfileForm({
+                          ...profileForm,
+                          gender: e.target.value,
+                        })
                       }
-                      className="w-full rounded-xl border-2 border-amber-200 bg-white px-4 py-2.5 text-sm transition focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     >
                       <option value="">Chọn giới tính</option>
                       <option value="male">Nam</option>
@@ -401,31 +382,29 @@ function Profile() {
                       type="date"
                       value={profileForm.dateOfBirth}
                       onChange={(e) =>
-                        setProfileForm({ ...profileForm, dateOfBirth: e.target.value })
+                        setProfileForm({
+                          ...profileForm,
+                          dateOfBirth: e.target.value,
+                        })
                       }
-                      className="w-full rounded-xl border-2 border-amber-200 bg-white px-4 py-2.5 text-sm transition focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div className="flex justify-end pt-4">
+                  <div className="flex justify-end gap-3 pt-4">
                     <button
                       type="submit"
                       disabled={isEditingProfile}
-                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 via-red-600 to-amber-500 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-red-200 transition hover:shadow-xl disabled:opacity-50"
+                      className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {isEditingProfile ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Save className="h-4 w-4" />
-                      )}
-                      <span>{isEditingProfile ? "Đang lưu..." : "Lưu thay đổi"}</span>
+                      {isEditingProfile ? "Đang lưu..." : "Lưu thay đổi"}
                     </button>
                   </div>
                 </form>
               )}
 
               {activeTab === "password" && (
-                <form onSubmit={handleChangePassword} className="space-y-5">
+                <form onSubmit={handleChangePassword} className="space-y-4">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
                       Mật khẩu hiện tại
@@ -434,10 +413,13 @@ function Profile() {
                       type="password"
                       value={passwordForm.currentPassword}
                       onChange={(e) =>
-                        setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
+                        setPasswordForm({
+                          ...passwordForm,
+                          currentPassword: e.target.value,
+                        })
                       }
                       required
-                      className="w-full rounded-xl border-2 border-amber-200 bg-white px-4 py-2.5 text-sm transition focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
@@ -449,10 +431,13 @@ function Profile() {
                       type="password"
                       value={passwordForm.newPassword}
                       onChange={(e) =>
-                        setPasswordForm({ ...passwordForm, newPassword: e.target.value })
+                        setPasswordForm({
+                          ...passwordForm,
+                          newPassword: e.target.value,
+                        })
                       }
                       required
-                      className="w-full rounded-xl border-2 border-amber-200 bg-white px-4 py-2.5 text-sm transition focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
@@ -464,25 +449,23 @@ function Profile() {
                       type="password"
                       value={passwordForm.confirmPassword}
                       onChange={(e) =>
-                        setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
+                        setPasswordForm({
+                          ...passwordForm,
+                          confirmPassword: e.target.value,
+                        })
                       }
                       required
-                      className="w-full rounded-xl border-2 border-amber-200 bg-white px-4 py-2.5 text-sm transition focus:border-red-400 focus:outline-none focus:ring-2 focus:ring-red-100"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm transition focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                     />
                   </div>
 
-                  <div className="flex justify-end pt-4">
+                  <div className="flex justify-end gap-3 pt-4">
                     <button
                       type="submit"
                       disabled={isChangingPassword}
-                      className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-red-500 via-red-600 to-amber-500 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-red-200 transition hover:shadow-xl disabled:opacity-50"
+                      className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
                     >
-                      {isChangingPassword ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <KeyRound className="h-4 w-4" />
-                      )}
-                      <span>{isChangingPassword ? "Đang đổi..." : "Đổi mật khẩu"}</span>
+                      {isChangingPassword ? "Đang đổi..." : "Đổi mật khẩu"}
                     </button>
                   </div>
                 </form>
@@ -491,7 +474,7 @@ function Profile() {
           </div>
         </div>
       </main>
-    </TetThemeWrapper>
+    </div>
   );
 }
 

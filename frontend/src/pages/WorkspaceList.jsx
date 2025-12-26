@@ -79,22 +79,26 @@ function WorkspaceList() {
     setIsJoinModalOpen(false);
     if (result.status === "APPROVED") {
       fetchWorkspaces();
-      setSuccessMessage(`Đã tham gia workspace "${result.workspaceName}" thành công!`);
+      setSuccessMessage(
+        `Đã tham gia workspace "${result.workspaceName}" thành công!`
+      );
       setTimeout(() => setSuccessMessage(""), 5000);
     } else {
-      setSuccessMessage(`Yêu cầu tham gia workspace "${result.workspaceName}" đang chờ phê duyệt`);
+      setSuccessMessage(
+        `Yêu cầu tham gia workspace "${result.workspaceName}" đang chờ phê duyệt`
+      );
       setTimeout(() => setSuccessMessage(""), 5000);
     }
   };
 
   // Icon decorations for headers
   const decorativeIcons = [
-    { Icon: RedEnvelopeIcon, color: 'text-red-500' },
-    { Icon: LanternIcon, color: 'text-red-500' },
-    { Icon: HorseIcon, color: 'text-amber-600' },
-    { Icon: ApricotBlossomIcon, color: 'text-yellow-500' },
-    { Icon: PeachBlossomIcon, color: 'text-pink-400' },
-    { Icon: CoinIcon, color: 'text-amber-500' },
+    { Icon: RedEnvelopeIcon, color: "text-red-500" },
+    { Icon: LanternIcon, color: "text-red-500" },
+    { Icon: HorseIcon, color: "text-amber-600" },
+    { Icon: ApricotBlossomIcon, color: "text-yellow-500" },
+    { Icon: PeachBlossomIcon, color: "text-pink-400" },
+    { Icon: CoinIcon, color: "text-amber-500" },
   ];
 
   return (
@@ -109,20 +113,21 @@ function WorkspaceList() {
           {/* Badge */}
           <div className="mb-4 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-red-100 via-amber-100 to-yellow-100 px-6 py-3 text-sm font-medium text-red-700 ring-2 ring-red-200 shadow-lg shadow-red-100">
             <LanternIcon className="h-5 w-5 animate-swing text-red-500" />
-            <span>Năm Bính Ngọ 2026</span>
-            <LanternIcon className="h-5 w-5 animate-swing text-red-500" style={{ animationDelay: '1.5s' }} />
+            <span>Năm 2026</span>
+            <LanternIcon
+              className="h-5 w-5 animate-swing text-red-500"
+              style={{ animationDelay: "1.5s" }}
+            />
           </div>
 
           {/* Title */}
           <h1 className="mt-6 text-5xl font-bold lg:text-6xl">
-            <span className="animate-rainbow-text">
-              Chúc Mừng Năm Mới!
-            </span>
+            <span className="animate-rainbow-text">Chúc Mừng Năm Mới!</span>
           </h1>
 
           {/* Subtitle */}
           <p className="mx-auto mt-6 max-w-xl text-lg text-gray-600">
-            Chọn workspace để bắt đầu làm việc cùng team. 
+            Chọn workspace để bắt đầu làm việc cùng team.
             <br />
             Chúc bạn năm mới an khang thịnh vượng!
           </p>
@@ -133,7 +138,10 @@ function WorkspaceList() {
               <Icon
                 key={i}
                 className={`h-7 w-7 ${color} animate-bounce`}
-                style={{ animationDelay: `${i * 0.15}s`, animationDuration: '2s' }}
+                style={{
+                  animationDelay: `${i * 0.15}s`,
+                  animationDuration: "2s",
+                }}
               />
             ))}
           </div>
@@ -163,17 +171,31 @@ function WorkspaceList() {
           <div className="flex items-center justify-center py-20">
             <div className="text-center">
               <div className="relative mx-auto h-24 w-24">
-                <div className="absolute inset-0 animate-spin rounded-full border-4 border-amber-200 border-t-red-500" style={{ animationDuration: '1s' }}></div>
-                <div className="absolute inset-3 animate-spin rounded-full border-4 border-yellow-200 border-t-amber-500" style={{ animationDirection: 'reverse', animationDuration: '1.5s' }}></div>
+                <div
+                  className="absolute inset-0 animate-spin rounded-full border-4 border-amber-200 border-t-red-500"
+                  style={{ animationDuration: "1s" }}
+                ></div>
+                <div
+                  className="absolute inset-3 animate-spin rounded-full border-4 border-yellow-200 border-t-amber-500"
+                  style={{
+                    animationDirection: "reverse",
+                    animationDuration: "1.5s",
+                  }}
+                ></div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <HorseIcon className="h-10 w-10 text-red-500 animate-heartbeat" />
                 </div>
               </div>
-              <p className="mt-8 text-xl font-medium text-gray-700">Đang tải workspaces...</p>
+              <p className="mt-8 text-xl font-medium text-gray-700">
+                Đang tải workspaces...
+              </p>
               <div className="mt-4 flex justify-center gap-4">
                 <ApricotBlossomIcon className="h-6 w-6 text-yellow-500 animate-bloom" />
                 <LanternIcon className="h-6 w-6 text-red-500 animate-swing" />
-                <PeachBlossomIcon className="h-6 w-6 text-pink-400 animate-bloom" style={{ animationDelay: '0.5s' }} />
+                <PeachBlossomIcon
+                  className="h-6 w-6 text-pink-400 animate-bloom"
+                  style={{ animationDelay: "0.5s" }}
+                />
               </div>
             </div>
           </div>
@@ -185,7 +207,10 @@ function WorkspaceList() {
             <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-amber-700">
               <ApricotBlossomIcon className="h-5 w-5 text-yellow-500 animate-bloom" />
               <span>Workspaces của bạn ({workspaces.length})</span>
-              <PeachBlossomIcon className="h-5 w-5 text-pink-400 animate-bloom" style={{ animationDelay: '0.5s' }} />
+              <PeachBlossomIcon
+                className="h-5 w-5 text-pink-400 animate-bloom"
+                style={{ animationDelay: "0.5s" }}
+              />
             </h2>
 
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -210,7 +235,11 @@ function WorkspaceList() {
                       <div className="relative">
                         <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 via-amber-500 to-yellow-500 text-xl font-bold text-white shadow-lg shadow-amber-300 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
                           {workspace.avatarUrl ? (
-                            <img src={workspace.avatarUrl} alt={workspace.name} className="h-full w-full rounded-xl object-cover" />
+                            <img
+                              src={workspace.avatarUrl}
+                              alt={workspace.name}
+                              className="h-full w-full rounded-xl object-cover"
+                            />
                           ) : (
                             workspace.name.charAt(0).toUpperCase()
                           )}
@@ -230,7 +259,9 @@ function WorkspaceList() {
                       </button>
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600">{workspace.name}</h3>
+                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-red-600">
+                      {workspace.name}
+                    </h3>
                     <p className="mt-1 flex items-center gap-1.5 text-sm text-amber-600/80">
                       <Users className="h-4 w-4" />
                       <span>{workspace.memberCount} thành viên</span>
@@ -253,13 +284,29 @@ function WorkspaceList() {
           <div className="mx-auto mb-12 max-w-md overflow-hidden rounded-3xl border-2 border-amber-300 bg-white shadow-2xl animate-zoom-bounce">
             <div className="relative bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500 px-8 py-8 text-center text-white overflow-hidden">
               <PartyPopper className="relative mx-auto h-16 w-16 mb-3 animate-heartbeat" />
-              <h3 className="relative text-2xl font-bold">Chưa có workspace nào</h3>
+              <h3 className="relative text-2xl font-bold">
+                Chưa có workspace nào
+              </h3>
             </div>
             <div className="p-8 text-center bg-gradient-to-b from-white to-amber-50">
-              <p className="text-gray-600 mb-4">Tạo workspace mới hoặc tham gia để bắt đầu năm mới!</p>
+              <p className="text-gray-600 mb-4">
+                Tạo workspace mới hoặc tham gia để bắt đầu năm mới!
+              </p>
               <div className="flex justify-center gap-4">
-                {[ApricotBlossomIcon, LanternIcon, HorseIcon, PeachBlossomIcon, CoinIcon].map((Icon, i) => (
-                  <Icon key={i} className={`h-7 w-7 ${i % 2 === 0 ? 'text-yellow-500' : 'text-red-500'} animate-bounce`} style={{ animationDelay: `${i * 0.15}s` }} />
+                {[
+                  ApricotBlossomIcon,
+                  LanternIcon,
+                  HorseIcon,
+                  PeachBlossomIcon,
+                  CoinIcon,
+                ].map((Icon, i) => (
+                  <Icon
+                    key={i}
+                    className={`h-7 w-7 ${
+                      i % 2 === 0 ? "text-yellow-500" : "text-red-500"
+                    } animate-bounce`}
+                    style={{ animationDelay: `${i * 0.15}s` }}
+                  />
                 ))}
               </div>
             </div>
@@ -275,7 +322,9 @@ function WorkspaceList() {
             <div className="relative flex justify-center">
               <span className="bg-gradient-to-r from-red-50 via-amber-50 to-yellow-50 px-6 flex items-center gap-4">
                 <ApricotBlossomIcon className="h-5 w-5 text-yellow-500 animate-bloom" />
-                <span className="text-sm font-bold uppercase tracking-wider text-amber-700">HOẶC</span>
+                <span className="text-sm font-bold uppercase tracking-wider text-amber-700">
+                  HOẶC
+                </span>
                 <PeachBlossomIcon className="h-5 w-5 text-pink-400 animate-bloom" />
               </span>
             </div>
@@ -283,9 +332,12 @@ function WorkspaceList() {
         )}
 
         {/* Create or Join */}
-        <div className={`${!isLoading && workspaces.length > 0 ? '' : 'mt-8'}`}>
+        <div className={`${!isLoading && workspaces.length > 0 ? "" : "mt-8"}`}>
           <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-amber-700">
-            <RedEnvelopeIcon className="h-5 w-5 text-red-500 animate-bounce" style={{ animationDuration: '2s' }} />
+            <RedEnvelopeIcon
+              className="h-5 w-5 text-red-500 animate-bounce"
+              style={{ animationDuration: "2s" }}
+            />
             <span>Tạo hoặc tham gia workspace</span>
           </h2>
 
@@ -302,7 +354,9 @@ function WorkspaceList() {
                 <SparkleDecor className="-right-1 -top-1" />
               </div>
 
-              <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">Tạo workspace mới</span>
+              <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">
+                Tạo workspace mới
+              </span>
               <span className="mt-2 flex items-center gap-2 text-sm text-amber-600/80">
                 <span>Khởi tạo không gian làm việc</span>
                 <Star className="h-4 w-4 text-yellow-500 animate-sparkle" />
@@ -321,7 +375,9 @@ function WorkspaceList() {
                 <SparkleDecor className="-left-1 -top-1" delay="0.5s" />
               </div>
 
-              <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">Tham gia bằng mã</span>
+              <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">
+                Tham gia bằng mã
+              </span>
               <span className="mt-2 flex items-center gap-2 text-sm text-red-600/80">
                 <span>Nhập mã mời để tham gia</span>
                 <RedEnvelopeIcon className="h-4 w-4 text-red-500 animate-bounce" />
@@ -337,18 +393,38 @@ function WorkspaceList() {
               <div className="flex items-center justify-center gap-4">
                 <LanternIcon className="h-10 w-10 text-red-500 animate-swing" />
                 <div>
-                  <p className="text-xl font-bold animate-rainbow-text">Chúc Mừng Năm Mới 2026</p>
+                  <p className="text-xl font-bold animate-rainbow-text">
+                    Chúc Mừng Năm Mới 2026
+                  </p>
                   <p className="mt-1 flex items-center justify-center gap-2 text-sm text-amber-700 font-medium">
                     <HorseIcon className="h-4 w-4" />
                     <span>An Khang Thịnh Vượng - Vạn Sự Như Ý</span>
                     <HorseIcon className="h-4 w-4" />
                   </p>
                 </div>
-                <LanternIcon className="h-10 w-10 text-red-500 animate-swing" style={{ animationDelay: '1.5s' }} />
+                <LanternIcon
+                  className="h-10 w-10 text-red-500 animate-swing"
+                  style={{ animationDelay: "1.5s" }}
+                />
               </div>
               <div className="mt-4 flex justify-center gap-4">
-                {[ApricotBlossomIcon, RedEnvelopeIcon, CoinIcon, PeachBlossomIcon, FireworkIcon].map((Icon, i) => (
-                  <Icon key={i} className={`h-6 w-6 ${i % 2 === 0 ? 'text-yellow-500' : 'text-red-500'} animate-bounce`} style={{ animationDelay: `${i * 0.2}s`, animationDuration: '2s' }} />
+                {[
+                  ApricotBlossomIcon,
+                  RedEnvelopeIcon,
+                  CoinIcon,
+                  PeachBlossomIcon,
+                  FireworkIcon,
+                ].map((Icon, i) => (
+                  <Icon
+                    key={i}
+                    className={`h-6 w-6 ${
+                      i % 2 === 0 ? "text-yellow-500" : "text-red-500"
+                    } animate-bounce`}
+                    style={{
+                      animationDelay: `${i * 0.2}s`,
+                      animationDuration: "2s",
+                    }}
+                  />
                 ))}
               </div>
             </div>

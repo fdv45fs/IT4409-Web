@@ -10,6 +10,7 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
  */
 export function useChatSocket(token, channelId) {
   const socketRef = useRef(null);
+  const heartbeatTimerRef = useRef(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -51,12 +52,24 @@ export function useChatSocket(token, channelId) {
       console.log("Authenticated:", data.user);
       setIsConnected(true);
       setError(null);
+
+      // Start heartbeat to keep presence fresh
+      if (heartbeatTimerRef.current) clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = setInterval(() => {
+        try {
+          socket.emit("presence:heartbeat");
+        } catch {}
+      }, 15000);
     });
 
     socket.on("disconnect", (reason) => {
       console.log("Socket disconnected:", reason);
       setIsConnected(false);
       setIsJoined(false);
+      if (heartbeatTimerRef.current) {
+        clearInterval(heartbeatTimerRef.current);
+        heartbeatTimerRef.current = null;
+      }
     });
 
     socket.on("connect_error", (err) => {
@@ -171,8 +184,16 @@ export function useChatSocket(token, channelId) {
 
     // Cleanup
     return () => {
+      // Attempt graceful leave + disconnect
+      try {
+        if (channelId) socket.emit("channel:leave", { channelId });
+      } catch {}
       socket.disconnect();
       socketRef.current = null;
+      if (heartbeatTimerRef.current) {
+        clearInterval(heartbeatTimerRef.current);
+        heartbeatTimerRef.current = null;
+      }
     };
   }, [token]);
 
@@ -194,6 +215,25 @@ export function useChatSocket(token, channelId) {
       }
     };
   }, [channelId, isConnected]);
+
+  // Gracefully disconnect on tab close
+  useEffect(() => {
+    const handlePageHide = () => {
+      try {
+        if (socketRef.current) {
+          if (channelId) socketRef.current.emit("channel:leave", { channelId });
+          socketRef.current.disconnect();
+        }
+      } catch {}
+    };
+
+    window.addEventListener("beforeunload", handlePageHide);
+    window.addEventListener("pagehide", handlePageHide);
+    return () => {
+      window.removeEventListener("beforeunload", handlePageHide);
+      window.removeEventListener("pagehide", handlePageHide);
+    };
+  }, [channelId]);
 
   // Actions
   const sendMessage = useCallback(
