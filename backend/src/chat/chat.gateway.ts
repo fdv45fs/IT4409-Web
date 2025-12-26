@@ -168,11 +168,19 @@ export class ChatGateway
       this.socketChannels.set(client.id, new Set());
 
       // Cập nhật user presence thành online
-      await this.prisma.userPresence.upsert({
-        where: { userId: user.id },
-        update: { status: 'online', updatedAt: new Date() },
-        create: { userId: user.id, status: 'online' },
-      });
+      try {
+        await this.prisma.userPresence.upsert({
+          where: { userId: user.id },
+          update: { status: 'online', updatedAt: new Date() },
+          create: { userId: user.id, status: 'online' },
+        });
+      } catch (err) {
+        this.logger.warn(
+          `Failed to update presence for user ${user.id}:`,
+          err.message,
+        );
+        // Don't throw - presence update is non-critical
+      }
 
       this.logger.log(
         `Client connected: ${client.id} (User: ${user.username})`,
@@ -211,19 +219,27 @@ export class ChatGateway
           this.server.emit('presence:user:offline', { userId: user.id });
 
           // Update presence to offline
-          await this.prisma.userPresence.upsert({
-            where: { userId: user.id },
-            update: {
-              status: 'offline',
-              lastSeen: new Date(),
-              updatedAt: new Date(),
-            },
-            create: {
-              userId: user.id,
-              status: 'offline',
-              lastSeen: new Date(),
-            },
-          });
+          try {
+            await this.prisma.userPresence.upsert({
+              where: { userId: user.id },
+              update: {
+                status: 'offline',
+                lastSeen: new Date(),
+                updatedAt: new Date(),
+              },
+              create: {
+                userId: user.id,
+                status: 'offline',
+                lastSeen: new Date(),
+              },
+            });
+          } catch (err) {
+            this.logger.warn(
+              `Failed to update presence for user ${user.id}:`,
+              err.message,
+            );
+            // Don't throw - presence update is non-critical
+          }
         }
       }
 

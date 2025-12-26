@@ -78,11 +78,12 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
     };
   }, [isInMeeting, fetchMeetingStatus]);
 
-  // Cleanup on unmount
+  // Cleanup Daily instance on unmount
   useEffect(() => {
     return () => {
       if (callObjectRef.current) {
         callObjectRef.current.destroy();
+        callObjectRef.current = null;
       }
     };
   }, []);
@@ -111,17 +112,34 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
   };
 
   const handleJoinMeeting = async () => {
+    // Guard: prevent joining multiple times
+    if (isJoining || isInMeeting || callObjectRef.current) {
+      return;
+    }
+
     setIsJoining(true);
     try {
+      // Destroy any existing Daily instance first
+      if (callObjectRef.current) {
+        try {
+          await callObjectRef.current.destroy();
+        } catch (e) {
+          console.warn("Error destroying previous call object:", e);
+        }
+        callObjectRef.current = null;
+      }
+
       // Wait for Daily.co SDK to load
       let attempts = 0;
       while (!window.DailyIframe && attempts < 50) {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }
 
       if (!window.DailyIframe) {
-        throw new Error("Daily.co SDK failed to load. Please refresh the page.");
+        throw new Error(
+          "Daily.co SDK failed to load. Please refresh the page."
+        );
       }
 
       // Request media permissions before joining
@@ -131,18 +149,21 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
           audio: true,
         });
         // Stop the test stream
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach((track) => track.stop());
       } catch (mediaError) {
         console.warn("Media permission warning:", mediaError);
-        showToast("Camera/microphone access denied. You can enable them later.", "warning");
+        showToast(
+          "Camera/microphone access denied. You can enable them later.",
+          "warning"
+        );
       }
 
-      await authFetch(`/api/channels/${channelId}/meetings/join`, {
-        method: "POST",
-      });
-
-      const tokenData = await authFetch(
-        `/api/channels/${channelId}/meetings/token`
+      // Join meeting - returns token and roomUrl (both required by Daily SDK)
+      const joinData = await authFetch(
+        `/api/channels/${channelId}/meetings/join`,
+        {
+          method: "POST",
+        }
       );
 
       // Create Daily call object
@@ -153,10 +174,10 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
       // Set up event listeners
       setupDailyListeners(callObject);
 
-      // Join the call
+      // Join the call with both token and URL (token is verified by Daily)
       await callObject.join({
-        url: tokenData.roomUrl,
-        token: tokenData.token,
+        url: joinData.roomUrl,
+        token: joinData.token,
       });
 
       // Sync initial state with Daily.co
@@ -193,7 +214,17 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
         console.log("Joined meeting event");
         updateParticipants();
       })
-      .on("left-meeting", handleLeaveMeetingUI)
+      .on("left-meeting", async () => {
+        try {
+          // Ensure backend reflects leave when Daily triggers left-meeting
+          await authFetch(`/api/channels/${channelId}/meetings/leave`, {
+            method: "POST",
+          });
+        } catch (err) {
+          console.warn("Failed to notify backend on left-meeting:", err);
+        }
+        handleLeaveMeetingUI();
+      })
       .on("participant-joined", (event) => {
         console.log("Participant joined:", event);
         updateParticipants();
@@ -204,10 +235,10 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
 
         // Update local mic/camera state if it's the local participant
         if (event.participant.local) {
-          if (typeof event.participant.audio === 'boolean') {
+          if (typeof event.participant.audio === "boolean") {
             setIsMicOn(event.participant.audio);
           }
-          if (typeof event.participant.video === 'boolean') {
+          if (typeof event.participant.video === "boolean") {
             setIsCameraOn(event.participant.video);
           }
         }
@@ -238,6 +269,36 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
       });
   };
 
+  // Ensure we mark leave in DB when tab/window is closed
+  useEffect(() => {
+    if (!isInMeeting) return;
+
+    const beforeUnloadHandler = (e) => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+        // Use fetch with keepalive to reliably send on unload
+        fetch(`/api/channels/${channelId}/meetings/leave`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          keepalive: true,
+        });
+      } catch {}
+    };
+
+    const pageHideHandler = () => beforeUnloadHandler();
+
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+    window.addEventListener("pagehide", pageHideHandler);
+
+    return () => {
+      window.removeEventListener("beforeunload", beforeUnloadHandler);
+      window.removeEventListener("pagehide", pageHideHandler);
+    };
+  }, [isInMeeting, channelId]);
+
   const updateParticipants = () => {
     if (!callObjectRef.current) return;
 
@@ -252,15 +313,16 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
 
     // Check if local participant is screen sharing
     if (localP) {
-      const localIsScreenShare = localP.screen ||
-                                 localP.screenVideoTrack ||
-                                 localP.tracks?.screenVideo?.state === 'playable';
+      const localIsScreenShare =
+        localP.screen ||
+        localP.screenVideoTrack ||
+        localP.tracks?.screenVideo?.state === "playable";
 
-      console.log('Local participant screen check:', {
+      console.log("Local participant screen check:", {
         screen: localP.screen,
         screenVideoTrack: localP.screenVideoTrack,
         screenVideoState: localP.tracks?.screenVideo?.state,
-        isScreenShare: localIsScreenShare
+        isScreenShare: localIsScreenShare,
       });
 
       if (localIsScreenShare) {
@@ -274,15 +336,16 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
 
       // Check if this is a screen share participant
       // Daily.co screen share participants have screen: true or screenVideoTrack
-      const isScreenShare = participant.screen ||
-                           participant.screenVideoTrack ||
-                           participant.tracks?.screenVideo?.state === 'playable';
+      const isScreenShare =
+        participant.screen ||
+        participant.screenVideoTrack ||
+        participant.tracks?.screenVideo?.state === "playable";
 
       console.log(`Participant ${id} screen check:`, {
         screen: participant.screen,
         screenVideoTrack: participant.screenVideoTrack,
         screenVideoState: participant.tracks?.screenVideo?.state,
-        isScreenShare
+        isScreenShare,
       });
 
       if (isScreenShare && !screenShareParticipant) {
@@ -313,7 +376,10 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
       showToast(actualState ? "Microphone on" : "Microphone off", "info");
     } catch (err) {
       console.error("Toggle mic error:", err);
-      showToast(err.message || "Failed to toggle microphone. Please check permissions.", "error");
+      showToast(
+        err.message || "Failed to toggle microphone. Please check permissions.",
+        "error"
+      );
       // Revert to actual state
       const localP = callObjectRef.current?.participants().local;
       if (localP) setIsMicOn(localP.audio);
@@ -333,7 +399,10 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
       showToast(actualState ? "Camera on" : "Camera off", "info");
     } catch (err) {
       console.error("Toggle camera error:", err);
-      showToast(err.message || "Failed to toggle camera. Please check permissions.", "error");
+      showToast(
+        err.message || "Failed to toggle camera. Please check permissions.",
+        "error"
+      );
       // Revert to actual state
       const localP = callObjectRef.current?.participants().local;
       if (localP) setIsCameraOn(localP.video);
@@ -399,9 +468,7 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
 
   const handleEndMeeting = async () => {
     if (
-      !window.confirm(
-        "Are you sure you want to end this meeting for everyone?"
-      )
+      !window.confirm("Are you sure you want to end this meeting for everyone?")
     ) {
       return;
     }
@@ -458,7 +525,8 @@ function ChannelMeeting({ channelId, isChannelAdmin, onMeetingStateChange }) {
                 {meeting?.title || "Channel Meeting"}
               </h3>
               <span className="text-sm text-gray-300">
-                {participantCount} participant{participantCount !== 1 ? "s" : ""}
+                {participantCount} participant
+                {participantCount !== 1 ? "s" : ""}
               </span>
             </div>
             <div className="flex gap-2 items-center">

@@ -55,8 +55,12 @@ export class MeetingService {
         {
           // NOTE: roomName Daily trả về bên dưới res.data.name
           name: `channel-${channel.name}-${Date.now()}`,
+          privacy: 'private', // CRITICAL: Require token to join - URL alone won't work
           properties: {
-            exp: Math.floor(Date.now() / 1000) + 3600, // expire in 1h
+            exp: Math.floor(Date.now() / 1000) + 600, // expire in 10 minutes
+            enable_knocking: false, // No knocking, must have valid token
+            enable_screenshare: true,
+            enable_chat: false, // Use our own chat system
           },
         },
         {
@@ -144,7 +148,7 @@ export class MeetingService {
 
   /** GET ---------------------------------------- */
   async getMeeting(channelId: string) {
-    return this.prisma.channelMeeting.findFirst({
+    const meeting = await this.prisma.channelMeeting.findFirst({
       where: { channelId, isActive: true },
       include: {
         participants: {
@@ -159,15 +163,30 @@ export class MeetingService {
         },
       },
     });
+
+    if (!meeting) return null;
+
+    // Remove sensitive fields (roomUrl, roomName) from response
+    const { roomUrl, roomName, ...safeMeeting } = meeting;
+    return safeMeeting;
   }
 
   /** JOIN ---------------------------------------- */
   async joinMeeting(channelId: string, userId: string) {
+    // Verify channel membership first
+    const channelMember = await this.prisma.channelMember.findUnique({
+      where: { channelId_userId: { channelId, userId } },
+      include: { role: true },
+    });
+    if (!channelMember)
+      throw new ForbiddenException('You are not a member of the channel');
+
     const meeting = await this.prisma.channelMeeting.findFirst({
       where: { channelId, isActive: true },
     });
     if (!meeting) throw new BadRequestException('No active meeting');
 
+    // Update/create participant record
     const existing = await this.prisma.channelMeetingParticipant.findFirst({
       where: { meetingId: meeting.id, userId },
     });
@@ -185,11 +204,52 @@ export class MeetingService {
       });
     }
 
-    return { roomUrl: meeting.roomUrl };
+    // Get user info
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('User not found');
+
+    // Determine if user is owner
+    const isOwner = channelMember.role.name === 'CHANNEL_ADMIN';
+
+    // Create Daily token
+    try {
+      if (!meeting.roomName)
+        throw new BadRequestException('Meeting has no roomName recorded');
+
+      // Token expires in 10 minutes for security
+      const tokenExpiry = Math.floor(Date.now() / 1000) + 600;
+
+      const res = await axios.post<DailyTokenResponse>(
+        'https://api.daily.co/v1/meeting-tokens',
+        {
+          properties: {
+            room_name: meeting.roomName,
+            user_name: user.fullName,
+            user_id: userId, // Bind token to specific user
+            is_owner: isOwner,
+            exp: tokenExpiry, // Token expires in 10 minutes
+          },
+        },
+        { headers: { Authorization: `Bearer ${process.env.DAILY_API_KEY}` } },
+      );
+
+      // Return token and roomUrl (URL needed by Daily SDK, but token is required)
+      return {
+        token: res.data?.token,
+        roomUrl: meeting.roomUrl,
+      };
+    } catch (err) {
+      const msg =
+        err?.response?.data || err?.message || 'Unknown error from Daily API';
+      throw new BadRequestException(
+        `Failed to create meeting token: ${JSON.stringify(msg)}`,
+      );
+    }
   }
 
-  /** GET JOIN TOKEN ---------------------------------------- */
+  /** GET JOIN TOKEN (deprecated - use joinMeeting instead) ---------------------------------------- */
   async getJoinToken(channelId: string, userId: string) {
+    // For backward compatibility, verify participant exists first
     const meeting = await this.prisma.channelMeeting.findFirst({
       where: { channelId, isActive: true },
     });
@@ -220,13 +280,18 @@ export class MeetingService {
       if (!meeting.roomName)
         throw new BadRequestException('Meeting has no roomName recorded');
 
+      // Token expires in 10 minutes for security
+      const tokenExpiry = Math.floor(Date.now() / 1000) + 600;
+
       const res = await axios.post<DailyTokenResponse>(
         'https://api.daily.co/v1/meeting-tokens',
         {
           properties: {
             room_name: meeting.roomName,
-            user_name: user.fullName, // <-- sử dụng fullName
+            user_name: user.fullName,
+            user_id: userId,
             is_owner: isOwner,
+            exp: tokenExpiry,
           },
         },
         { headers: { Authorization: `Bearer ${process.env.DAILY_API_KEY}` } },

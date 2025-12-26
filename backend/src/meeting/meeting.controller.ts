@@ -33,20 +33,20 @@ export class MeetingController {
     return this.meetingService.startMeeting(channelId, req.user.id, dto);
   }
 
-  /** GET JOIN TOKEN */
-  @UseGuards(RolesGuard)
-  @Roles(ROLES.CHANNEL_MEMBER, ROLES.CHANNEL_ADMIN)
-  @Get('token')
-  getToken(@Req() req, @Param('channelId') channelId: string) {
-    return this.meetingService.getJoinToken(channelId, req.user.id);
-  }
-
-  /** JOIN */
+  /** JOIN - returns both roomUrl and Daily token */
   @UseGuards(RolesGuard)
   @Roles(ROLES.CHANNEL_MEMBER, ROLES.CHANNEL_ADMIN)
   @Post('join')
   join(@Req() req, @Param('channelId') channelId: string) {
     return this.meetingService.joinMeeting(channelId, req.user.id);
+  }
+
+  /** GET JOIN TOKEN (deprecated - use POST /join instead) */
+  @UseGuards(RolesGuard)
+  @Roles(ROLES.CHANNEL_MEMBER, ROLES.CHANNEL_ADMIN)
+  @Get('token')
+  getToken(@Req() req, @Param('channelId') channelId: string) {
+    return this.meetingService.getJoinToken(channelId, req.user.id);
   }
 
   /** LEAVE */
