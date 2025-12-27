@@ -8,6 +8,7 @@ import Profile from "./pages/Profile.jsx";
 import { AuthProvider } from "./contexts/AuthContext.jsx";
 import { ToastProvider } from "./contexts/ToastContext.jsx";
 import { MeetingProvider } from "./contexts/MeetingContext.jsx";
+import { UserProfileProvider } from "./contexts/UserProfileContext.jsx";
 import WorkspaceLayout from "./components/WorkspaceLayout.jsx";
 import ChannelDetail from "./components/ChannelDetail.jsx";
 import WorkspaceWelcome from "./components/WorkspaceWelcome.jsx";
@@ -19,28 +20,30 @@ function App() {
       <ToastProvider>
         <AuthProvider>
           <MeetingProvider>
-            <Routes>
-              <Route path="/" element={<Navigate to="/login" replace />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-              <Route path="/reset-password" element={<ResetPasswordPage />} />
-              <Route path="/workspaces" element={<WorkspaceList />} />
+            <UserProfileProvider>
+              <Routes>
+                <Route path="/" element={<Navigate to="/login" replace />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
+                <Route path="/workspaces" element={<WorkspaceList />} />
 
-              <Route
-                path="/workspace/:workspaceId"
-                element={<WorkspaceLayout />}
-              >
-                <Route index element={<WorkspaceWelcome />} />
-                <Route path="channel/:channelId" element={<ChannelDetail />} />
                 <Route
-                  path="dm/:conversationId"
-                  element={<DirectMessageChat />}
-                />
-              </Route>
+                  path="/workspace/:workspaceId"
+                  element={<WorkspaceLayout />}
+                >
+                  <Route index element={<WorkspaceWelcome />} />
+                  <Route path="channel/:channelId" element={<ChannelDetail />} />
+                  <Route
+                    path="dm/:conversationId"
+                    element={<DirectMessageChat />}
+                  />
+                </Route>
 
-              <Route path="/profile" element={<Profile />} />
-            </Routes>
+                <Route path="/profile" element={<Profile />} />
+              </Routes>
+            </UserProfileProvider>
           </MeetingProvider>
         </AuthProvider>
       </ToastProvider>

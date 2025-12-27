@@ -35,6 +35,17 @@ body {
         }
     }
 
+    /* Slide in from right animation */
+    @keyframes slide-in-from-right {
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
     /* ===== TẾT 2026 ANIMATIONS ===== */
 
     /* Falling petals animation - slow and gentle */

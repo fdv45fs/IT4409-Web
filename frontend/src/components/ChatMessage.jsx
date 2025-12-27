@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { API_URL } from "../api";
 import useAuth from "../hooks/useAuth";
+import UserProfileModal from "./UserProfileModal";
+import { useUserProfile } from "../contexts/UserProfileContext";
 
 const EMOJI_LIST = ["👍", "❤️", "😂", "😮", "😢", "🎉", "🔥", "👏"];
 
@@ -16,9 +18,13 @@ function ChatMessage({
   members = [],
 }) {
   const { authFetchRaw } = useAuth();
+  const { openProfile } = useUserProfile();
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [showUserProfile, setShowUserProfile] = useState(false);
+  const [profilePosition, setProfilePosition] = useState({ x: 0, y: 0 });
   const emojiPickerRef = useRef(null);
+  const profileTimeoutRef = useRef(null);
 
   const isOwner = message.sender?.id === currentUserId;
   const isDeleted = message.isDeleted;
@@ -48,6 +54,64 @@ function ChatMessage({
       onAddReaction(message.id, emoji);
     }
     setShowEmojiPicker(false);
+  };
+
+  const handleShowProfile = (event) => {
+    // Clear any existing timeout
+    if (profileTimeoutRef.current) {
+      clearTimeout(profileTimeoutRef.current);
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setProfilePosition({
+      x: rect.left + rect.width + 10,
+      y: rect.top,
+    });
+
+    // Delay showing profile slightly to avoid accidental triggers
+    profileTimeoutRef.current = setTimeout(() => {
+      setShowUserProfile(true);
+    }, 300);
+  };
+
+  const handleHideProfile = () => {
+    // Clear timeout if user moves away before profile shows
+    if (profileTimeoutRef.current) {
+      clearTimeout(profileTimeoutRef.current);
+    }
+    setShowUserProfile(false);
+  };
+
+  const handleClick = () => {
+    // Clear any existing timeout
+    if (profileTimeoutRef.current) {
+      clearTimeout(profileTimeoutRef.current);
+    }
+
+    // Hide hover profile if showing
+    setShowUserProfile(false);
+
+    // Open full profile page via context
+    if (message.sender) {
+      openProfile(message.sender);
+    }
+  };
+
+  const handleRightClick = (event) => {
+    event.preventDefault(); // Prevent default browser context menu
+
+    // Clear any existing timeout
+    if (profileTimeoutRef.current) {
+      clearTimeout(profileTimeoutRef.current);
+    }
+
+    // Hide hover profile if showing
+    setShowUserProfile(false);
+
+    // Open full profile page via context
+    if (message.sender) {
+      openProfile(message.sender);
+    }
   };
 
   const formatTime = (dateStr) => {
@@ -89,7 +153,13 @@ function ChatMessage({
       }}
     >
       {/* Avatar */}
-      <div className="flex-shrink-0">
+      <div
+        onMouseEnter={handleShowProfile}
+        onMouseLeave={handleHideProfile}
+        onClick={handleClick}
+        onContextMenu={handleRightClick}
+        className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+      >
         {message.sender?.avatarUrl ? (
           <img
             src={message.sender.avatarUrl}
@@ -109,7 +179,13 @@ function ChatMessage({
       <div className="flex-1 min-w-0">
         {/* Header */}
         <div className="flex items-baseline gap-2">
-          <span className="font-semibold text-gray-900 text-sm">
+          <span
+            onMouseEnter={handleShowProfile}
+            onMouseLeave={handleHideProfile}
+            onClick={handleClick}
+            onContextMenu={handleRightClick}
+            className="font-semibold text-gray-900 text-sm hover:underline cursor-pointer"
+          >
             {message.sender?.fullName || message.sender?.username || "Unknown"}
           </span>
           <span className="text-xs text-gray-400">
@@ -383,6 +459,15 @@ function ChatMessage({
             </button>
           )}
         </div>
+      )}
+
+      {/* User Profile Modal (hover) */}
+      {showUserProfile && message.sender && (
+        <UserProfileModal
+          user={message.sender}
+          onClose={() => setShowUserProfile(false)}
+          position={profilePosition}
+        />
       )}
     </div>
   );

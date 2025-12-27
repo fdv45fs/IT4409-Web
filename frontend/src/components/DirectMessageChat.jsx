@@ -11,12 +11,15 @@ import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import ChatSearchBar from "./ChatSearchBar";
 import ConfirmationModal from "./ConfirmationModal";
+import UserProfilePage from "./UserProfilePage";
+import { useUserProfile } from "../contexts/UserProfileContext";
 import { Search } from "lucide-react";
 
 function DirectMessageChat() {
   const { workspaceId, conversationId } = useParams();
   const navigate = useNavigate();
   const { accessToken, currentUser, authFetch } = useAuth();
+  const { profileUser, closeProfile } = useUserProfile();
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
   const messageRefs = useRef({});
@@ -489,9 +492,11 @@ function DirectMessageChat() {
   }
 
   return (
-    <div className="flex h-full flex-col bg-white relative">
-      {/* Header with user info */}
-      <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+    <>
+      {/* Main chat area */}
+      <div className={`flex flex-col bg-white relative h-full transition-[margin-right] duration-300 ${profileUser ? 'mr-[28rem]' : 'mr-0'}`}>
+        {/* Header with user info */}
+        <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
         <div className="flex items-center gap-3">
           {/* Back button (mobile) */}
           <button
@@ -748,20 +753,30 @@ function DirectMessageChat() {
         }
       />
 
-      {/* Delete Confirmation Modal */}
-      <ConfirmationModal
-        isOpen={deleteConfirmModal.isOpen}
-        onClose={() =>
-          setDeleteConfirmModal({ isOpen: false, messageId: null })
-        }
-        onConfirm={confirmDelete}
-        title="Xóa tin nhắn"
-        message="Bạn có chắc muốn xóa tin nhắn này? Hành động này không thể hoàn tác."
-        confirmText="Xóa"
-        cancelText="Hủy"
-        variant="danger"
-      />
-    </div>
+        {/* Delete Confirmation Modal */}
+        <ConfirmationModal
+          isOpen={deleteConfirmModal.isOpen}
+          onClose={() =>
+            setDeleteConfirmModal({ isOpen: false, messageId: null })
+          }
+          onConfirm={confirmDelete}
+          title="Xóa tin nhắn"
+          message="Bạn có chắc muốn xóa tin nhắn này? Hành động này không thể hoàn tác."
+          confirmText="Xóa"
+          cancelText="Hủy"
+          variant="danger"
+        />
+      </div>
+
+      {/* User Profile Panel */}
+      {profileUser && (
+        <UserProfilePage
+          user={profileUser}
+          onClose={closeProfile}
+          workspaceId={workspaceId}
+        />
+      )}
+    </>
   );
 }
 

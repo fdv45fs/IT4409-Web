@@ -12,6 +12,7 @@ import {
 import useAuth from "../hooks/useAuth";
 import { useToast } from "../contexts/ToastContext";
 import { useMeetingContext } from "../contexts/MeetingContext";
+import { useUserProfile } from "../contexts/UserProfileContext";
 import UpdateChannelModal from "./UpdateChannelModal";
 import AddChannelMemberModal from "./AddChannelMemberModal";
 import ChannelMembersModal from "./ChannelMembersModal";
@@ -19,6 +20,7 @@ import ChannelJoinRequestsModal from "./ChannelJoinRequestsModal";
 import ChannelFiles from "./ChannelFiles";
 import ChannelMeeting from "./ChannelMeeting";
 import ChannelChat from "./ChannelChat";
+import UserProfilePage from "./UserProfilePage";
 
 function ChannelDetail() {
   const { channelId } = useParams();
@@ -26,6 +28,7 @@ function ChannelDetail() {
   const { currentUser, authFetch } = useAuth();
   const { addToast } = useToast();
   const { isInMeeting, setIsInMeeting } = useMeetingContext();
+  const { profileUser, closeProfile } = useUserProfile();
   const navigate = useNavigate();
 
   const [channel, setChannel] = useState(null);
@@ -240,9 +243,11 @@ function ChannelDetail() {
   const hideChrome = isInMeeting && !isMeetingMinimized;
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Header - Hide when in full meeting mode */}
-      {!hideChrome && (
+    <>
+      {/* Main channel area */}
+      <div className={`flex flex-col h-full transition-[margin-right] duration-300 ${profileUser ? 'mr-[28rem]' : 'mr-0'}`}>
+        {/* Header - Hide when in full meeting mode */}
+        {!hideChrome && (
         <div className="flex items-center justify-between border-b border-gray-200 bg-gray-50 px-6 py-3">
           <div>
             <div className="flex items-center gap-2">
@@ -848,7 +853,17 @@ function ChannelDetail() {
           onUpdate={() => fetchChannelData(true)}
         />
       )}
-    </div>
+
+        {/* User Profile Panel */}
+        {profileUser && (
+          <UserProfilePage
+            user={profileUser}
+            onClose={closeProfile}
+            workspaceId={workspace?.id}
+          />
+        )}
+      </div>
+    </>
   );
 }
 
