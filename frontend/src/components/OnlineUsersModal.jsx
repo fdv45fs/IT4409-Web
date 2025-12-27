@@ -1,6 +1,10 @@
 import React, { useEffect, useRef } from "react";
 
-const OnlineUsersModal = ({ isOpen, onClose, onlineUsers: onlineUsersProp }) => {
+const OnlineUsersModal = ({
+  isOpen,
+  onClose,
+  onlineUsers: onlineUsersProp,
+}) => {
   const modalRef = useRef(null);
   const onlineUsers = Array.isArray(onlineUsersProp) ? onlineUsersProp : [];
 
@@ -51,7 +55,10 @@ const OnlineUsersModal = ({ isOpen, onClose, onlineUsers: onlineUsersProp }) => 
           {/* Header */}
           <div className="flex items-center justify-between rounded-t-lg border-b border-slate-800 bg-[rgb(30,41,59)] px-6 py-4">
             <div>
-              <h2 id="online-users-title" className="text-lg font-semibold text-white">
+              <h2
+                id="online-users-title"
+                className="text-lg font-semibold text-white"
+              >
                 Người dùng online
               </h2>
               <p className="text-sm text-slate-300">

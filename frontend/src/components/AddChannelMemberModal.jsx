@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { addChannelMember, getWorkspaceMembers, getChannelMembers } from "../api";
+import {
+  addChannelMember,
+  getWorkspaceMembers,
+  getChannelMembers,
+} from "../api";
 import useAuth from "../hooks/useAuth";
 
 function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
@@ -98,15 +102,13 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
         aria-label="Close modal"
       />
 
-      <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
+      <div className="relative w-full max-w-md rounded-2xl overflow-hidden bg-white shadow-2xl">
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-white">
-            Thêm thành viên
-          </h2>
+        <div className="flex items-center justify-between bg-[rgb(30,41,59)] px-6 py-4">
+          <h2 className="text-2xl font-bold text-white">Thêm thành viên</h2>
           <button
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+            className="rounded-lg p-2 text-white/70 transition hover:bg-white/10 hover:text-white"
             aria-label="Close modal"
           >
             <svg
@@ -125,90 +127,100 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Content */}
-        <div className="space-y-4">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-slate-200">
-              Tìm kiếm thành viên (theo tên hoặc email)
-            </label>
-            <div className="relative">
+        <div className="p-6">
+          {/* Content */}
+          <div className="space-y-4">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-[rgb(30,41,59)]">
+                Tìm kiếm thành viên (theo tên hoặc email)
+              </label>
+              <div className="relative">
                 <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Nhập tên hoặc email..."
-                className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 pl-10 text-white placeholder-slate-500 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Nhập tên hoặc email..."
+                  className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pl-10 text-[rgb(30,41,59)] placeholder-gray-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 />
                 <svg
-                className="absolute left-3 top-3.5 h-5 w-5 text-slate-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
+                  className="absolute left-3 top-3.5 h-5 w-5 text-gray-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                <path
+                  <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
+                  />
                 </svg>
+              </div>
             </div>
-          </div>
 
-          {/* Messages */}
-          {error && (
-            <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
-              {error}
-            </div>
-          )}
-          {successMsg && (
-            <div className="rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
-              {successMsg}
-            </div>
-          )}
+            {/* Messages */}
+            {error && (
+              <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+                {error}
+              </div>
+            )}
+            {successMsg && (
+              <div className="rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
+                {successMsg}
+              </div>
+            )}
 
-          {/* Search Results */}
-          <div className="mt-4 max-h-60 overflow-y-auto rounded-xl border border-slate-800 bg-slate-800/50">
-            {isLoading ? (
-                <div className="p-4 text-center text-slate-400">Đang tải danh sách thành viên...</div>
-            ) : query && filteredMembers.length === 0 ? (
-                <div className="p-4 text-center text-slate-400">
-                    <p>Không tìm thấy thành viên nào khớp với "{query}".</p>
-                    {query.includes('@') && (
-                        <button
-                            onClick={() => handleAddMember(null, query)}
-                            disabled={isSubmitting}
-                            className="mt-2 text-indigo-400 hover:underline disabled:opacity-50"
-                        >
-                            Thêm bằng email: {query}
-                        </button>
-                    )}
+            {/* Search Results */}
+            <div className="mt-4 max-h-60 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50">
+              {isLoading ? (
+                <div className="p-4 text-center text-gray-500">
+                  Đang tải danh sách thành viên...
                 </div>
-            ) : (
+              ) : query && filteredMembers.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  <p>Không tìm thấy thành viên nào khớp với "{query}".</p>
+                  {query.includes("@") && (
+                    <button
+                      onClick={() => handleAddMember(null, query)}
+                      disabled={isSubmitting}
+                      className="mt-2 text-indigo-400 hover:underline disabled:opacity-50"
+                    >
+                      Thêm bằng email: {query}
+                    </button>
+                  )}
+                </div>
+              ) : (
                 filteredMembers.map((member) => (
-                <div
+                  <div
                     key={member.id}
-                    className="flex items-center justify-between border-b border-slate-700/50 p-3 last:border-0 hover:bg-slate-700/50"
-                >
+                    className="flex items-center justify-between border-b border-gray-200 p-3 last:border-0 hover:bg-white transition"
+                  >
                     <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-500 text-xs font-medium text-white">
-                        {(member.fullName?.[0] || member.username?.[0] || "?").toUpperCase()}
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-white">{member.fullName || member.username}</p>
-                        <p className="text-xs text-slate-400">{member.email}</p>
-                    </div>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[rgb(30,41,59)] text-xs font-medium text-white">
+                        {(
+                          member.fullName?.[0] ||
+                          member.username?.[0] ||
+                          "?"
+                        ).toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[rgb(30,41,59)]">
+                          {member.fullName || member.username}
+                        </p>
+                        <p className="text-xs text-gray-500">{member.email}</p>
+                      </div>
                     </div>
                     <button
-                    onClick={() => handleAddMember(member.userId, null)}
-                    disabled={isSubmitting}
-                    className="rounded-lg bg-indigo-500/10 px-3 py-1.5 text-xs font-medium text-indigo-400 transition hover:bg-indigo-500 hover:text-white disabled:opacity-50"
+                      onClick={() => handleAddMember(member.userId, null)}
+                      disabled={isSubmitting}
+                      className="rounded-lg bg-[rgb(30,41,59)] px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-50"
                     >
-                    Thêm
+                      Thêm
                     </button>
-                </div>
+                  </div>
                 ))
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>

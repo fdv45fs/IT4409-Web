@@ -184,20 +184,30 @@ function ChannelChat({ channelId, channelName, members = [] }) {
   };
 
   // Handle send message with files
-  const handleSendWithFiles = async (content, replyToId, mentionedUserIds, files) => {
+  const handleSendWithFiles = async (
+    content,
+    replyToId,
+    mentionedUserIds,
+    files
+  ) => {
     try {
       // Send text message first
       const message = await sendMessage(content, replyToId, mentionedUserIds);
-      
+
       // If has files, upload them
       if (files.length > 0 && message?.id) {
-        const result = await uploadMessageFiles(channelId, message.id, files, authFetch);
+        const result = await uploadMessageFiles(
+          channelId,
+          message.id,
+          files,
+          authFetch
+        );
         // Update the message in local state with attachments
         if (result?.message) {
           updateMessage(result.message);
         }
       }
-      
+
       setReplyTo(null);
     } catch (error) {
       console.error("Failed to send message with files:", error);
@@ -218,25 +228,32 @@ function ChannelChat({ channelId, channelName, members = [] }) {
   };
 
   // Handle search
-  const handleSearch = useCallback(async (query) => {
-    setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
+  const handleSearch = useCallback(
+    async (query) => {
+      setSearchQuery(query);
+      if (!query.trim()) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
 
-    setIsSearching(true);
-    try {
-      const results = await searchChannelMessages(channelId, query, authFetch);
-      setSearchResults(results);
-    } catch (error) {
-      console.error("Search error:", error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [channelId, authFetch]);
+      setIsSearching(true);
+      try {
+        const results = await searchChannelMessages(
+          channelId,
+          query,
+          authFetch
+        );
+        setSearchResults(results);
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [channelId, authFetch]
+  );
 
   const handleJumpToMessage = async (messageId) => {
     if (!messageId) return;
@@ -400,7 +417,7 @@ function ChannelChat({ channelId, channelName, members = [] }) {
         <div className="flex items-center gap-2">
           {onlineUsers.length > 0 && (
             <div className="flex -space-x-2">
-              {onlineUsers.slice(0, 5).map((user) => (
+              {onlineUsers.slice(0, 2).map((user) => (
                 <div
                   key={user.id}
                   className="flex h-7 w-7 items-center justify-center flex-shrink-0 rounded-full border-2 border-white bg-gradient-to-br from-green-400 to-emerald-500 text-xs font-medium text-white overflow-hidden"
@@ -417,19 +434,20 @@ function ChannelChat({ channelId, channelName, members = [] }) {
                   )}
                 </div>
               ))}
-              {onlineUsers.length > 5 && (
+              {onlineUsers.length > 2 && (
                 <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-medium text-gray-600">
-                  +{onlineUsers.length - 5}
+                  +{onlineUsers.length - 2}
                 </div>
               )}
             </div>
           )}
-          
+
           {/* View online list button */}
           {onlineUsers.length > 0 && (
             <button
               onClick={() => setIsOnlineListOpen(true)}
-              className="ml-2 rounded-lg bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition"
+              className="ml-2 rounded-lg px-3 py-1.5 text-sm font-semibold text-white transition hover:opacity-90"
+              style={{ backgroundColor: "rgb(30,41,59)" }}
             >
               Xem tất cả
             </button>
@@ -521,7 +539,9 @@ function ChannelChat({ channelId, channelName, members = [] }) {
                 </div>
               ))
             ) : !isSearching ? (
-              <p className="text-sm text-gray-500">Không tìm thấy tin nhắn nào</p>
+              <p className="text-sm text-gray-500">
+                Không tìm thấy tin nhắn nào
+              </p>
             ) : null}
           </div>
         ) : (
@@ -595,7 +615,7 @@ function ChannelChat({ channelId, channelName, members = [] }) {
       {showScrollButton && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
+          className="absolute bottom-20 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
           title="Đi đến tin nhắn mới nhất"
         >
           <svg

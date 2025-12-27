@@ -2,7 +2,11 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { useDMSocket } from "../hooks/useDMSocket";
-import { getDirectMessages, uploadDirectMessageFiles, searchDirectMessages } from "../api";
+import {
+  getDirectMessages,
+  uploadDirectMessageFiles,
+  searchDirectMessages,
+} from "../api";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import ChatSearchBar from "./ChatSearchBar";
@@ -235,21 +239,30 @@ function DirectMessageChat() {
   };
 
   // Handle send message with files
-  const handleSendWithFiles = async (content, replyToId, mentionedUserIds, files) => {
+  const handleSendWithFiles = async (
+    content,
+    replyToId,
+    mentionedUserIds,
+    files
+  ) => {
     try {
       // Send text message first
       if (!otherUser) return;
       const message = await sendMessage(content, otherUser.id, replyToId);
-      
+
       // If has files, upload them
       if (files.length > 0 && message?.id) {
-        const result = await uploadDirectMessageFiles(message.id, files, authFetch);
+        const result = await uploadDirectMessageFiles(
+          message.id,
+          files,
+          authFetch
+        );
         // Update the message in local state with attachments
         if (result?.message) {
           updateMessage(result.message);
         }
       }
-      
+
       setReplyTo(null);
     } catch (error) {
       console.error("Failed to send message with files:", error);
@@ -282,25 +295,33 @@ function DirectMessageChat() {
   };
 
   // Handle search
-  const handleSearch = useCallback(async (query) => {
-    setSearchQuery(query);
-    if (!query.trim()) {
-      setSearchResults([]);
-      setIsSearching(false);
-      return;
-    }
+  const handleSearch = useCallback(
+    async (query) => {
+      setSearchQuery(query);
+      if (!query.trim()) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
 
-    setIsSearching(true);
-    try {
-      const results = await searchDirectMessages(workspaceId, conversationId, query, authFetch);
-      setSearchResults(results);
-    } catch (error) {
-      console.error("Search error:", error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [workspaceId, conversationId, authFetch]);
+      setIsSearching(true);
+      try {
+        const results = await searchDirectMessages(
+          workspaceId,
+          conversationId,
+          query,
+          authFetch
+        );
+        setSearchResults(results);
+      } catch (error) {
+        console.error("Search error:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    },
+    [workspaceId, conversationId, authFetch]
+  );
 
   const handleJumpToMessage = async (messageId) => {
     if (!messageId) return;
@@ -617,7 +638,9 @@ function DirectMessageChat() {
                 </div>
               ))
             ) : !isSearching ? (
-              <p className="text-sm text-gray-500">Không tìm thấy tin nhắn nào</p>
+              <p className="text-sm text-gray-500">
+                Không tìm thấy tin nhắn nào
+              </p>
             ) : null}
           </div>
         ) : (
@@ -688,7 +711,7 @@ function DirectMessageChat() {
       {showScrollButton && (
         <button
           onClick={scrollToBottom}
-          className="absolute bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
+          className="absolute bottom-20 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
           title="Đi đến tin nhắn mới nhất"
         >
           <svg

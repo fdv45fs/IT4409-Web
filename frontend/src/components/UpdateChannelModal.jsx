@@ -273,7 +273,7 @@ function UpdateChannelModal({ channel, onClose, onSuccess, onDelete }) {
               className="flex-1 rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
               disabled={isLoading}
             >
-              {isLoading ? "Đang tạo..." : "Tạo Channel"}
+              {isLoading ? "Đang cập nhật..." : "Cập nhật Channel"}
             </button>
           </div>
         </form>
