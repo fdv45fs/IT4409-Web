@@ -8,6 +8,7 @@ import {
 } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { useToast } from "../contexts/ToastContext";
+import { useMeetingContext } from "../contexts/MeetingContext";
 import UserMenu from "./UserMenu";
 import CreateChannelModal from "./CreateChannelModal";
 import JoinChannelModal from "./JoinChannelModal";
@@ -21,6 +22,7 @@ function WorkspaceLayout() {
   const { workspaceId } = useParams();
   const { authFetch } = useAuth();
   const { addToast } = useToast();
+  const { isInMeeting } = useMeetingContext();
   const navigate = useNavigate();
   const location = useLocation();
   const [workspace, setWorkspace] = useState(null);
@@ -103,7 +105,11 @@ function WorkspaceLayout() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Global Header - HUST Collab Platform */}
-      <header className="flex-shrink-0 border-b border-slate-800 bg-slate-900">
+      <header
+        className={`flex-shrink-0 border-b border-slate-800 bg-slate-900 transition ${
+          isInMeeting ? "pointer-events-none opacity-80" : ""
+        }`}
+      >
         <div className="px-6 py-3">
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-xl font-bold text-white whitespace-nowrap">
@@ -124,7 +130,11 @@ function WorkspaceLayout() {
       {/* Main Layout: Sidebar + Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
-        <aside className="flex w-64 flex-col bg-slate-900 text-slate-300">
+        <aside
+          className={`flex w-64 flex-col bg-slate-900 text-slate-300 transition ${
+            isInMeeting ? "pointer-events-none opacity-80" : ""
+          }`}
+        >
           {/* Workspace Header */}
           <div className="relative border-b border-slate-800">
             <div className="flex items-center">

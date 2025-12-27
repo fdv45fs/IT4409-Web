@@ -10,6 +10,7 @@ export interface AuthenticatedSocket extends Socket {
     email: string;
     username: string;
     fullName: string;
+    avatarUrl?: string | null;
   };
 }
 
@@ -47,6 +48,7 @@ export class WsJwtGuard implements CanActivate {
           email: true,
           username: true,
           fullName: true,
+          avatarUrl: true,
         },
       });
 
@@ -145,6 +147,7 @@ export async function validateSocketToken(
         email: true,
         username: true,
         fullName: true,
+        avatarUrl: true,
       },
     });
 

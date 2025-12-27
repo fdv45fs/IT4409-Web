@@ -11,6 +11,7 @@ import {
 } from "../api";
 import useAuth from "../hooks/useAuth";
 import { useToast } from "../contexts/ToastContext";
+import { useMeetingContext } from "../contexts/MeetingContext";
 import UpdateChannelModal from "./UpdateChannelModal";
 import AddChannelMemberModal from "./AddChannelMemberModal";
 import ChannelMembersModal from "./ChannelMembersModal";
@@ -24,6 +25,7 @@ function ChannelDetail() {
   const { workspace, refreshChannels } = useOutletContext();
   const { currentUser, authFetch } = useAuth();
   const { addToast } = useToast();
+  const { isInMeeting, setIsInMeeting } = useMeetingContext();
   const navigate = useNavigate();
 
   const [channel, setChannel] = useState(null);
@@ -49,7 +51,6 @@ function ChannelDetail() {
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isRequestsModalOpen, setIsRequestsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("chat");
-  const [isInMeeting, setIsInMeeting] = useState(false); // Track if user is in a meeting
   const [isMeetingMinimized, setIsMeetingMinimized] = useState(false);
 
   const fetchChannelData = useCallback(

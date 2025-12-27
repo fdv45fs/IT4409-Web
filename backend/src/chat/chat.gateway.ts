@@ -23,6 +23,7 @@ interface OnlineUser {
   userId: string;
   username: string;
   fullName: string;
+  avatarUrl?: string | null;
   socketIds: Set<string>;
 }
 
@@ -256,6 +257,7 @@ export class ChatGateway
               id: user.id,
               username: user.username,
               fullName: user.fullName,
+              avatarUrl: user.avatarUrl,
             },
           });
         }
@@ -321,6 +323,7 @@ export class ChatGateway
           id: user.id,
           username: user.username,
           fullName: user.fullName,
+          avatarUrl: user.avatarUrl,
         },
       });
 
@@ -363,6 +366,7 @@ export class ChatGateway
         id: user.id,
         username: user.username,
         fullName: user.fullName,
+        avatarUrl: user.avatarUrl,
       },
     });
 
@@ -684,6 +688,7 @@ export class ChatGateway
         userId: user.id,
         username: user.username,
         fullName: user.fullName,
+        avatarUrl: user.avatarUrl,
         socketIds: new Set(),
       });
     }
@@ -717,7 +722,12 @@ export class ChatGateway
 
   private getOnlineUsersInChannel(
     channelId: string,
-  ): Array<{ id: string; username: string; fullName: string }> {
+  ): Array<{
+    id: string;
+    username: string;
+    fullName: string;
+    avatarUrl?: string | null;
+  }> {
     const channelUserMap = this.channelUsers.get(channelId);
     if (!channelUserMap) return [];
 
@@ -725,6 +735,7 @@ export class ChatGateway
       id: user.userId,
       username: user.username,
       fullName: user.fullName,
+      avatarUrl: user.avatarUrl,
     }));
   }
 

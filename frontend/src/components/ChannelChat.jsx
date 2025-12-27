@@ -4,6 +4,7 @@ import { useChatSocket } from "../hooks/useChatSocket";
 import { useToast } from "../contexts/ToastContext";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
+import OnlineUsersModal from "./OnlineUsersModal";
 
 function ChannelChat({ channelId, channelName, members = [] }) {
   const { accessToken, currentUser, authFetch } = useAuth();
@@ -27,6 +28,7 @@ function ChannelChat({ channelId, channelName, members = [] }) {
   const [page, setPage] = useState(1);
   const [highlightMessageId, setHighlightMessageId] = useState(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isOnlineListOpen, setIsOnlineListOpen] = useState(false);
 
   const {
     isConnected,
@@ -344,25 +346,45 @@ function ChannelChat({ channelId, channelName, members = [] }) {
           </span>
         </div>
 
-        {/* Online users avatars */}
-        {onlineUsers.length > 0 && (
-          <div className="flex -space-x-2">
-            {onlineUsers.slice(0, 5).map((user) => (
-              <div
-                key={user.id}
-                className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-gradient-to-br from-green-400 to-emerald-500 text-xs font-medium text-white"
-                title={user.fullName || user.username}
-              >
-                {user.fullName?.slice(0, 1) || user.username?.slice(0, 1)}
-              </div>
-            ))}
-            {onlineUsers.length > 5 && (
-              <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-medium text-gray-600">
-                +{onlineUsers.length - 5}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Online users avatars + View button */}
+        <div className="flex items-center gap-2">
+          {onlineUsers.length > 0 && (
+            <div className="flex -space-x-2">
+              {onlineUsers.slice(0, 5).map((user) => (
+                <div
+                  key={user.id}
+                  className="flex h-7 w-7 items-center justify-center flex-shrink-0 rounded-full border-2 border-white bg-gradient-to-br from-green-400 to-emerald-500 text-xs font-medium text-white overflow-hidden"
+                  title={user.fullName || user.username}
+                >
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt={user.fullName || user.username}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    user.fullName?.slice(0, 1) || user.username?.slice(0, 1)
+                  )}
+                </div>
+              ))}
+              {onlineUsers.length > 5 && (
+                <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-white bg-gray-200 text-xs font-medium text-gray-600">
+                  +{onlineUsers.length - 5}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {/* View online list button */}
+          {onlineUsers.length > 0 && (
+            <button
+              onClick={() => setIsOnlineListOpen(true)}
+              className="ml-2 rounded-lg bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-100 transition"
+            >
+              Xem
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Error message */}
@@ -514,6 +536,13 @@ function ChannelChat({ channelId, channelName, members = [] }) {
         onCancelReply={() => setReplyTo(null)}
         members={members}
         disabled={!isConnected}
+      />
+
+      {/* Online Users Modal */}
+      <OnlineUsersModal
+        isOpen={isOnlineListOpen}
+        onClose={() => setIsOnlineListOpen(false)}
+        onlineUsers={onlineUsers}
       />
     </div>
   );
