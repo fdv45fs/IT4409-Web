@@ -10,11 +10,11 @@ const loginFields = [
     name: "email",
     label: "Email",
     type: "email",
-    placeholder: "nhap-email@domain.com",
+    placeholder: "enter-email@domain.com",
   },
   {
     name: "password",
-    label: "Mật khẩu",
+    label: "Password",
     type: "password",
     placeholder: "••••••••",
   },
@@ -43,7 +43,7 @@ function LoginPage() {
     try {
       const result = await login(formState);
       setSuccess({
-        message: "Đăng nhập thành công!",
+        message: "Signed in successfully!",
         user: result.user,
       });
       // Redirect to workspaces after successful login
@@ -59,13 +59,13 @@ function LoginPage() {
 
   return (
     <TetAuthLayout
-      title="Đăng nhập"
-      subtitle="Sử dụng tài khoản đã đăng ký để truy cập ứng dụng"
+      title="Sign In"
+      subtitle="Use your registered account to access the application"
       footer={
         <span>
-          Bạn chưa có tài khoản?{" "}
+          Don't have an account?{" "}
           <Link to="/register" className="font-medium text-red-600 underline-offset-2 hover:text-red-700 transition-colors">
-            Đăng ký ngay
+            Sign up now
           </Link>
         </span>
       }
@@ -85,7 +85,7 @@ function LoginPage() {
             to="/forgot-password"
             className="text-sm text-amber-600 hover:text-red-600 underline-offset-2 transition-colors"
           >
-            Quên mật khẩu?
+            Forgot password?
           </Link>
         </div>
 
@@ -105,7 +105,7 @@ function LoginPage() {
               <span className="font-semibold">{success.message}</span>
             </div>
             <p className="mt-1 text-xs text-emerald-600 ml-7">
-              Xin chào {success.user?.fullName || success.user?.email}!
+              Welcome {success.user?.fullName || success.user?.email}!
             </p>
           </div>
         )}
@@ -119,12 +119,12 @@ function LoginPage() {
           {isLoading ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Đang xử lý...</span>
+              <span>Processing...</span>
             </>
           ) : (
             <>
               <HorseIcon className="h-5 w-5" />
-              <span>Đăng nhập</span>
+              <span>Sign In</span>
             </>
           )}
         </button>

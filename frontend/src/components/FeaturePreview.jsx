@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const heroPhrases = ["Nơi công việc diễn ra", "Nơi workspace kết nối", "Channel cùng sáng tạo"];
+const heroPhrases = ["Where work happens", "Where workspaces connect", "Channels spark ideas"];
 
 const workspaces = [
   { name: "Marketing Squad", members: 18, color: "bg-blue-500" },
@@ -14,9 +14,9 @@ const channels = [
 ];
 
 const highlights = [
-  { label: "Workspace", value: "12+", desc: "Quản lý nhóm" },
-  { label: "Channel", value: "58", desc: "Trao đổi realtime" },
-  { label: "Tin nhắn/ngày", value: "3.5K", desc: "Message từ Prisma schema" },
+  { label: "Workspace", value: "12+", desc: "Team management" },
+  { label: "Channel", value: "58", desc: "Real-time collaboration" },
+  { label: "Messages/day", value: "3.5K", desc: "Messages from Prisma schema" },
 ];
 
 const sampleMessages = [
@@ -24,15 +24,15 @@ const sampleMessages = [
     author: "Kuron",
     avatar: "KR",
     channel: "#general",
-    text: "Plan mới đã được chấp nhận, triển khai giúp mình nhé!",
-    time: "2m trước",
+    text: "New plan approved, please roll it out!",
+    time: "2m ago",
   },
   {
-    author: "Việt Hùng",
+    author: "Viet Hung",
     avatar: "VH",
     channel: "#hust",
-    text: "Đã lên plan demo Workspace vào 15:00.",
-    time: "10m trước",
+    text: "Demo workspace scheduled for 15:00.",
+    time: "10m ago",
   },
 ];
 
@@ -80,14 +80,14 @@ function FeaturePreview({ variant = "scroll" }) {
               className={`rounded-xl ${ws.color} p-4 text-sm font-semibold shadow-md`}
             >
               <p className="text-base font-semibold text-white">{ws.name}</p>
-              <p className="text-xs text-white/80">{ws.members} thành viên hoạt động</p>
+              <p className="text-xs text-white/80">{ws.members} active members</p>
             </div>
           ))}
         </div>
 
         <div className="flex flex-col gap-3 rounded-xl bg-black/10 p-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-semibold text-white">Channel đang theo dõi</p>
+            <p className="text-sm font-semibold text-white">Channels you follow</p>
             <span className="text-xs text-sky-100">Realtime sync</span>
           </div>
           <div className="space-y-2">

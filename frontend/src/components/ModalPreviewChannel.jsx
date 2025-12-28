@@ -20,7 +20,7 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
         setChannelPreview(data);
       } catch (err) {
         console.error("Failed to fetch channel preview:", err);
-        setError(err.message || "Không thể tải thông tin channel");
+        setError(err.message || "Failed to load channel information");
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +49,7 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
       }
     } catch (err) {
       console.error("Failed to join channel:", err);
-      addToast(err.message || "Không thể tham gia channel", "error");
+      addToast(err.message || "Failed to join channel", "error");
     } finally {
       setIsJoining(false);
     }
@@ -60,7 +60,7 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
       <div className="relative w-full max-w-md rounded-2xl overflow-hidden bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between bg-[rgb(30,41,59)] px-6 py-4">
-          <h2 className="text-2xl font-bold text-white">Thông tin Channel</h2>
+          <h2 className="text-2xl font-bold text-white">Channel Information</h2>
           <button
             onClick={onClose}
             disabled={isJoining}
@@ -75,7 +75,7 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
-              <p className="mt-4 text-sm text-gray-500">Đang tải...</p>
+              <p className="mt-4 text-sm text-gray-500">Loading...</p>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center py-8">
@@ -84,7 +84,7 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
                 onClick={onClose}
                 className="mt-4 rounded-lg bg-[rgb(30,41,59)] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
               >
-                Đóng
+                Close
               </button>
             </div>
           ) : channelPreview ? (
@@ -179,7 +179,7 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
                     <strong className="text-[rgb(30,41,59)]">
                       {channelPreview.memberCount}
                     </strong>{" "}
-                    thành viên
+                    members
                   </span>
                 </div>
               </div>
@@ -187,20 +187,20 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
               {/* Status Messages */}
               {channelPreview.isMember && (
                 <div className="mb-4 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                  Bạn đã là thành viên của channel này
+                  You are already a member of this channel
                 </div>
               )}
 
               {!channelPreview.canJoin && !channelPreview.isMember && (
                 <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
-                  Bạn không thể tham gia channel này
+                  You cannot join this channel
                 </div>
               )}
 
               {channelPreview.isPrivate && channelPreview.canJoin && (
                 <div className="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
-                  <Lock className="mb-1 inline h-4 w-4" /> Channel này là
-                  private. Yêu cầu của bạn sẽ cần được admin duyệt.
+                  <Lock className="mb-1 inline h-4 w-4" /> This channel is
+                  private. Your request will need to be approved by admin.
                 </div>
               )}
 
@@ -211,7 +211,7 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
                   disabled={isJoining}
                   className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2.5 font-medium text-gray-700 transition-all hover:bg-gray-50 disabled:opacity-50"
                 >
-                  Hủy
+                  Cancel
                 </button>
 
                 {channelPreview.canJoin && !channelPreview.isMember && (
@@ -223,13 +223,13 @@ function ModalPreviewChannel({ channelId, workspaceId, onClose, onSuccess }) {
                     {isJoining ? (
                       <>
                         <Loader2 className="h-4 w-4 animate-spin" />
-                        <span>Đang xử lý...</span>
+                        <span>Processing...</span>
                       </>
                     ) : (
                       <span>
                         {channelPreview.isPrivate
-                          ? "Gửi yêu cầu"
-                          : "Tham gia ngay"}
+                          ? "Send Request"
+                          : "Join Now"}
                       </span>
                     )}
                   </button>

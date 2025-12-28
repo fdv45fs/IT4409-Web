@@ -76,7 +76,7 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
       const payload = userId ? { userId } : { email };
       // Pass authFetch
       await addChannelMember(channelId, payload, authFetch);
-      setSuccessMsg(`Đã thêm thành viên thành công!`);
+      setSuccessMsg("Member added successfully!");
       setTimeout(() => {
         setSuccessMsg("");
         // Reset query to allow adding more
@@ -84,9 +84,9 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
         if (onSuccess) onSuccess();
       }, 2000);
     } catch (err) {
-      let errorMsg = err.message || "Không thể thêm thành viên";
+      let errorMsg = err.message || "Unable to add member";
       if (err.status === 400) {
-        errorMsg = "Thành viên đã có trong channel hoặc không tồn tại.";
+        errorMsg = "Member already in the channel or does not exist.";
       }
       setError(errorMsg);
     } finally {
@@ -105,7 +105,7 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
       <div className="relative w-full max-w-md rounded-2xl overflow-hidden bg-white shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between bg-[rgb(30,41,59)] px-6 py-4">
-          <h2 className="text-2xl font-bold text-white">Thêm thành viên</h2>
+          <h2 className="text-2xl font-bold text-white">Add Member</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 text-white/70 transition hover:bg-white/10 hover:text-white"
@@ -132,14 +132,14 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
           <div className="space-y-4">
             <div>
               <label className="mb-2 block text-sm font-medium text-[rgb(30,41,59)]">
-                Tìm kiếm thành viên (theo tên hoặc email)
+                Search members (by name or email)
               </label>
               <div className="relative">
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Nhập tên hoặc email..."
+                  placeholder="Enter name or email..."
                   className="w-full rounded-xl border border-gray-300 bg-white px-4 py-3 pl-10 text-[rgb(30,41,59)] placeholder-gray-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                 />
                 <svg
@@ -160,12 +160,12 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
 
             {/* Messages */}
             {error && (
-              <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+              <div className="rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </div>
             )}
             {successMsg && (
-              <div className="rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-200">
+              <div className="rounded-xl border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-700">
                 {successMsg}
               </div>
             )}
@@ -174,18 +174,18 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
             <div className="mt-4 max-h-60 overflow-y-auto rounded-xl border border-gray-200 bg-gray-50">
               {isLoading ? (
                 <div className="p-4 text-center text-gray-500">
-                  Đang tải danh sách thành viên...
+                  Loading members...
                 </div>
               ) : query && filteredMembers.length === 0 ? (
                 <div className="p-4 text-center text-gray-500">
-                  <p>Không tìm thấy thành viên nào khớp với "{query}".</p>
+                  <p>No members found matching "{query}".</p>
                   {query.includes("@") && (
                     <button
                       onClick={() => handleAddMember(null, query)}
                       disabled={isSubmitting}
                       className="mt-2 text-indigo-400 hover:underline disabled:opacity-50"
                     >
-                      Thêm bằng email: {query}
+                      Add by email: {query}
                     </button>
                   )}
                 </div>
@@ -215,7 +215,7 @@ function AddChannelMemberModal({ workspaceId, channelId, onClose, onSuccess }) {
                       disabled={isSubmitting}
                       className="rounded-lg bg-[rgb(30,41,59)] px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-90 disabled:opacity-50"
                     >
-                      Thêm
+                      Add
                     </button>
                   </div>
                 ))

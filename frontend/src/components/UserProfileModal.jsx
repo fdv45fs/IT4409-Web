@@ -118,13 +118,13 @@ function UserProfileModal({ user, onClose, position = { x: 0, y: 0 } }) {
               </h2>
               {isCurrentUser && (
                 <span className="px-2 py-0.5 text-xs font-semibold bg-slate-100 text-slate-700 rounded-full">
-                  Bạn
+                  You
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <div className="h-2 w-2 rounded-full bg-green-500"></div>
-              <span>Đang hoạt động</span>
+              <span>Active now</span>
             </div>
           </div>
 
@@ -169,10 +169,10 @@ function UserProfileModal({ user, onClose, position = { x: 0, y: 0 } }) {
               </svg>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-0.5">
-                  Giờ địa phương
+                  Local Time
                 </p>
                 <p className="text-sm text-gray-900">
-                  {new Date().toLocaleTimeString("vi-VN", {
+                  {new Date().toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}

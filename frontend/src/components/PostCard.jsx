@@ -32,7 +32,7 @@ function PostCard({
 
   const isAuthor = post.author?.id === currentUser?.id;
   const createdDate = post.createdAt
-    ? new Date(post.createdAt).toLocaleString("vi-VN", {
+          ? new Date(post.createdAt).toLocaleString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -82,11 +82,11 @@ function PostCard({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h4 className="text-sm font-semibold text-gray-900 truncate">
-              {post.author?.fullName || post.author?.username || "Ẩn danh"}
+              {post.author?.fullName || post.author?.username || "Anonymous"}
             </h4>
             {isAuthor && (
               <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-600">
-                Bạn
+                You
               </span>
             )}
           </div>
@@ -118,7 +118,7 @@ function PostCard({
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                   >
                     <Edit2 className="h-4 w-4" />
-                    Chỉnh sửa
+                    Edit
                   </button>
                   <button
                     onClick={() => {
@@ -128,7 +128,7 @@ function PostCard({
                     className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50"
                   >
                     <Trash2 className="h-4 w-4" />
-                    Xóa bài
+                    Delete
                   </button>
                 </div>
               </>
@@ -147,7 +147,7 @@ function PostCard({
             onClick={() => onViewDetail?.(post.id)}
             className="mt-2 text-sm font-medium text-indigo-600 hover:text-indigo-700"
           >
-            Xem thêm...
+            View more...
           </button>
         )}
 
@@ -178,7 +178,7 @@ function PostCard({
                     onClick={() => setPreviewFile(att)}
                     className="absolute top-2 right-2 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white shadow hover:bg-black/80"
                   >
-                    Phóng to
+                    Zoom
                   </button>
                 </div>
               ))}
@@ -281,7 +281,7 @@ function PostCard({
             className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800 transition-colors disabled:opacity-50"
           >
             <Smile className="h-4 w-4" />
-            <span className="hidden sm:inline">Thích</span>
+            <span className="hidden sm:inline">Like</span>
           </button>
 
           {showReactionPicker && (
@@ -319,7 +319,7 @@ function PostCard({
           <MessageCircle className="h-4 w-4" />
           <span>
             {post.commentCount || 0}{" "}
-            <span className="hidden sm:inline">bình luận</span>
+            <span className="hidden sm:inline">comments</span>
           </span>
         </button>
 
@@ -336,7 +336,7 @@ function PostCard({
           onClick={() => onViewDetail?.(post.id)}
           className="ml-auto rounded-lg px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 transition-colors"
         >
-          Xem chi tiết
+          View Details
         </button>
       </div>
       {previewFile && (

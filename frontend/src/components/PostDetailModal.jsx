@@ -16,8 +16,8 @@ import {
   Loader2,
   Image,
   FileAudio,
-  FileVideo,
   FileArchive,
+  FileVideo,
 } from "lucide-react";
 import {
   getPostDetail,
@@ -31,6 +31,7 @@ import {
 } from "../api";
 import LinkPreviews from "./LinkPreview";
 import FilePreviewModal from "./FilePreviewModal";
+import ConfirmationModal from "./ConfirmationModal";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "👏"];
 
@@ -151,6 +152,10 @@ function PostDetailModal({
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingCommentContent, setEditingCommentContent] = useState("");
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [deleteCommentConfirm, setDeleteCommentConfirm] = useState({
+    isOpen: false,
+    commentId: null,
+  });
   const [activeCommentMenu, setActiveCommentMenu] = useState(null);
   const [showCommentReactionPicker, setShowCommentReactionPicker] =
     useState(null);
@@ -205,10 +210,10 @@ function PostDetailModal({
 
     setIsSendingComment(true);
     try {
-      // Tạo comment trước
+      // Create comment first
       const createdComment = await addPostComment(channelId, postId, newComment.trim() || " ", authFetch);
 
-      // Upload files nếu có
+      // Upload files if any
       if (commentFiles.length > 0 && createdComment?.id) {
         setIsUploadingComment(true);
         await uploadCommentFiles(channelId, postId, createdComment.id, commentFiles, authFetch);
@@ -276,13 +281,18 @@ function PostDetailModal({
 
   // Handle delete comment
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa bình luận này?")) return;
+    setDeleteCommentConfirm({ isOpen: true, commentId });
+  };
+
+  const confirmDeleteComment = async () => {
+    if (!deleteCommentConfirm.commentId) return;
 
     try {
-      await deletePostComment(channelId, postId, commentId, authFetch);
+      await deletePostComment(channelId, postId, deleteCommentConfirm.commentId, authFetch);
       fetchComments();
       fetchPost();
       onPostUpdated?.();
+      setDeleteCommentConfirm({ isOpen: false, commentId: null });
     } catch (err) {
       console.error("Failed to delete comment:", err);
     }
@@ -300,7 +310,7 @@ function PostDetailModal({
         emoji,
         authFetch
       );
-      // Cập nhật reactions từ response
+      // Update reactions from response
       setPost((prev) =>
         prev ? { ...prev, reactions: result.reactions } : prev
       );
@@ -323,7 +333,7 @@ function PostDetailModal({
         emoji,
         authFetch
       );
-      // Cập nhật reactions từ response
+      // Update reactions from response
       setCommentReactions((prev) => ({
         ...prev,
         [commentId]: result.reactions || [],
@@ -339,7 +349,7 @@ function PostDetailModal({
 
   const formatDate = (date) => {
     if (!date) return "";
-    return new Date(date).toLocaleString("vi-VN", {
+    return new Date(date).toLocaleString("en-US", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -364,7 +374,7 @@ function PostDetailModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-8 shadow-xl">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-          <p className="text-sm text-gray-600">Đang tải bài đăng...</p>
+          <p className="text-sm text-gray-600">Loading post...</p>
         </div>
       </div>
     );
@@ -374,12 +384,12 @@ function PostDetailModal({
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
         <div className="rounded-2xl bg-white p-8 shadow-xl text-center">
-          <p className="text-red-600">Không thể tải bài đăng</p>
+          <p className="text-red-600">Failed to load post</p>
           <button
             onClick={onClose}
             className="mt-4 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
           >
-            Đóng
+            Close
           </button>
         </div>
       </div>
@@ -395,7 +405,7 @@ function PostDetailModal({
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between rounded-t-2xl border-b border-gray-100 bg-white/95 backdrop-blur px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">
-            Chi tiết bài đăng
+            Post Details
           </h2>
           <button
             onClick={onClose}
@@ -425,11 +435,11 @@ function PostDetailModal({
             <div className="flex-1">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold text-gray-900">
-                  {post.author?.fullName || post.author?.username || "Ẩn danh"}
+                  {post.author?.fullName || post.author?.username || "Anonymous"}
                 </h3>
                 {isPostAuthor && (
                   <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-medium text-indigo-600">
-                    Bạn
+                    You
                   </span>
                 )}
               </div>
@@ -437,7 +447,7 @@ function PostDetailModal({
                 <Clock className="h-3 w-3" />
                 <span>{formatDate(post.createdAt)}</span>
                 {post.updatedAt && post.updatedAt !== post.createdAt && (
-                  <span className="text-gray-400">(đã chỉnh sửa)</span>
+                  <span className="text-gray-400">(edited)</span>
                 )}
               </div>
             </div>
@@ -476,7 +486,7 @@ function PostDetailModal({
                         onClick={() => setPreviewFile(att)}
                         className="absolute top-3 right-3 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white shadow hover:bg-black/80"
                       >
-                        Phóng to
+                        Expand
                       </button>
                     </div>
                   ))}
@@ -555,7 +565,7 @@ function PostDetailModal({
                 className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-all"
               >
                 <Smile className="h-4 w-4" />
-                <span>Thêm</span>
+                <span>Add</span>
               </button>
 
               {showReactionPicker && (
@@ -593,7 +603,7 @@ function PostDetailModal({
             <div className="flex items-center gap-2">
               <MessageCircle className="h-4 w-4 text-gray-500" />
               <span className="text-sm font-medium text-gray-700">
-                {comments.length} bình luận
+                {comments.length} comments
               </span>
             </div>
           </div>
@@ -624,7 +634,7 @@ function PostDetailModal({
                     type="text"
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Viết bình luận..."
+                    placeholder="Write a comment..."
                     className="w-full rounded-full border border-gray-200 bg-gray-50 px-4 py-2.5 pr-20 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                   />
                   <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
@@ -640,7 +650,7 @@ function PostDetailModal({
                       type="button"
                       onClick={() => commentFileInputRef.current?.click()}
                       className="rounded-full p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
-                      title="Đính kèm file"
+                      title="Attach file"
                     >
                       <Paperclip className="h-4 w-4" />
                     </button>
@@ -695,7 +705,7 @@ function PostDetailModal({
               </div>
             ) : comments.length === 0 ? (
               <div className="py-8 text-center text-sm text-gray-500">
-                Chưa có bình luận nào. Hãy là người đầu tiên bình luận!
+                No comments yet. Be the first to comment!
               </div>
             ) : (
               <div className="divide-y divide-gray-50">
@@ -734,13 +744,13 @@ function PostDetailModal({
                             <div className="rounded-2xl bg-gray-100 px-4 py-3">
                               <div className="flex items-center gap-1.5">
                                 <span className="text-xs font-semibold text-gray-900">
-                                  {comment.author?.fullName ||
+                                    {comment.author?.fullName ||
                                     comment.author?.username ||
-                                    "Ẩn danh"}
+                                    "Anonymous"}
                                 </span>
                                 {isCommentAuthor && (
                                   <span className="inline-flex items-center rounded bg-indigo-50 px-1 py-0.5 text-[9px] font-medium text-indigo-600">
-                                    Bạn
+                                    You
                                   </span>
                                 )}
                               </div>
@@ -852,7 +862,7 @@ function PostDetailModal({
                                   }
                                   className="font-medium hover:text-indigo-600 hover:underline"
                                 >
-                                  Thích
+                                  Like
                                 </button>
 
                                 {showCommentReactionPicker === comment.id && (
@@ -894,7 +904,7 @@ function PostDetailModal({
                               {comment.updatedAt &&
                                 comment.updatedAt !== comment.createdAt && (
                                   <span className="text-gray-400">
-                                    (đã chỉnh sửa)
+                                    (edited)
                                   </span>
                                 )}
                             </div>
@@ -929,7 +939,7 @@ function PostDetailModal({
                                     className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                                   >
                                     <Edit2 className="h-3.5 w-3.5" />
-                                    Sửa
+                                    Edit
                                   </button>
                                   <button
                                     onClick={() =>
@@ -938,7 +948,7 @@ function PostDetailModal({
                                     className="flex w-full items-center gap-2 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
-                                    Xóa
+                                    Delete
                                   </button>
                                 </div>
                               </>
@@ -953,6 +963,18 @@ function PostDetailModal({
             )}
           </div>
         </div>
+
+        {/* Delete Comment Confirmation */}
+        <ConfirmationModal
+          isOpen={deleteCommentConfirm.isOpen}
+          onClose={() => setDeleteCommentConfirm({ isOpen: false, commentId: null })}
+          onConfirm={confirmDeleteComment}
+          title="Delete Comment"
+          message="Are you sure you want to delete this comment? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger"
+        />
 
         {previewFile && (
           <FilePreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />

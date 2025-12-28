@@ -18,7 +18,7 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
       const data = await authFetch(`/api/workspaces/${workspaceId}/members`);
       setMembers(data.members || []);
     } catch (err) {
-      setError(err.message || "Không thể tải danh sách thành viên");
+      setError(err.message || "Unable to load members");
     } finally {
       if (!silent) setIsLoading(false);
     }
@@ -31,7 +31,7 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
   }, [workspaceId]);
 
   const handleRemoveMember = async (memberId) => {
-    if (!window.confirm("Bạn có chắc chắn muốn xóa thành viên này khỏi workspace?")) {
+    if (!window.confirm("Are you sure you want to remove this member from the workspace?")) {
       return;
     }
 
@@ -43,11 +43,11 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
       await authFetch(`/api/workspaces/${workspaceId}/members/${memberId}`, {
         method: "DELETE",
       });
-      addToast("Đã xóa thành viên", "success");
+      addToast("Member removed", "success");
     } catch (err) {
       // Rollback on error
       setMembers(originalMembers);
-      addToast(err.message || "Lỗi khi xóa thành viên", "error");
+      addToast(err.message || "Error removing member", "error");
     }
   };
 
@@ -65,11 +65,11 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
         method: "PATCH",
         body: JSON.stringify({ role: newRole }),
       });
-      addToast("Đã cập nhật quyền thành viên", "success");
+      addToast("Member role updated", "success");
     } catch (err) {
       // Rollback on error
       setMembers(originalMembers);
-      addToast(err.message || "Lỗi khi cập nhật quyền", "error");
+      addToast(err.message || "Error updating role", "error");
     }
   };
 
@@ -78,7 +78,7 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
       <div className="flex items-center justify-center py-12 bg-gray-50 rounded-lg">
         <div className="text-center">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-600 border-t-transparent mx-auto"></div>
-          <p className="mt-3 text-sm text-gray-600">Đang tải danh sách thành viên...</p>
+          <p className="mt-3 text-sm text-gray-600">Loading members...</p>
         </div>
       </div>
     );
@@ -109,9 +109,9 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Thành viên Workspace</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Workspace Members</h1>
               <p className="mt-1 text-sm text-gray-600">
-                Quản lý và kiểm soát quyền truy cập của các thành viên
+                Manage and control member access
               </p>
             </div>
           </div>
@@ -123,10 +123,10 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
           <div className="flex items-center justify-between border-b border-gray-200 bg-gradient-to-r from-gray-50 via-slate-50/30 to-gray-50 px-8 py-6">
             <div>
               <h2 className="text-xl font-bold text-gray-900">
-                Danh sách thành viên
+                Member List
               </h2>
               <p className="mt-2 text-sm text-gray-600">
-                <span className="font-semibold text-slate-600">{members.length}</span> {members.length === 1 ? 'thành viên' : 'thành viên'}
+                <span className="font-semibold text-slate-600">{members.length}</span> {members.length === 1 ? 'member' : 'members'}
               </p>
             </div>
             {isAdmin && (
@@ -137,7 +137,7 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
                 <svg className="h-4 w-4 transition-transform duration-200 group-hover:rotate-90" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Thêm thành viên
+                Add Member
               </button>
             )}
           </div>
@@ -150,9 +150,9 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <p className="text-base font-semibold text-gray-900">Chưa có thành viên nào</p>
+              <p className="text-base font-semibold text-gray-900">No members yet</p>
               <p className="mt-2 text-sm text-gray-600 max-w-sm mx-auto">
-                Bắt đầu xây dựng đội ngũ bằng cách mời thành viên vào workspace
+                Start building your team by inviting members to the workspace
               </p>
             </div>
           ) : (
@@ -193,7 +193,7 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
                       </p>
                       {member.userId === currentUser?.id && (
                         <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-800 ring-1 ring-slate-200 animate-in fade-in zoom-in duration-300">
-                          Bạn
+                          You
                         </span>
                       )}
                     </div>
@@ -231,7 +231,7 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
                         <button
                           onClick={() => handleRemoveMember(member.id)}
                           className="group/delete rounded-xl p-2.5 text-gray-400 hover:bg-red-50 hover:text-red-600 hover:scale-110 focus:outline-none focus:ring-4 focus:ring-red-500/20 active:scale-95 transition-all duration-200"
-                          title="Xóa thành viên"
+                          title="Remove member"
                         >
                           <svg className="h-5 w-5 transition-transform duration-200 group-hover/delete:rotate-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -247,7 +247,7 @@ function WorkspaceMembers({ workspaceId, isAdmin }) {
                             ? "bg-gradient-to-r from-slate-100 to-slate-50 text-slate-700 ring-slate-200 hover:shadow-md hover:from-slate-200 hover:to-slate-100"
                             : "bg-gradient-to-r from-gray-100 to-gray-50 text-gray-700 ring-gray-200 hover:shadow-md hover:from-gray-200 hover:to-gray-100"
                         }`}
-                        title={member.role === "WORKSPACE_ADMIN" ? "Có toàn quyền quản lý workspace" : member.role === "WORKSPACE_PRIVILEGE_MEMBER" ? "Có quyền quản lý kênh và tin nhắn" : "Thành viên thông thường"}
+                        title={member.role === "WORKSPACE_ADMIN" ? "Has full workspace management permissions" : member.role === "WORKSPACE_PRIVILEGE_MEMBER" ? "Can manage channels and messages" : "Standard member"}
                       >
                         {member.role === "WORKSPACE_ADMIN" && (
                           <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">

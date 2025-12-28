@@ -299,7 +299,7 @@ export class ChatGateway
       const isMember = await this.isChannelMember(user.id, channelId);
       if (!isMember) {
         client.emit('error', {
-          message: 'Bạn không phải thành viên của channel này',
+          message: 'You are not a member of this channel',
         });
         return;
       }
@@ -799,7 +799,7 @@ export class ChatGateway
       );
       if (!isParticipant) {
         client.emit('error', {
-          message: 'Bạn không phải thành viên của conversation này',
+          message: 'You are not a participant of this conversation',
         });
         return;
       }

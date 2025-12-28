@@ -8,7 +8,7 @@ function ChatInput({
   onCancelReply,
   members = [],
   disabled = false,
-  placeholder = "Nhập tin nhắn... (@ để mention)",
+  placeholder = "Type a message... (@ to mention)",
   onSendWithFiles, // New prop for sending with files
 }) {
   const [content, setContent] = useState("");
@@ -173,7 +173,7 @@ function ChatInput({
                 d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"
               />
             </svg>
-            <span className="text-gray-500">Đang trả lời</span>
+            <span className="text-gray-500">Replying to</span>
             <span className="font-medium text-gray-700">
               {replyTo.sender?.fullName || replyTo.sender?.username}
             </span>
@@ -285,7 +285,7 @@ function ChatInput({
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled}
             className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl border border-gray-300 bg-white text-gray-400 hover:bg-gray-50 hover:text-gray-600 disabled:opacity-50"
-            title="Đính kèm file"
+            title="Attach file"
           >
             <svg
               className="h-5 w-5"
@@ -337,7 +337,7 @@ function ChatInput({
                 (!content.trim() && pendingFiles.length === 0) || disabled
               }
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-600 text-white transition-colors hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-              title="Gửi"
+              title="Send"
             >
               <svg
                 className="h-4 w-4"

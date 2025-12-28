@@ -38,11 +38,11 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
     const file = event.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        setError("Vui lòng chọn file ảnh");
+        setError("please upload a valid image file");
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setError("Kích thước ảnh không được vượt quá 5MB");
+        setError("Image size must not exceed 5MB");
         return;
       }
       setAvatarFile(file);
@@ -98,11 +98,11 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
       let errorMsg = err.message || "Không thể tạo workspace";
 
       if (errorMsg.includes("WORKSPACE_ADMIN") || errorMsg.includes("Role") || errorMsg.includes("not found")) {
-        errorMsg = "Lỗi Backend: Database chưa có roles.";
+        errorMsg = "No permission to create workspace.";
       } else if (err.status === 401) {
-        errorMsg = "Phiên đăng nhập hết hạn.";
+        errorMsg = "Session expired - please log in again.";
       } else if (err.status === 500) {
-        errorMsg = "Lỗi server: " + errorMsg;
+        errorMsg = "Server error: " + errorMsg;
       }
 
       setError(errorMsg);
@@ -125,7 +125,7 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/20">
               <Plus className="h-5 w-5" />
             </div>
-            <h2 className="text-lg font-bold">Tạo Workspace Mới</h2>
+            <h2 className="text-lg font-bold">Create New Workspace</h2>
           </div>
           <button
             onClick={onClose}
@@ -179,14 +179,14 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
                 {/* Name */}
                 <div className="flex-1">
                   <label className="mb-1 block text-xs font-medium text-gray-600">
-                    Tên Workspace <span className="text-red-500">*</span>
+                    Workspace Name <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
                     value={formState.name}
                     onChange={handleChange("name")}
                     required
-                    placeholder="VD: Team Marketing..."
+                    placeholder="e.g., Team Marketing..."
                     className="w-full rounded-lg border-2 border-amber-200 px-3 py-2 text-sm transition focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-100"
                   />
                 </div>
@@ -195,13 +195,13 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
               {/* Description */}
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-600">
-                  Mô tả (tùy chọn)
+                  Description (optional)
                 </label>
                 <textarea
                   value={formState.description}
                   onChange={handleChange("description")}
                   rows={2}
-                  placeholder="Mô tả ngắn..."
+                  placeholder="Short description..."
                   className="w-full rounded-lg border-2 border-amber-200 px-3 py-2 text-sm transition focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-100"
                 />
               </div>
@@ -210,7 +210,7 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
             {/* Right Column - Privacy */}
             <div>
               <label className="mb-2 block text-xs font-medium text-gray-600">
-                Quyền riêng tư
+                Privacy
               </label>
               <div className="space-y-2">
                 {/* Public */}
@@ -230,7 +230,7 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
                   <Globe className="h-4 w-4 text-emerald-500" />
                   <div className="flex-1">
                     <span className="text-sm font-medium text-gray-900">Public</span>
-                    <p className="text-xs text-gray-500">Ai có mã đều vào được</p>
+                    <p className="text-xs text-gray-500">Anyone with the join code can join</p>
                   </div>
                 </label>
 
@@ -251,7 +251,7 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
                   <Lock className="h-4 w-4 text-amber-500" />
                   <div className="flex-1">
                     <span className="text-sm font-medium text-gray-900">Private</span>
-                    <p className="text-xs text-gray-500">Cần admin phê duyệt</p>
+                    <p className="text-xs text-gray-500">Requires admin approval</p>
                   </div>
                 </label>
               </div>
@@ -282,7 +282,7 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
                 className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
                 disabled={isLoading}
               >
-                Hủy
+                  Cancel
               </button>
               <button
                 type="submit"
@@ -292,12 +292,12 @@ function CreateWorkspaceModal({ onClose, onSuccess }) {
                 {isLoading ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Đang tạo...</span>
+                    <span>Creating...</span>
                   </>
                 ) : (
                   <>
                     <HorseIcon className="h-4 w-4" />
-                    <span>Tạo Workspace</span>
+                    <span>Create Workspace</span>
                   </>
                 )}
               </button>

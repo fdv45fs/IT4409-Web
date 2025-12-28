@@ -118,7 +118,7 @@ function ChatMessage({
 
   const formatTime = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleTimeString("vi-VN", {
+    return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -225,7 +225,7 @@ function ChatMessage({
             </span>
             <span className="truncate max-w-xs">
               {message.replyTo.isDeleted
-                ? "Tin nhắn đã bị xóa"
+                ? "Message has been deleted"
                 : message.replyTo.content}
             </span>
           </button>
@@ -234,7 +234,7 @@ function ChatMessage({
         {/* Message content */}
         {isDeleted ? (
           <p className="mt-1 text-base text-gray-400 italic leading-relaxed">
-            Tin nhắn đã bị xóa
+            Message has been deleted
           </p>
         ) : (
           <p className="mt-1 text-base text-gray-800 whitespace-pre-wrap break-words leading-relaxed">
@@ -352,7 +352,7 @@ function ChatMessage({
                       <div className="flex-1 min-w-0">
                         <p className="truncate font-medium">{fileName}</p>
                         <p className="text-xs text-gray-500">
-                          {isPdf ? "Nhấn để mở" : "Nhấn để tải xuống"}
+                          {isPdf ? "Click to open" : "Click to download"}
                         </p>
                       </div>
                       <svg
@@ -412,7 +412,7 @@ function ChatMessage({
             <button
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-              title="Thêm reaction"
+              title="Add reaction"
             >
               <svg
                 className="h-4 w-4"
@@ -449,7 +449,7 @@ function ChatMessage({
           <button
             onClick={() => onReply(message)}
             className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-            title="Trả lời"
+            title="Reply"
           >
             <svg
               className="h-4 w-4"
@@ -471,7 +471,7 @@ function ChatMessage({
             <button
               onClick={() => onDelete(message.id)}
               className="rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-500"
-              title="Xóa tin nhắn"
+              title="Delete message"
             >
               <svg
                 className="h-4 w-4"

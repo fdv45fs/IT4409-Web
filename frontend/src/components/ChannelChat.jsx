@@ -5,6 +5,7 @@ import { useToast } from "../contexts/ToastContext";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import ChatSearchBar from "./ChatSearchBar";
+import ConfirmationModal from "./ConfirmationModal";
 import { uploadMessageFiles, searchChannelMessages } from "../api";
 
 function ChannelChat({
@@ -35,6 +36,10 @@ function ChannelChat({
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [deleteConfirmModal, setDeleteConfirmModal] = useState({
+    isOpen: false,
+    messageId: null,
+  });
 
   useEffect(() => {
     if (isSearchOpen) return;
@@ -237,14 +242,19 @@ function ChannelChat({
       setReplyTo(null);
     } catch (error) {
       console.error("Failed to send message with files:", error);
-      addToast("Không thể gửi tin nhắn với file đính kèm", "error");
+      addToast("Unable to send message with attachments", "error");
     }
   };
 
   // Handle delete message
   const handleDelete = (messageId) => {
-    if (window.confirm("Bạn có chắc muốn xóa tin nhắn này?")) {
-      deleteMessage(messageId);
+    setDeleteConfirmModal({ isOpen: true, messageId });
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirmModal.messageId) {
+      deleteMessage(deleteConfirmModal.messageId);
+      setDeleteConfirmModal({ isOpen: false, messageId: null });
     }
   };
 
@@ -327,7 +337,7 @@ function ChannelChat({
         window.dispatchEvent(
           new CustomEvent("show:toast", {
             detail: {
-              message: "Không tìm thấy tin nhắn",
+              message: "Message not found",
               type: "error",
             },
           })
@@ -376,7 +386,7 @@ function ChannelChat({
       window.dispatchEvent(
         new CustomEvent("show:toast", {
           detail: {
-            message: "Không thể tải tin nhắn. Vui lòng thử lại.",
+            message: "Unable to load message. Please try again.",
             type: "error",
           },
         })
@@ -415,11 +425,11 @@ function ChannelChat({
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (date.toDateString() === today.toDateString()) {
-      return "Hôm nay";
+      return "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Hôm qua";
+      return "Yesterday";
     }
-    return date.toLocaleDateString("vi-VN", {
+    return date.toLocaleDateString("en-US", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -465,7 +475,7 @@ function ChannelChat({
               onClick={() => fetchMessageHistory(page + 1, true)}
               className="text-sm text-indigo-600 hover:text-indigo-700"
             >
-              Tải thêm tin nhắn cũ
+              Load more messages
             </button>
           </div>
         )}
@@ -486,8 +496,8 @@ function ChannelChat({
                 d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
               />
             </svg>
-            <p className="text-lg font-medium">Chưa có tin nhắn nào</p>
-            <p className="text-sm">Hãy bắt đầu cuộc trò chuyện!</p>
+            <p className="text-lg font-medium">No messages yet</p>
+            <p className="text-sm">Start the conversation!</p>
           </div>
         )}
 
@@ -497,7 +507,7 @@ function ChannelChat({
           <div className="p-4">
             <div className="mb-4 flex items-center gap-2">
               <span className="text-sm text-gray-600">
-                Kết quả tìm kiếm cho "{searchQuery}"
+                Results for "{searchQuery}"
               </span>
               {isSearching && (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-indigo-600"></div>
@@ -520,7 +530,7 @@ function ChannelChat({
                     handleSearchResultClick(message.id);
                   }}
                   className="mb-2 block w-full text-left"
-                  title="Nhấp để nhảy đến tin nhắn"
+                  title="Click to jump to message"
                 >
                   <ChatMessage
                     message={message}
@@ -537,7 +547,7 @@ function ChannelChat({
               ))
             ) : !isSearching ? (
               <p className="text-sm text-gray-500">
-                Không tìm thấy tin nhắn nào
+                Cannot find any messages matching "{searchQuery}".
               </p>
             ) : null}
           </div>
@@ -599,7 +609,7 @@ function ChannelChat({
                 {otherTypingUsers
                   .map((u) => u.fullName || u.username)
                   .join(", ")}{" "}
-                đang nhập...
+                is typing...
               </span>
             </div>
           </div>
@@ -613,7 +623,7 @@ function ChannelChat({
         <button
           onClick={scrollToBottom}
           className="absolute bottom-20 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
-          title="Đi đến tin nhắn mới nhất"
+          title="Go to latest message"
         >
           <svg
             className="h-4 w-4"
@@ -628,7 +638,7 @@ function ChannelChat({
               d="M19 14l-7 7m0 0l-7-7m7 7V3"
             />
           </svg>
-          <span>Tin nhắn mới</span>
+          <span>New messages</span>
         </button>
       )}
 
@@ -644,6 +654,17 @@ function ChannelChat({
         disabled={!isConnected}
       />
 
+      {/* Delete Message Confirmation */}
+      <ConfirmationModal
+        isOpen={deleteConfirmModal.isOpen}
+        onClose={() => setDeleteConfirmModal({ isOpen: false, messageId: null })}
+        onConfirm={confirmDelete}
+        title="Delete Message"
+        message="Are you sure you want to delete this message? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        variant="danger"
+      />
     </div>
   );
 }

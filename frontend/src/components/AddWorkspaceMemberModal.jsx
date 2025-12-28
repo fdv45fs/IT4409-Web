@@ -17,11 +17,11 @@ function AddWorkspaceMemberModal({ workspaceId, onClose, onSuccess }) {
         method: "POST",
         body: JSON.stringify({ email }),
       });
-      addToast("Đã thêm thành viên thành công", "success");
+      addToast("Member added successfully", "success");
       onSuccess(newMember);
       onClose();
     } catch (err) {
-      addToast(err.message || "Lỗi khi thêm thành viên", "error");
+      addToast(err.message || "Error adding member", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -30,12 +30,12 @@ function AddWorkspaceMemberModal({ workspaceId, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        <h2 className="mb-4 text-xl font-bold text-gray-900">Thêm thành viên</h2>
+        <h2 className="mb-4 text-xl font-bold text-gray-900">Add Member</h2>
         
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="mb-1 block text-sm font-medium text-gray-700">
-              Email thành viên
+              Member Email
             </label>
             <input
               type="email"
@@ -54,14 +54,14 @@ function AddWorkspaceMemberModal({ workspaceId, onClose, onSuccess }) {
               className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
               disabled={isSubmitting}
             >
-              Hủy
+              Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
               className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSubmitting ? "Đang thêm..." : "Thêm"}
+              {isSubmitting ? "Adding..." : "Add"}
             </button>
           </div>
         </form>

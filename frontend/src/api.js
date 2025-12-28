@@ -26,7 +26,7 @@ export async function request(path, options = {}) {
   if (!response.ok) {
     const message = Array.isArray(data?.message)
       ? data.message.join(", ")
-      : data?.message || "Có lỗi xảy ra, hãy thử lại.";
+      : data?.message || "Error occurred, please try again.";
     const error = new Error(message);
     error.status = response.status;
     throw error;

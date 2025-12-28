@@ -594,7 +594,7 @@ function ChannelMeeting({
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString("vi-VN", {
+    return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
     });
@@ -646,14 +646,13 @@ function ChannelMeeting({
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
                   <div className="min-w-0">
-                    <p className="text-[11px] text-gray-400">
-                      Đang trong cuộc họp
-                    </p>
+                    <p className="text-[11px] text-gray-400">In a meeting</p>
                     <p className="truncate text-sm font-semibold text-white">
                       {meeting?.title || "Channel Meeting"}
                     </p>
                     <p className="text-[11px] text-gray-400">
-                      {participantCount} người tham gia
+                      {participantCount} participant
+                      {participantCount === 1 ? "" : "s"}
                     </p>
                   </div>
                 </div>
@@ -661,7 +660,7 @@ function ChannelMeeting({
                   <button
                     onClick={handleMinimizeToggle}
                     className="rounded-lg bg-gray-700 px-2 py-1 text-xs font-semibold text-white hover:bg-gray-600"
-                    title="Phóng to cuộc họp"
+                    title="Expand meeting"
                   >
                     <svg
                       className="h-4 w-4"
@@ -680,9 +679,9 @@ function ChannelMeeting({
                   <button
                     onClick={handleLeaveMeeting}
                     className="rounded-lg bg-red-600 px-2 py-1 text-xs font-semibold text-white hover:bg-red-700"
-                    title="Rời cuộc họp"
+                    title="Leave meeting"
                   >
-                    Rời
+                    Leave
                   </button>
                 </div>
               </div>
@@ -696,7 +695,7 @@ function ChannelMeeting({
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-xs text-gray-400">
-                    Đang chờ video...
+                    Waiting for video...
                   </div>
                 )}
               </div>
@@ -710,7 +709,7 @@ function ChannelMeeting({
                         ? "bg-gray-700 text-white hover:bg-gray-600"
                         : "bg-red-600 text-white hover:bg-red-700"
                     }`}
-                    title={isMicOn ? "Tắt mic" : "Bật mic"}
+                    title={isMicOn ? "Mute microphone" : "Unmute microphone"}
                   >
                     {isMicOn ? (
                       <svg
@@ -755,7 +754,7 @@ function ChannelMeeting({
                         ? "bg-gray-700 text-white hover:bg-gray-600"
                         : "bg-red-600 text-white hover:bg-red-700"
                     }`}
-                    title={isCameraOn ? "Tắt camera" : "Bật camera"}
+                    title={isCameraOn ? "Turn off camera" : "Turn on camera"}
                   >
                     {isCameraOn ? (
                       <svg
@@ -798,7 +797,7 @@ function ChannelMeeting({
                         : "bg-gray-700 text-white hover:bg-gray-600"
                     }`}
                     title={
-                      isScreenSharing ? "Dừng chia sẻ" : "Chia sẻ màn hình"
+                      isScreenSharing ? "Stop sharing" : "Share screen"
                     }
                   >
                     <svg
@@ -848,7 +847,7 @@ function ChannelMeeting({
               <button
                 onClick={handleMinimizeToggle}
                 className="p-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
-                title="Thu nhỏ cuộc họp"
+                title="Minimize meeting"
               >
                 <svg
                   className="h-5 w-5"

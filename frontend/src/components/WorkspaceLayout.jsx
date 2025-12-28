@@ -63,7 +63,7 @@ function WorkspaceLayout() {
       setChannels(channelsData);
     } catch (err) {
       console.error("Failed to fetch workspace data", err);
-      if (!silent) setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
+      if (!silent) setError(err.message || "An error occurred while loading data");
       // If 403 or 404, maybe redirect to home
       if (err.status === 403 || err.status === 404) {
         navigate("/workspaces");
@@ -90,12 +90,12 @@ function WorkspaceLayout() {
   if (error) {
     return (
       <div className="flex h-screen items-center justify-center flex-col gap-4 bg-white">
-        <p className="text-red-500 text-xl font-bold">Lỗi: {error}</p>
+        <p className="text-red-500 text-xl font-bold">Error: {error}</p>
         <button
           onClick={() => navigate("/workspaces")}
           className="px-4 py-2 bg-slate-900 text-white rounded hover:bg-slate-800"
         >
-          Quay lại danh sách
+          Back to List
         </button>
       </div>
     );
@@ -296,7 +296,7 @@ function WorkspaceLayout() {
           <div className="border-t border-slate-800 flex items-center justify-around px-3 py-3">
             <button
               onClick={() => setAdminPanelTab("settings")}
-              title="Cài đặt chung"
+              title="General Settings"
               className={`flex items-center justify-center w-10 h-10 rounded-lg transition ${
                 adminPanelTab === "settings"
                   ? "bg-blue-600 text-white shadow-lg"
@@ -326,7 +326,7 @@ function WorkspaceLayout() {
 
             <button
               onClick={() => setAdminPanelTab("members")}
-              title="Thành Viên"
+              title="Members"
               className={`flex items-center justify-center w-10 h-10 rounded-lg transition ${
                 adminPanelTab === "members"
                   ? "bg-blue-600 text-white shadow-lg"
@@ -351,7 +351,7 @@ function WorkspaceLayout() {
             {workspace?.myRole === "WORKSPACE_ADMIN" && (
               <button
                 onClick={() => setAdminPanelTab("requests")}
-                title="Yêu cầu tham gia"
+                title="Join Requests"
                 className={`flex items-center justify-center w-10 h-10 rounded-lg transition ${
                   adminPanelTab === "requests"
                     ? "bg-blue-600 text-white shadow-lg"
@@ -385,9 +385,9 @@ function WorkspaceLayout() {
                 <div className="flex items-center justify-between">
                   <h2 className="text-xl font-bold text-gray-900">
                     {adminPanelTab === "settings" &&
-                      "⚙️ Cài đặt thông tin chung"}
-                    {adminPanelTab === "members" && "👥 Thành Viên"}
-                    {adminPanelTab === "requests" && "📋 Yêu cầu tham gia"}
+                      "⚙️ General Settings"}
+                    {adminPanelTab === "members" && "👥 Members"}
+                    {adminPanelTab === "requests" && "📋 Join Requests"}
                   </h2>
                   <button
                     onClick={() => setAdminPanelTab(null)}

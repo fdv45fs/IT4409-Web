@@ -17,7 +17,7 @@ function JoinRequests({ workspaceId }) {
       // Backend returns { requests: [...], totalCount, myRole }
       setRequests(data.requests || []);
     } catch (err) {
-      setError(err.message || "Không thể tải danh sách yêu cầu");
+      setError(err.message || "Failed to load join requests");
     } finally {
       setIsLoading(false);
     }
@@ -50,12 +50,12 @@ function JoinRequests({ workspaceId }) {
       );
 
       // Show success message
-      setSuccessMessage("Đã chấp nhận yêu cầu thành công!");
+      setSuccessMessage("Request approved successfully!");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       // Rollback on error
       setRequests(originalRequests);
-      setError(err.message || "Không thể chấp nhận yêu cầu");
+      setError(err.message || "Failed to approve request");
     } finally {
       setActionLoading(null);
     }
@@ -63,7 +63,7 @@ function JoinRequests({ workspaceId }) {
 
   const handleReject = async (requestId) => {
     // Confirmation dialog
-    if (!window.confirm("Bạn có chắc muốn từ chối yêu cầu này?")) {
+    if (!window.confirm("Are you sure you want to reject this request?")) {
       return;
     }
 
@@ -79,12 +79,12 @@ function JoinRequests({ workspaceId }) {
       );
 
       // Show success message
-      setSuccessMessage("Đã từ chối yêu cầu");
+      setSuccessMessage("Request rejected");
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
       // Rollback on error
       setRequests(originalRequests);
-      setError(err.message || "Không thể từ chối yêu cầu");
+      setError(err.message || "Failed to reject request");
     } finally {
       setActionLoading(null);
     }
@@ -95,7 +95,7 @@ function JoinRequests({ workspaceId }) {
       <div className="flex items-center justify-center py-12 bg-gray-50 rounded-lg">
         <div className="text-center">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-600 border-t-transparent mx-auto"></div>
-          <p className="mt-3 text-sm text-gray-600">Đang tải yêu cầu tham gia...</p>
+          <p className="mt-3 text-sm text-gray-600">Loading join requests...</p>
         </div>
       </div>
     );
@@ -113,9 +113,9 @@ function JoinRequests({ workspaceId }) {
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Yêu cầu tham gia</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Join Requests</h1>
               <p className="mt-1 text-sm text-gray-600">
-                Xem xét và phê duyệt các yêu cầu tham gia workspace
+                Review and approve workspace join requests
               </p>
             </div>
           </div>
@@ -154,10 +154,10 @@ function JoinRequests({ workspaceId }) {
           {/* Card Header */}
           <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 via-slate-50/30 to-gray-50 px-8 py-6">
             <h2 className="text-xl font-bold text-gray-900">
-              Danh sách yêu cầu
+              Requests
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              <span className="font-semibold text-slate-600">{requests.length}</span> {requests.length === 1 ? 'yêu cầu đang chờ' : 'yêu cầu đang chờ'}
+              <span className="font-semibold text-slate-600">{requests.length}</span> {requests.length === 1 ? 'pending request' : 'pending requests'}
             </p>
           </div>
 
@@ -169,9 +169,9 @@ function JoinRequests({ workspaceId }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-base font-semibold text-gray-900">Không có yêu cầu nào đang chờ duyệt</p>
+              <p className="text-base font-semibold text-gray-900">No pending requests</p>
               <p className="mt-2 text-sm text-gray-600 max-w-sm mx-auto">
-                Khi có người muốn tham gia workspace, yêu cầu của họ sẽ xuất hiện ở đây để bạn xem xét
+                When someone requests to join this workspace, their request will appear here for review.
               </p>
             </div>
           ) : (
@@ -189,7 +189,7 @@ function JoinRequests({ workspaceId }) {
                         <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
-                        Mới
+                        New
                       </span>
                     </div>
                   )}
@@ -216,7 +216,7 @@ function JoinRequests({ workspaceId }) {
                         <svg className="h-3.5 w-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        {new Date(request.createdAt).toLocaleString("vi-VN", {
+                          {new Date(request.createdAt).toLocaleString("en-US", {
                           day: "2-digit",
                           month: "2-digit",
                           year: "numeric",
@@ -233,7 +233,7 @@ function JoinRequests({ workspaceId }) {
                       onClick={() => handleAccept(request.id)}
                       disabled={actionLoading === request.id}
                       className="group/accept inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-slate-500/30 hover:shadow-xl hover:shadow-slate-500/40 hover:from-slate-700 hover:to-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-500/50 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none transition-all duration-200"
-                      title="Chấp nhận yêu cầu tham gia"
+                      title="Approve join request"
                     >
                       {actionLoading === request.id ? (
                         <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -245,13 +245,13 @@ function JoinRequests({ workspaceId }) {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       )}
-                      Chấp nhận
+                      Approve
                     </button>
                     <button
                       onClick={() => handleReject(request.id)}
                       disabled={actionLoading === request.id}
                       className="group/reject inline-flex items-center justify-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 hover:border-red-300 hover:bg-red-50 hover:text-red-700 hover:shadow-md focus:outline-none focus:ring-4 focus:ring-red-500/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
-                      title="Từ chối yêu cầu"
+                      title="Reject request"
                     >
                       {actionLoading === request.id ? (
                         <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -263,7 +263,7 @@ function JoinRequests({ workspaceId }) {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       )}
-                      Từ chối
+                      Reject
                     </button>
                   </div>
                 </li>

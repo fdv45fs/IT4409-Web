@@ -8,13 +8,13 @@ import { CheckCircle2, AlertCircle, Loader2, UserPlus } from "lucide-react";
 const registerFields = [
   {
     name: "fullName",
-    label: "Họ và tên",
+    label: "Full Name",
     type: "text",
-    placeholder: "Nguyễn Văn A",
+    placeholder: "John Doe",
   },
   {
     name: "username",
-    label: "Tên đăng nhập",
+    label: "Username",
     type: "text",
     placeholder: "hustian"
   },
@@ -22,33 +22,33 @@ const registerFields = [
     name: "email",
     label: "Email",
     type: "email",
-    placeholder: "nhap-email@domain.com",
+    placeholder: "enter-email@domain.com",
   },
   {
     name: "password",
-    label: "Mật khẩu",
+    label: "Password",
     type: "password",
     placeholder: "••••••••",
   },
   {
     name: "confirmPassword",
-    label: "Nhập lại mật khẩu",
+    label: "Confirm Password",
     type: "password",
     placeholder: "••••••••",
   },
   {
     name: "gender",
-    label: "Giới tính",
+    label: "Gender",
     type: "select",
     options: [
-      { value: "male", label: "Nam" },
-      { value: "female", label: "Nữ" },
-      { value: "other", label: "Khác" },
+      { value: "male", label: "Male" },
+      { value: "female", label: "Female" },
+      { value: "other", label: "Other" },
     ],
   },
   {
     name: "dateOfBirth",
-    label: "Ngày sinh",
+    label: "Date of Birth",
     type: "date",
   },
 ];
@@ -81,7 +81,7 @@ function RegisterPage() {
 
     // Validate password confirmation
     if (formState.password !== formState.confirmPassword) {
-      setError("Mật khẩu nhập lại không khớp");
+      setError("Passwords do not match");
       return;
     }
 
@@ -92,7 +92,7 @@ function RegisterPage() {
       const { confirmPassword, ...registerData } = formState;
       const result = await register(registerData);
       setSuccess({
-        message: "Tạo tài khoản thành công!",
+        message: "Account created successfully!",
         user: result.user,
       });
     } catch (err) {
@@ -104,13 +104,13 @@ function RegisterPage() {
 
   return (
     <TetAuthLayout
-      title="Đăng ký tài khoản"
-      subtitle="Nhập thông tin cá nhân để khởi tạo hồ sơ"
+      title="Create Account"
+      subtitle="Enter your personal information to create profile"
       footer={
         <span>
-          Bạn đã có tài khoản?{" "}
+          Already have an account?{" "}
           <Link to="/login" className="font-medium text-red-600 underline-offset-2 hover:text-red-700 transition-colors">
-            Đăng nhập
+            Sign In
           </Link>
         </span>
       }
@@ -144,14 +144,14 @@ function RegisterPage() {
               <span className="font-semibold">{success.message}</span>
             </div>
             <p className="mt-1 text-xs text-emerald-600 ml-7">
-              Xin chào {success.user?.fullName || success.user?.email}! Bạn có thể đăng nhập ngay.
+              Welcome {success.user?.fullName || success.user?.email}! You can sign in now.
             </p>
             <Link
               to="/login"
               className="mt-3 ml-7 inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:text-emerald-800 underline underline-offset-2"
             >
               <HorseIcon className="h-3 w-3" />
-              Đi đến trang đăng nhập
+              Go to sign in page
             </Link>
           </div>
         )}
@@ -165,12 +165,12 @@ function RegisterPage() {
           {isLoading ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Đang xử lý...</span>
+              <span>Processing...</span>
             </>
           ) : (
             <>
               <UserPlus className="h-5 w-5" />
-              <span>Tạo tài khoản</span>
+              <span>Create Account</span>
             </>
           )}
         </button>
@@ -178,7 +178,7 @@ function RegisterPage() {
         {/* Benefits hint */}
         <div className="flex items-center justify-center gap-2 text-xs text-amber-600/80">
           <RedEnvelopeIcon className="h-4 w-4 text-red-500" />
-          <span>Đăng ký ngay để nhận nhiều ưu đãi năm mới!</span>
+          <span>Register now to receive New Year benefits!</span>
         </div>
       </form>
     </TetAuthLayout>

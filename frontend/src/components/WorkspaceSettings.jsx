@@ -42,11 +42,11 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
         method: "PATCH",
         body: JSON.stringify(formData),
       });
-      setSaveMessage({ type: "success", content: "Cập nhật thành công!" });
+      setSaveMessage({ type: "success", content: "Updated successfully!" });
     } catch (err) {
       setSaveMessage({
         type: "error",
-        content: err.message || "Lỗi khi cập nhật",
+        content: err.message || "Error updating workspace",
       });
     } finally {
       setIsSaving(false);
@@ -56,7 +56,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
   const handleDeleteWorkspace = async () => {
     if (
       !window.confirm(
-        "Bạn có chắc chắn muốn xóa Workspace này? Hành động này không thể hoàn tác!"
+        "Are you sure you want to delete this Workspace? This action cannot be undone!"
       )
     ) {
       return;
@@ -66,11 +66,11 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
       await authFetch(`/api/workspaces/${workspaceId}`, {
         method: "DELETE",
       });
-      addToast("Workspace đã bị xóa", "success");
+      addToast("Workspace deleted", "success");
       onClose();
       // Navigate will be handled by parent or route
     } catch (err) {
-      addToast(err.message || "Lỗi khi xóa workspace", "error");
+      addToast(err.message || "Error deleting workspace", "error");
     }
   };
 
@@ -87,17 +87,17 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
 
   const handleCopyInviteCode = async () => {
     if (!workspace?.joinCode) {
-      addToast("Không tìm thấy mã tham gia", "error");
+      addToast("Invite code not found", "error");
       return;
     }
 
     try {
       await navigator.clipboard.writeText(workspace.joinCode);
       setCopySuccess(true);
-      addToast("Đã sao chép mã tham gia", "success");
+      addToast("Invite code copied", "success");
       setTimeout(() => setCopySuccess(false), 2000);
     } catch (err) {
-      addToast("Không thể sao chép mã", "error");
+      addToast("Unable to copy code", "error");
     }
   };
 
@@ -114,9 +114,9 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
               </svg>
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Cài đặt Workspace</h1>
+              <h1 className="text-3xl font-bold text-gray-900">Workspace Settings</h1>
               <p className="mt-1 text-sm text-gray-600">
-                Quản lý thông tin và cấu hình workspace của bạn
+                Manage your workspace information and configuration
               </p>
             </div>
           </div>
@@ -134,9 +134,9 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                 </div>
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-bold text-slate-900">Chế độ chỉ xem</h3>
+                <h3 className="text-sm font-bold text-slate-900">View-only mode</h3>
                 <p className="mt-1 text-sm text-slate-800 leading-relaxed">
-                  Bạn là thành viên workspace. Để chỉnh sửa cài đặt, vui lòng liên hệ với quản trị viên.
+                  You are a workspace member. To edit settings, please contact an administrator.
                 </p>
               </div>
             </div>
@@ -154,9 +154,9 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                   </svg>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-sm font-bold text-gray-900">Mã tham gia Workspace</h3>
+                  <h3 className="text-sm font-bold text-gray-900">Workspace invite code</h3>
                   <p className="mt-1.5 text-xs text-gray-600 leading-relaxed">
-                    Chia sẻ mã này để mời thành viên mới tham gia workspace của bạn
+                    Share this code to invite new members to your workspace
                   </p>
                 </div>
               </div>
@@ -190,14 +190,14 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                     <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
-                    Đã sao chép!
+                    Copied!
                   </>
                 ) : (
                   <>
                     <svg className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    Sao chép mã tham gia
+                    Copy invite code
                   </>
                 )}
               </button>
@@ -209,9 +209,9 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                   </svg>
                   <div className="flex-1 space-y-1">
-                    <p className="text-xs font-semibold text-slate-900">Lưu ý quan trọng</p>
+                    <p className="text-xs font-semibold text-slate-900">Important note</p>
                     <p className="text-xs text-slate-800 leading-relaxed">
-                      Mã này được tạo cố định khi workspace được khởi tạo. Chỉ chia sẻ với người bạn tin tưởng để đảm bảo an toàn cho workspace.
+                      This code is created once when the workspace is initialized. Only share it with people you trust to keep the workspace secure.
                     </p>
                   </div>
                 </div>
@@ -225,10 +225,10 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
           {/* Card Header */}
           <div className="bg-gradient-to-r from-gray-50 via-slate-50/30 to-gray-50 border-b border-gray-200 px-8 py-6">
             <h2 className="text-xl font-bold text-gray-900">
-              Thông tin cơ bản
+              Basic info
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Cập nhật tên, mô tả và cài đặt quyền riêng tư cho workspace
+              Update the name, description, and privacy settings for the workspace
             </p>
           </div>
 
@@ -274,7 +274,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                   <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
-                  Tên Workspace
+                  Workspace name
                 </label>
                 <input
                   type="text"
@@ -283,7 +283,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                     setFormData({ ...formData, name: e.target.value })
                   }
                   disabled={!isAdmin}
-                  placeholder="VD: Team Marketing, Dự án Alpha..."
+                  placeholder="E.g., Marketing Team, Project Alpha..."
                   className={`block w-full rounded-xl border-2 px-4 py-3.5 text-sm font-medium text-gray-900 transition-all ${
                     isAdmin
                       ? "border-gray-200 bg-white hover:border-slate-300 focus:border-slate-500 focus:outline-none focus:ring-4 focus:ring-slate-500/10"
@@ -299,7 +299,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                   <svg className="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Mô tả
+                  Description
                 </label>
                 <textarea
                   value={formData.description}
@@ -308,7 +308,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                   }
                   rows={4}
                   disabled={!isAdmin}
-                  placeholder="Mô tả ngắn gọn về workspace, mục đích sử dụng và các thành viên..."
+                  placeholder="Briefly describe the workspace, its purpose, and members..."
                   className={`block w-full rounded-xl border-2 px-4 py-3.5 text-sm text-gray-900 transition-all resize-none ${
                     isAdmin
                       ? "border-gray-200 bg-white hover:border-slate-300 focus:border-slate-500 focus:outline-none focus:ring-4 focus:ring-slate-500/10"
@@ -316,7 +316,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                   }`}
                 />
                 <p className="mt-2 text-xs text-gray-500">
-                  {formData.description.length} ký tự
+                  {formData.description.length} characters
                 </p>
               </div>
 
@@ -331,10 +331,10 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                     </div>
                     <div className="flex-1">
                       <label htmlFor="isPrivate" className="block text-sm font-bold text-gray-900 cursor-pointer">
-                        Workspace riêng tư
+                        Private workspace
                       </label>
                       <p className="mt-1.5 text-xs text-gray-600 leading-relaxed">
-                        Kích hoạt để yêu cầu phê duyệt từ quản trị viên trước khi thành viên mới có thể tham gia workspace
+                        Require admin approval before new members can join the workspace
                       </p>
                     </div>
                   </div>
@@ -369,7 +369,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
-                    Đặt lại
+                    Reset
                   </button>
                   <button
                     type="submit"
@@ -382,14 +382,14 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Đang lưu...
+                        Saving...
                       </>
                     ) : (
                       <>
                         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
-                        Lưu thay đổi
+                        Save changes
                       </>
                     )}
                   </button>
@@ -410,14 +410,14 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                   </svg>
                 </div>
                 <h3 className="text-lg font-bold text-red-700">
-                  Vùng nguy hiểm
+                  Danger zone
                 </h3>
               </div>
             </div>
             <div className="p-8">
               <p className="mb-5 text-sm text-gray-700 leading-relaxed">
-                Xóa workspace sẽ xóa vĩnh viễn <strong className="text-gray-900">tất cả kênh, tin nhắn, thành viên và dữ liệu</strong> liên quan.
-                <span className="block mt-2 text-red-700 font-bold">⚠️ Hành động này không thể hoàn tác.</span>
+                Deleting a workspace will permanently remove <strong className="text-gray-900">all channels, messages, members, and related data</strong>.
+                <span className="block mt-2 text-red-700 font-bold">⚠️ This action cannot be undone.</span>
               </p>
               <button
                 onClick={handleDeleteWorkspace}
@@ -426,7 +426,7 @@ function WorkspaceSettings({ workspace, workspaceId, isAdmin, onClose }) {
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
-                Xóa Workspace
+                Delete Workspace
               </button>
             </div>
           </div>

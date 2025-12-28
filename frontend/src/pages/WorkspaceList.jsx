@@ -48,12 +48,12 @@ function WorkspaceList() {
       const data = await authFetch("/api/workspaces");
       setWorkspaces(data);
     } catch (err) {
-      let errorMsg = err.message || "Không thể tải danh sách workspace";
+      let errorMsg = err.message || "Cannot load workspace list";
 
       if (err.status === 401) {
-        errorMsg = "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.";
+        errorMsg = "Session expired. Please sign in again.";
       } else if (err.status === 500) {
-        errorMsg = "Lỗi server khi tải workspaces. Vui lòng thử lại sau.";
+        errorMsg = "Server error loading workspaces. Please try again later.";
       }
 
       setError(errorMsg);
@@ -80,12 +80,12 @@ function WorkspaceList() {
     if (result.status === "APPROVED") {
       fetchWorkspaces();
       setSuccessMessage(
-        `Đã tham gia workspace "${result.workspaceName}" thành công!`
+        `Successfully joined workspace "${result.workspaceName}"!`
       );
       setTimeout(() => setSuccessMessage(""), 5000);
     } else {
       setSuccessMessage(
-        `Yêu cầu tham gia workspace "${result.workspaceName}" đang chờ phê duyệt`
+        `Request to join workspace "${result.workspaceName}" is pending approval`
       );
       setTimeout(() => setSuccessMessage(""), 5000);
     }
@@ -113,7 +113,7 @@ function WorkspaceList() {
           {/* Badge */}
           <div className="mb-4 inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-red-100 via-amber-100 to-yellow-100 px-6 py-3 text-sm font-medium text-red-700 ring-2 ring-red-200 shadow-lg shadow-red-100">
             <LanternIcon className="h-5 w-5 animate-swing text-red-500" />
-            <span>Năm 2026</span>
+            <span>Year 2026</span>
             <LanternIcon
               className="h-5 w-5 animate-swing text-red-500"
               style={{ animationDelay: "1.5s" }}
@@ -122,14 +122,14 @@ function WorkspaceList() {
 
           {/* Title */}
           <h1 className="mt-6 text-5xl font-bold lg:text-6xl">
-            <span className="animate-rainbow-text">Chúc Mừng Năm Mới!</span>
+            <span className="animate-rainbow-text">Happy New Year!</span>
           </h1>
 
           {/* Subtitle */}
           <p className="mx-auto mt-6 max-w-xl text-lg text-gray-600">
-            Chọn workspace để bắt đầu làm việc cùng team.
+            Choose a workspace to start working with your team.
             <br />
-            Chúc bạn năm mới an khang thịnh vượng!
+            Wishing you prosperity and success in the new year!
           </p>
 
           {/* Decorative Icons */}
@@ -187,7 +187,7 @@ function WorkspaceList() {
                 </div>
               </div>
               <p className="mt-8 text-xl font-medium text-gray-700">
-                Đang tải workspaces...
+                Loading workspaces...
               </p>
               <div className="mt-4 flex justify-center gap-4">
                 <ApricotBlossomIcon className="h-6 w-6 text-yellow-500 animate-bloom" />
@@ -206,7 +206,7 @@ function WorkspaceList() {
           <div className="mb-12">
             <h2 className="mb-6 flex items-center gap-3 text-sm font-semibold uppercase tracking-wider text-amber-700">
               <ApricotBlossomIcon className="h-5 w-5 text-yellow-500 animate-bloom" />
-              <span>Workspaces của bạn ({workspaces.length})</span>
+              <span>Your Workspaces ({workspaces.length})</span>
               <PeachBlossomIcon
                 className="h-5 w-5 text-pink-400 animate-bloom"
                 style={{ animationDelay: "0.5s" }}
@@ -262,7 +262,7 @@ function WorkspaceList() {
                           navigate(`/workspace/${workspace.id}/admin`);
                         }}
                         className="rounded-lg p-2 text-amber-400 opacity-0 transition-all hover:bg-amber-50 hover:text-red-600 hover:rotate-90 group-hover:opacity-100"
-                        title="Quản lý workspace"
+                        title="Manage workspace"
                       >
                         <Settings className="h-5 w-5" />
                       </button>
@@ -273,12 +273,12 @@ function WorkspaceList() {
                     </h3>
                     <p className="mt-1 flex items-center gap-1.5 text-sm text-amber-600/80">
                       <Users className="h-4 w-4" />
-                      <span>{workspace.memberCount} thành viên</span>
+                      <span>{workspace.memberCount} members</span>
                     </p>
 
                     <div className="mt-4 flex items-center gap-2 text-sm font-medium text-red-600 opacity-0 group-hover:opacity-100">
                       <HorseIcon className="h-4 w-4 animate-bounce" />
-                      <span>Mở workspace</span>
+                      <span>Open workspace</span>
                       <ChevronRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
                     </div>
                   </div>
@@ -294,12 +294,12 @@ function WorkspaceList() {
             <div className="relative bg-gradient-to-r from-red-500 via-amber-500 to-yellow-500 px-8 py-8 text-center text-white overflow-hidden">
               <PartyPopper className="relative mx-auto h-16 w-16 mb-3 animate-heartbeat" />
               <h3 className="relative text-2xl font-bold">
-                Chưa có workspace nào
+                No workspaces yet
               </h3>
             </div>
             <div className="p-8 text-center bg-gradient-to-b from-white to-amber-50">
               <p className="text-gray-600 mb-4">
-                Tạo workspace mới hoặc tham gia để bắt đầu năm mới!
+                Create a new workspace or join one to start the new year!
               </p>
               <div className="flex justify-center gap-4">
                 {[
@@ -332,7 +332,7 @@ function WorkspaceList() {
               <span className="bg-gradient-to-r from-red-50 via-amber-50 to-yellow-50 px-6 flex items-center gap-4">
                 <ApricotBlossomIcon className="h-5 w-5 text-yellow-500 animate-bloom" />
                 <span className="text-sm font-bold uppercase tracking-wider text-amber-700">
-                  HOẶC
+                  OR
                 </span>
                 <PeachBlossomIcon className="h-5 w-5 text-pink-400 animate-bloom" />
               </span>
@@ -347,7 +347,7 @@ function WorkspaceList() {
               className="h-5 w-5 text-red-500 animate-bounce"
               style={{ animationDuration: "2s" }}
             />
-            <span>Tạo hoặc tham gia workspace</span>
+            <span>Create or Join Workspace</span>
           </h2>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -364,10 +364,10 @@ function WorkspaceList() {
               </div>
 
               <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">
-                Tạo workspace mới
+                Create new workspace
               </span>
               <span className="mt-2 flex items-center gap-2 text-sm text-amber-600/80">
-                <span>Khởi tạo không gian làm việc</span>
+                <span>Initialize work space</span>
                 <Star className="h-4 w-4 text-yellow-500 animate-sparkle" />
               </span>
             </button>
@@ -385,10 +385,10 @@ function WorkspaceList() {
               </div>
 
               <span className="mt-5 text-lg font-bold text-gray-900 group-hover:text-red-700">
-                Tham gia bằng mã
+                Join with code
               </span>
               <span className="mt-2 flex items-center gap-2 text-sm text-red-600/80">
-                <span>Nhập mã mời để tham gia</span>
+                <span>Enter invite code to join</span>
                 <RedEnvelopeIcon className="h-4 w-4 text-red-500 animate-bounce" />
               </span>
             </button>
@@ -403,11 +403,11 @@ function WorkspaceList() {
                 <LanternIcon className="h-10 w-10 text-red-500 animate-swing" />
                 <div>
                   <p className="text-xl font-bold animate-rainbow-text">
-                    Chúc Mừng Năm Mới 2026
+                    Happy New Year 2026
                   </p>
                   <p className="mt-1 flex items-center justify-center gap-2 text-sm text-amber-700 font-medium">
                     <HorseIcon className="h-4 w-4" />
-                    <span>An Khang Thịnh Vượng - Vạn Sự Như Ý</span>
+                    <span>Peace, Prosperity and Success</span>
                     <HorseIcon className="h-4 w-4" />
                   </p>
                 </div>

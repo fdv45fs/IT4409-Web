@@ -100,7 +100,7 @@ export function AuthProvider({ children }) {
       }
       if (!tokenToUse) {
         await logout();
-        throw new Error("Phiên đăng nhập đã hết hạn.");
+        throw new Error("Session expired.");
       }
 
       try {
@@ -110,7 +110,7 @@ export function AuthProvider({ children }) {
           const newToken = await refreshWithRedirect().catch(() => null);
           if (!newToken) {
             await logout();
-            throw new Error("Phiên đăng nhập đã hết hạn.");
+            throw new Error("Session expired.");
           }
           return makeRequest(newToken);
         }
@@ -141,7 +141,7 @@ export function AuthProvider({ children }) {
       }
       if (!tokenToUse) {
         await logout();
-        throw new Error("Phiên đăng nhập đã hết hạn.");
+        throw new Error("Session expired.");
       }
 
       let response = await makeRequest(tokenToUse);
@@ -149,13 +149,13 @@ export function AuthProvider({ children }) {
         const newToken = await refreshWithRedirect().catch(() => null);
         if (!newToken) {
           await logout();
-          throw new Error("Phiên đăng nhập đã hết hạn.");
+          throw new Error("Session expired.");
         }
         response = await makeRequest(newToken);
       }
 
       if (!response.ok) {
-        const error = new Error("Có lỗi xảy ra, hãy thử lại.");
+        const error = new Error("Request failed");
         error.status = response.status;
         throw error;
       }

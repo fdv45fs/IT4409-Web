@@ -20,7 +20,7 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
     setError("");
 
     if (!joinCode.trim()) {
-      setError("Vui lòng nhập mã tham gia");
+      setError("Please enter join code");
       return;
     }
 
@@ -33,7 +33,7 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
 
       onSuccess(result);
     } catch (err) {
-      setError(err.message || "Không thể tham gia workspace");
+      setError(err.message || "Failed to join workspace");
     } finally {
       setIsLoading(false);
     }
@@ -69,8 +69,8 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
               <UserPlus className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-bold">Tham gia Workspace</h2>
-              <p className="text-sm text-red-100">Nhập mã để kết nối!</p>
+              <h2 className="text-xl font-bold">Join Workspace</h2>
+              <p className="text-sm text-red-100">Enter code to connect!</p>
             </div>
           </div>
 
@@ -96,7 +96,7 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
           {/* Join Code Input */}
           <div className="mb-6">
             <label htmlFor="joinCode" className="mb-2 block text-sm font-medium text-gray-700">
-              Mã tham gia
+              Join Code
             </label>
             <div className="relative">
               <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2">
@@ -115,7 +115,7 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
             </div>
             <p className="mt-2 flex items-center justify-center gap-2 text-xs text-gray-500">
               <RedEnvelopeIcon className="h-3 w-3 text-red-400" />
-              <span>Nhập mã được chia sẻ bởi admin của workspace</span>
+              <span>Enter code shared by workspace admin</span>
             </p>
           </div>
 
@@ -123,8 +123,8 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
           <div className="mb-6 flex items-center justify-center gap-4 rounded-xl bg-gradient-to-r from-amber-50 to-yellow-50 py-4">
             <LanternIcon className="h-10 w-10 text-red-500 animate-swing" />
             <div className="text-center">
-              <p className="text-sm font-medium text-amber-800">Tham gia cùng team!</p>
-              <p className="text-xs text-amber-600">Cộng tác và phát triển</p>
+              <p className="text-sm font-medium text-amber-800">Join the team!</p>
+              <p className="text-xs text-amber-600">Collaborate and grow</p>
             </div>
             <LanternIcon className="h-10 w-10 text-red-500 animate-swing" style={{ animationDelay: '1.5s' }} />
           </div>
@@ -136,7 +136,7 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
               onClick={onClose}
               className="flex-1 rounded-xl border-2 border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
             >
-              Hủy
+              Cancel
             </button>
             <button
               type="submit"
@@ -146,12 +146,12 @@ function JoinWorkspaceModal({ onClose, onSuccess }) {
               {isLoading ? (
                 <>
                   <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Đang xử lý...</span>
+                  <span>Processing...</span>
                 </>
               ) : (
                 <>
                   <HorseIcon className="h-5 w-5" />
-                  <span>Tham gia</span>
+                  <span>Join</span>
                 </>
               )}
             </button>

@@ -49,7 +49,7 @@ const LinkPreviewCard = memo(function LinkPreviewCard({ url, authFetch }) {
         return (
             <div className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 bg-gray-50">
                 <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                <span className="text-sm text-gray-500">Đang tải xem trước...</span>
+                                <span className="text-sm text-gray-500">Loading preview...</span>
             </div>
         );
     }

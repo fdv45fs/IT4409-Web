@@ -47,7 +47,7 @@ function Profile() {
         dateOfBirth: data.dateOfBirth ? data.dateOfBirth.split("T")[0] : "",
       });
     } catch (err) {
-      setError(err.message || "Không thể tải thông tin hồ sơ");
+      setError(err.message || "Failed to load profile information");
     } finally {
       setIsLoading(false);
     }
@@ -71,10 +71,10 @@ function Profile() {
       });
       setProfile(updatedProfile);
       updateCurrentUser(updatedProfile); // Update context
-      setSuccess("Cập nhật hồ sơ thành công!");
+      setSuccess("Profile updated successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.message || "Không thể cập nhật hồ sơ");
+      setError(err.message || "Failed to update profile");
     } finally {
       setIsEditingProfile(false);
     }
@@ -85,11 +85,11 @@ function Profile() {
     const file = event.target.files?.[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        setError("Vui lòng chọn file ảnh");
+        setError("Please select an image file");
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setError("Kích thước ảnh không được vượt quá 5MB");
+        setError("Image size must not exceed 5MB");
         return;
       }
       setAvatarFile(file);
@@ -120,10 +120,10 @@ function Profile() {
       updateCurrentUser(updatedProfile); 
       setAvatarFile(null);
       setAvatarPreview(null);
-      setSuccess("Cập nhật avatar thành công!");
+      setSuccess("Avatar updated successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.message || "Không thể cập nhật avatar");
+      setError(err.message || "Failed to update avatar");
     } finally {
       setIsUploadingAvatar(false);
     }
@@ -136,12 +136,12 @@ function Profile() {
     setSuccess("");
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setError("Mật khẩu mới không khớp");
+      setError("New passwords do not match");
       return;
     }
 
     if (passwordForm.newPassword.length < 6) {
-      setError("Mật khẩu mới phải có ít nhất 6 ký tự");
+      setError("New password must be at least 6 characters");
       return;
     }
 
@@ -161,10 +161,10 @@ function Profile() {
         newPassword: "",
         confirmPassword: "",
       });
-      setSuccess("Đổi mật khẩu thành công!");
+      setSuccess("Password changed successfully!");
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
-      setError(err.message || "Không thể đổi mật khẩu");
+      setError(err.message || "Failed to change password");
     } finally {
       setIsChangingPassword(false);
     }
@@ -175,7 +175,7 @@ function Profile() {
       <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-          <p className="mt-4 text-gray-600">Đang tải...</p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -206,8 +206,8 @@ function Profile() {
               </svg>
             </button>
             <div>
-              <h1 className="text-xl font-bold text-amber-800">Hồ sơ cá nhân</h1>
-              <p className="text-sm text-amber-600">Quản lý thông tin tài khoản</p>
+              <h1 className="text-xl font-bold text-amber-800">Profile</h1>
+              <p className="text-sm text-amber-600">Manage account information</p>
             </div>
           </div>
         </div>
@@ -273,7 +273,7 @@ function Profile() {
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
-                  Chọn ảnh
+                  Select Image
                 </label>
                 <input
                   id="avatar-upload"
@@ -289,7 +289,7 @@ function Profile() {
                       disabled={isUploadingAvatar}
                       className="flex-1 rounded-lg bg-red-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
                     >
-                      {isUploadingAvatar ? "Đang tải..." : "Lưu"}
+                      {isUploadingAvatar ? "Uploading..." : "Save"}
                     </button>
                     <button
                       onClick={() => {
@@ -298,7 +298,7 @@ function Profile() {
                       }}
                       className="rounded-lg border border-amber-200 px-3 py-2 text-sm font-medium text-amber-800 transition hover:bg-amber-50"
                     >
-                      Hủy
+                      Cancel
                     </button>
                   </div>
                 )}
@@ -319,7 +319,7 @@ function Profile() {
                       : "border-transparent text-amber-600 hover:border-amber-200 hover:text-amber-700"
                   }`}
                 >
-                  Thông tin cá nhân
+                  Personal Information
                 </button>
                 <button
                   onClick={() => setActiveTab("password")}
@@ -329,7 +329,7 @@ function Profile() {
                       : "border-transparent text-amber-600 hover:border-amber-200 hover:text-amber-700"
                   }`}
                 >
-                  Đổi mật khẩu
+                  Change Password
                 </button>
               </nav>
             </div>
@@ -340,7 +340,7 @@ function Profile() {
                 <form onSubmit={handleUpdateProfile} className="space-y-4">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Họ và tên
+                      Full Name
                     </label>
                     <input
                       type="text"
@@ -357,7 +357,7 @@ function Profile() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Giới tính
+                      Gender
                     </label>
                     <select
                       value={profileForm.gender}
@@ -369,16 +369,16 @@ function Profile() {
                       }
                       className="w-full rounded-lg border border-amber-200 px-4 py-2.5 text-sm transition focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
                     >
-                      <option value="">Chọn giới tính</option>
-                      <option value="male">Nam</option>
-                      <option value="female">Nữ</option>
-                      <option value="other">Khác</option>
+                      <option value="">Select gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Ngày sinh
+                      Date of Birth
                     </label>
                     <input
                       type="date"
@@ -399,7 +399,7 @@ function Profile() {
                       disabled={isEditingProfile}
                       className="rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
                     >
-                      {isEditingProfile ? "Đang lưu..." : "Lưu thay đổi"}
+                      {isEditingProfile ? "Saving..." : "Save Changes"}
                     </button>
                   </div>
                 </form>
@@ -409,7 +409,7 @@ function Profile() {
                 <form onSubmit={handleChangePassword} className="space-y-4">
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Mật khẩu hiện tại
+                      Current Password
                     </label>
                     <input
                       type="password"
@@ -427,7 +427,7 @@ function Profile() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Mật khẩu mới
+                      New Password
                     </label>
                     <input
                       type="password"
@@ -445,7 +445,7 @@ function Profile() {
 
                   <div>
                     <label className="mb-2 block text-sm font-medium text-gray-700">
-                      Nhập lại mật khẩu mới
+                      Confirm New Password
                     </label>
                     <input
                       type="password"
@@ -467,7 +467,7 @@ function Profile() {
                       disabled={isChangingPassword}
                       className="rounded-lg bg-red-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
                     >
-                      {isChangingPassword ? "Đang đổi..." : "Đổi mật khẩu"}
+                      {isChangingPassword ? "Changing..." : "Change Password"}
                     </button>
                   </div>
                 </form>

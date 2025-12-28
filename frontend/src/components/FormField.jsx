@@ -15,7 +15,7 @@ function FormField({
       <label htmlFor={id} className="block text-sm">
         <span className="mb-1 inline-flex items-center gap-2 font-medium text-gray-700">
           {label}
-          {optional && <span className="text-xs text-gray-400">(không bắt buộc)</span>}
+          {optional && <span className="text-xs text-gray-400">(optional)</span>}
         </span>
         <div className="relative rounded-lg border border-gray-300 bg-white">
           <select
@@ -40,7 +40,7 @@ function FormField({
     <label htmlFor={id} className="block text-sm">
       <span className="mb-1 inline-flex items-center gap-2 font-medium text-gray-700">
         {label}
-        {optional && <span className="text-xs text-gray-400">(không bắt buộc)</span>}
+        {optional && <span className="text-xs text-gray-400">(optional)</span>}
       </span>
       <div className="relative rounded-lg border border-gray-300 bg-white focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500">
         <input

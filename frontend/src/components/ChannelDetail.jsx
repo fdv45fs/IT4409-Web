@@ -18,6 +18,7 @@ import UpdateChannelModal from "./UpdateChannelModal";
 import AddChannelMemberModal from "./AddChannelMemberModal";
 import ChannelMembersModal from "./ChannelMembersModal";
 import ChannelJoinRequestsModal from "./ChannelJoinRequestsModal";
+import ConfirmationModal from "./ConfirmationModal";
 import ChannelFiles from "./ChannelFiles";
 import ChannelMeeting from "./ChannelMeeting";
 import ChannelChat from "./ChannelChat";
@@ -59,6 +60,9 @@ function ChannelDetail() {
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
   const [isMembersModalOpen, setIsMembersModalOpen] = useState(false);
   const [isRequestsModalOpen, setIsRequestsModalOpen] = useState(false);
+  const [isLeaveConfirmOpen, setIsLeaveConfirmOpen] = useState(false);
+  const [isDeletePostConfirmOpen, setIsDeletePostConfirmOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState(null);
   const [activeTab, setActiveTab] = useState("chat");
   const [isMeetingMinimized, setIsMeetingMinimized] = useState(false);
   const [onlineUsersCount, setOnlineUsersCount] = useState(0);
@@ -78,7 +82,7 @@ function ChannelDetail() {
         setChannel(channelData);
         setMembers(membersData);
       } catch (err) {
-        addToast(err.message || "Không tải được thông tin channel", "error");
+        addToast(err.message || "Failed to load channel information", "error");
       } finally {
         if (!silent) setIsLoading(false);
       }
@@ -92,7 +96,7 @@ function ChannelDetail() {
       const data = await getPosts(channelId, authFetch);
       setPosts(Array.isArray(data) ? data : []);
     } catch (err) {
-      addToast(err.message || "Không tải được danh sách bài đăng", "error");
+      addToast(err.message || "Failed to load posts", "error");
     } finally {
       setIsPostsLoading(false);
     }
@@ -123,50 +127,53 @@ function ChannelDetail() {
   };
 
   const handleLeaveChannel = async () => {
-    if (!window.confirm("Bạn có chắc chắn muốn rời khỏi channel này?")) return;
+    setIsLeaveConfirmOpen(true);
+  };
+
+  const confirmLeaveChannel = async () => {
     try {
       await leaveChannel(channelId, authFetch);
       if (refreshChannels) refreshChannels();
       navigate(`/workspace/${workspace.id}`);
     } catch (err) {
-      addToast(err.message || "Không thể rời channel", "error");
+      addToast(err.message || "Failed to leave channel", "error");
     }
   };
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
     if (!postContent.trim() && postFiles.length === 0) {
-      addToast("Nội dung hoặc file không được để trống", "error");
+      addToast("Content or files cannot be empty", "error");
       return;
     }
     setIsPosting(true);
     try {
-      // 1. Tạo bài đăng trước
+      // 1. Create post first
       const newPost = await createPost(
         channelId,
-        { content: postContent.trim() || " " },
+        { content: postContent.trim() || "" },
         authFetch
       );
 
-      // 2. Upload files nếu có
+      // 2. Upload files if any
       if (postFiles.length > 0) {
         setIsUploadingFiles(true);
         try {
           await uploadPostFiles(channelId, newPost.id, postFiles, authFetch);
         } catch (uploadErr) {
           console.error("Failed to upload files:", uploadErr);
-          addToast("Đã tạo bài đăng nhưng upload file thất bại", "warning");
+          addToast("Post created but file upload failed", "warning");
         } finally {
           setIsUploadingFiles(false);
         }
       }
 
-      addToast("Đã tạo bài đăng", "success");
+      addToast("Post created", "success");
       setPostContent("");
       setPostFiles([]);
       fetchPosts();
     } catch (err) {
-      addToast(err.message || "Không tạo được bài đăng", "error");
+      addToast(err.message || "Failed to create post", "error");
     } finally {
       setIsPosting(false);
     }
@@ -186,24 +193,31 @@ function ChannelDetail() {
     setIsEditingPost(true);
     try {
       await updatePost(channelId, editingPost.id, data, authFetch);
-      addToast("Đã cập nhật bài đăng", "success");
+      addToast("Post updated", "success");
       setEditingPost(null);
       fetchPosts();
     } catch (err) {
-      addToast(err.message || "Không cập nhật được bài đăng", "error");
+      addToast(err.message || "Failed to update post", "error");
     } finally {
       setIsEditingPost(false);
     }
   };
 
-  const handleDeletePost = async (postId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa bài đăng này?")) return;
+  const handleDeletePost = (postId) => {
+    setPostToDelete(postId);
+    setIsDeletePostConfirmOpen(true);
+  };
+
+  const confirmDeletePost = async () => {
+    if (!postToDelete) return;
     try {
-      await deletePost(channelId, postId, authFetch);
-      addToast("Đã xóa bài đăng", "success");
+      await deletePost(channelId, postToDelete, authFetch);
+      addToast("Post deleted", "success");
+      setPostToDelete(null);
+      setIsDeletePostConfirmOpen(false);
       fetchPosts();
     } catch (err) {
-      addToast(err.message || "Không xóa được bài đăng", "error");
+      addToast(err.message || "Failed to delete post", "error");
     }
   };
 
@@ -219,7 +233,7 @@ function ChannelDetail() {
         )
       );
     } catch (err) {
-      addToast(err.message || "Không thể thực hiện reaction", "error");
+      addToast(err.message || "Failed to perform reaction", "error");
     } finally {
       setIsReacting(false);
     }
@@ -246,7 +260,7 @@ function ChannelDetail() {
     );
   }
 
-  if (!channel) return <div className="p-6">Channel không tồn tại</div>;
+  if (!channel) return <div className="p-6">Channel not found</div>;
 
   const isWorkspaceAdmin = workspace?.myRole === "WORKSPACE_ADMIN";
   const isChannelAdmin = channel?.myRole === "CHANNEL_ADMIN";
@@ -346,7 +360,7 @@ function ChannelDetail() {
                 onClick={() => setIsMembersModalOpen(true)}
                 className="text-sm font-medium text-gray-600 hover:underline"
               >
-                Thành viên ({onlineUsersCount}/{members.length} đang online)
+                Members ({onlineUsersCount}/{members.length} online)
               </button>
 
               <button
@@ -360,10 +374,10 @@ function ChannelDetail() {
                   });
                 }}
                 className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-                title="Tìm kiếm tin nhắn"
+                title="Search messages"
               >
                 <Search className="h-5 w-5" />
-                <span>Search tin nhắn</span>
+                <span>Search messages</span>
               </button>
 
               {channel.joinCode && (
@@ -371,13 +385,13 @@ function ChannelDetail() {
                   type="button"
                   onClick={() => {
                     navigator.clipboard.writeText(channel.joinCode);
-                    addToast("Đã sao chép mã tham gia channel", "success");
+                    addToast("Copied channel join code", "success");
                   }}
                   className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-                  title="Sao chép mã tham gia"
+                  title="Copy join code"
                 >
                   <Copy className="h-5 w-5" />
-                  <span>Mã tham gia</span>
+                  <span>Join Code</span>
                   <span className="font-mono text-xs tracking-wider text-gray-700 select-none"></span>
                 </button>
               )}
@@ -390,7 +404,7 @@ function ChannelDetail() {
                       onClick={() => setIsRequestsModalOpen(true)}
                       className="text-sm font-medium text-indigo-600 hover:underline"
                     >
-                      Yêu cầu tham gia
+                      Join Requests
                     </button>
                   )}
 
@@ -399,14 +413,14 @@ function ChannelDetail() {
                     onClick={() => setIsAddMemberModalOpen(true)}
                     className="text-sm font-medium text-indigo-600 hover:underline"
                   >
-                    + Thêm thành viên
+                    + Add Member
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setIsUpdateModalOpen(true)}
                     className="rounded-lg p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
-                    title="Cài đặt channel"
+                    title="Channel settings"
                   >
                     <svg
                       className="h-5 w-5"
@@ -435,7 +449,7 @@ function ChannelDetail() {
                 type="button"
                 onClick={handleLeaveChannel}
                 className="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-red-700"
-                title="Rời khỏi channel"
+                title="Leave channel"
               >
                 <svg
                   className="h-5 w-5"
@@ -450,7 +464,7 @@ function ChannelDetail() {
                     d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
-                <span>Rời khỏi</span>
+                <span>Leave</span>
               </button>
             </div>
           </div>
@@ -491,7 +505,7 @@ function ChannelDetail() {
               >
                 <span className="inline-flex items-center justify-center gap-2 w-full">
                   <FileText className="h-4 w-4" />
-                  Bài đăng
+                  Posts
                 </span>
               </button>
               <button
@@ -564,7 +578,7 @@ function ChannelDetail() {
                     <textarea
                       value={postContent}
                       onChange={(e) => setPostContent(e.target.value)}
-                      placeholder={`Chia sẻ với #${channel.name}...`}
+                      placeholder={`Share with #${channel.name}...`}
                       className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
                       rows={3}
                     />
@@ -624,10 +638,10 @@ function ChannelDetail() {
                           className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-indigo-600 transition-colors"
                         >
                           <Image className="h-4 w-4" />
-                          <span>Ảnh/File</span>
+                          <span>Image/File</span>
                         </button>
                         <span className="text-xs text-gray-400">
-                          Bài đăng sẽ hiển thị cho tất cả thành viên
+                          Post will be visible to all members
                         </span>
                       </div>
                       <button
@@ -638,12 +652,12 @@ function ChannelDetail() {
                         {(isPosting || isUploadingFiles) ? (
                           <>
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            {isUploadingFiles ? "Đang tải file..." : "Đang đăng..."}
+                            {isUploadingFiles ? "Uploading files..." : "Posting..."}
                           </>
                         ) : (
                           <>
                             <PenLine className="h-4 w-4" />
-                            Đăng bài
+                            Post
                           </>
                         )}
                       </button>
@@ -657,13 +671,13 @@ function ChannelDetail() {
                 <div className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-indigo-600" />
                   <h3 className="text-base font-semibold text-gray-900">
-                    Bài đăng ({posts.length})
+                    Posts ({posts.length})
                   </h3>
                 </div>
                 {isPostsLoading && (
                   <div className="flex items-center gap-2 text-xs text-gray-500">
                     <span className="h-3 w-3 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent"></span>
-                    Đang tải...
+                    Loading...
                   </div>
                 )}
               </div>
@@ -673,10 +687,10 @@ function ChannelDetail() {
                 <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50/50 py-12 text-center">
                   <FileText className="mx-auto h-12 w-12 text-gray-300" />
                   <p className="mt-3 text-sm text-gray-500">
-                    Chưa có bài đăng nào trong channel này.
+                    No posts in this channel yet.
                   </p>
                   <p className="mt-1 text-xs text-gray-400">
-                    Hãy là người đầu tiên chia sẻ!
+                    Be the first to share!
                   </p>
                 </div>
               ) : (
@@ -831,6 +845,33 @@ function ChannelDetail() {
             onUpdate={() => fetchChannelData(true)}
           />
         )}
+
+        {/* Leave Channel Confirmation */}
+        <ConfirmationModal
+          isOpen={isLeaveConfirmOpen}
+          onClose={() => setIsLeaveConfirmOpen(false)}
+          onConfirm={confirmLeaveChannel}
+          title="Leave Channel"
+          message="Are you sure you want to leave this channel? You will need to be re-invited to rejoin."
+          confirmText="Leave"
+          cancelText="Cancel"
+          variant="danger"
+        />
+
+        {/* Delete Post Confirmation */}
+        <ConfirmationModal
+          isOpen={isDeletePostConfirmOpen}
+          onClose={() => {
+            setIsDeletePostConfirmOpen(false);
+            setPostToDelete(null);
+          }}
+          onConfirm={confirmDeletePost}
+          title="Delete Post"
+          message="Are you sure you want to delete this post? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
+          variant="danger"
+        />
 
         {/* User Profile Panel */}
         {profileUser && (

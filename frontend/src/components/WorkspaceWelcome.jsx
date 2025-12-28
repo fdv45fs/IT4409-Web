@@ -34,11 +34,11 @@ function WorkspaceWelcome() {
       try {
         await navigator.clipboard.writeText(workspace.joinCode);
         setCopied(true);
-        addToast("Đã sao chép mã tham gia vào clipboard", "success");
+        addToast("Copied join code to clipboard", "success");
         setTimeout(() => setCopied(false), 2000);
       } catch (err) {
         console.error("Failed to copy:", err);
-        addToast("Không thể sao chép mã", "error");
+        addToast("Failed to copy code", "error");
       }
     }
   };

@@ -59,16 +59,16 @@ const OnlineUsersModal = ({
                 id="online-users-title"
                 className="text-lg font-semibold text-white"
               >
-                Người dùng online
+                Online Users
               </h2>
               <p className="text-sm text-slate-300">
-                {onlineUsers.length} người đang online
+                {onlineUsers.length} online
               </p>
             </div>
             <button
               onClick={onClose}
               className="rounded-lg p-1 text-white/80 transition hover:bg-white/10 hover:text-white"
-              title="Đóng"
+              title="Close"
             >
               <svg
                 className="h-5 w-5"
@@ -136,7 +136,7 @@ const OnlineUsersModal = ({
                     d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM6 20h12a6 6 0 00-6-6 6 6 0 00-6 6z"
                   />
                 </svg>
-                <p className="text-sm">Không có người nào đang online</p>
+                <p className="text-sm">No one is online right now</p>
               </div>
             )}
           </div>
@@ -147,7 +147,7 @@ const OnlineUsersModal = ({
               onClick={onClose}
               className="w-full rounded-lg bg-[rgb(30,41,59)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 transition"
             >
-              Đóng
+              Close
             </button>
           </div>
         </div>

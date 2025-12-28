@@ -30,7 +30,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
 
   const handleMessageClick = async () => {
     if (!workspaceId) {
-      addToast("Không xác định workspace", "error");
+      addToast("Cannot determine workspace", "error");
       return;
     }
 
@@ -46,7 +46,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
       navigate(`/workspace/${workspaceId}/dm/${conversation.id}`);
       onClose(); // Close profile panel after navigating
     } catch (err) {
-      addToast(err.message || "Không thể tạo cuộc trò chuyện", "error");
+      addToast(err.message || "Failed to create conversation", "error");
     } finally {
       setIsCreatingConversation(false);
     }
@@ -68,11 +68,11 @@ function UserProfilePage({ user, onClose, workspaceId }) {
       >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h1 className="text-lg font-bold text-gray-900">Hồ sơ</h1>
+          <h1 className="text-lg font-bold text-gray-900">Profile</h1>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
-            aria-label="Đóng"
+            aria-label="Close"
           >
             <X className="h-5 w-5" />
           </button>
@@ -101,14 +101,14 @@ function UserProfilePage({ user, onClose, workspaceId }) {
                 </h2>
                 {isCurrentUser && (
                   <span className="px-2.5 py-1 text-xs font-bold bg-slate-100 text-slate-700 rounded-full">
-                    Bạn
+                    You
                   </span>
                 )}
               </div>
 
               <div className="flex items-center justify-center gap-2 text-sm">
                 <div className="h-2.5 w-2.5 rounded-full bg-green-500"></div>
-                <span className="text-green-600 font-medium">Đang hoạt động</span>
+                <span className="text-green-600 font-medium">Active</span>
               </div>
             </div>
           </div>
@@ -116,7 +116,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
           {/* Contact Information */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-              Thông tin liên hệ
+              Contact Information
             </h3>
 
             {/* Email */}
@@ -164,10 +164,10 @@ function UserProfilePage({ user, onClose, workspaceId }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                  Giờ địa phương
+                  Local Time
                 </p>
                 <p className="text-sm text-gray-900 font-medium">
-                  {new Date().toLocaleTimeString("vi-VN", {
+                    {new Date().toLocaleTimeString("en-US", {
                     hour: "2-digit",
                     minute: "2-digit",
                     hour12: false,
@@ -180,7 +180,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
           {/* About Section */}
           <div className="space-y-4">
             <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wide">
-              Giới thiệu
+              About
             </h3>
 
             <div className="space-y-3">
@@ -192,7 +192,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-700">
-                    Thành viên của workspace
+                    Member of workspace
                   </p>
                 </div>
               </div>
@@ -205,7 +205,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-gray-700">
-                    Tham gia từ {new Date().toLocaleDateString("vi-VN", {
+                    Joined {new Date().toLocaleDateString("en-US", {
                       month: "long",
                       year: "numeric"
                     })}
@@ -227,7 +227,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                {isCreatingConversation ? "Đang tải..." : "Nhắn tin"}
+                {isCreatingConversation ? "Loading..." : "Message"}
               </button>
 
               <button
@@ -238,7 +238,7 @@ function UserProfilePage({ user, onClose, workspaceId }) {
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                Thêm vào Channel
+                Add to Channel
               </button>
             </div>
           )}

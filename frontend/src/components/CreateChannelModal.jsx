@@ -31,9 +31,9 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
       });
       onSuccess(newChannel);
     } catch (err) {
-      let errorMsg = err.message || "Không thể tạo channel";
+      let errorMsg = err.message || "Cant create channel. Please try again.";
       if (err.status === 403) {
-        errorMsg = "Bạn không có quyền tạo channel trong workspace này.";
+        errorMsg = "You do not have permission to create a channel in this workspace.";
       }
       setError(errorMsg);
     } finally {
@@ -69,7 +69,7 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
             </div>
             <div>
               <h2 className="text-base font-semibold text-white">
-                Tạo Channel Mới
+                Create New Channel
               </h2>
             </div>
           </div>
@@ -101,7 +101,7 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
                 className="mb-2 block text-sm font-medium"
                 color="rgb(30,41,59)"
               >
-                Tên Channel <span className="text-red-400">*</span>
+                Channel Name <span className="text-red-400">*</span>
               </label>
               <input
                 id="name"
@@ -109,7 +109,7 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
                 value={formState.name}
                 onChange={handleChange("name")}
                 required
-                placeholder="VD: general, random..."
+                placeholder="e.g., general, random..."
                 className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800"
               />
             </div>
@@ -120,13 +120,13 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
                 className="mb-2 block text-sm font-medium"
                 color="rgb(30,41,59)"
               >
-                Mô tả
+                Description
               </label>
               <textarea
                 id="description"
                 value={formState.description}
                 onChange={handleChange("description")}
-                placeholder="Mô tả ngắn về channel..."
+                placeholder="Short description for the channel..."
                 rows={3}
                 className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 transition focus:border-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-800 resize-none"
               />
@@ -138,7 +138,7 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
                 className="mb-3 block text-sm font-medium"
                 color="rgb(30,41,59)"
               >
-                Quyền riêng tư
+                Privacy
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 {/* Public Option */}
@@ -267,14 +267,14 @@ function CreateChannelModal({ workspaceId, onClose, onSuccess }) {
                 className="flex-1 rounded-xl border border-slate-300 px-6 py-3 font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
                 disabled={isLoading}
               >
-                Hủy
+                  Cancel
               </button>
               <button
                 type="submit"
                 className="flex-1 rounded-xl bg-slate-900 px-6 py-3 font-semibold text-white transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-800 disabled:cursor-not-allowed disabled:opacity-70"
                 disabled={isLoading}
               >
-                {isLoading ? "Đang tạo..." : "Tạo Channel"}
+                {isLoading ? "Creating..." : "Create Channel"}
               </button>
             </div>
           </form>

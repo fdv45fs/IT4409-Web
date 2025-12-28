@@ -95,7 +95,7 @@ function EditPostModal({
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-gray-100 bg-white px-6 py-4 rounded-t-2xl">
           <h2 className="text-lg font-semibold text-gray-900">
-            Chỉnh sửa bài đăng
+            Edit Post
           </h2>
           <button
             onClick={onClose}
@@ -112,18 +112,18 @@ function EditPostModal({
             {/* Content */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nội dung bài đăng
+                Post Content
               </label>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Nhập nội dung bài đăng..."
+                placeholder="Input your post content here..."
                 rows={5}
                 className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm placeholder:text-gray-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 autoFocus
               />
               <p className="mt-1 text-xs text-gray-500">
-                {content.length} ký tự
+                {content.length} characters
               </p>
             </div>
 
@@ -131,7 +131,7 @@ function EditPostModal({
             {existingAttachments.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ảnh/File hiện tại
+                  Current Images/Files
                 </label>
                 <div className="space-y-2">
                   {/* Images */}
@@ -153,7 +153,7 @@ function EditPostModal({
                               type="button"
                               onClick={() => handleRemoveExistingAttachment(att.id)}
                               className="absolute top-1 right-1 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                              title="Xóa ảnh"
+                              title="Delete image"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -180,7 +180,7 @@ function EditPostModal({
                               type="button"
                               onClick={() => handleRemoveExistingAttachment(att.id)}
                               className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50"
-                              title="Xóa file"
+                              title="Delete file"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
                             </button>
@@ -196,7 +196,7 @@ function EditPostModal({
             {newFiles.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ảnh/File mới sẽ thêm
+                  New Images/Files to add
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {newFiles.map((file, index) => {
@@ -252,7 +252,7 @@ function EditPostModal({
                 className="inline-flex items-center gap-2 rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-600 hover:border-indigo-400 hover:text-indigo-600 hover:bg-indigo-50/50 transition-colors disabled:opacity-50"
               >
                 <Paperclip className="h-4 w-4" />
-                Thêm ảnh/file
+                Add image/file
               </button>
             </div>
           </div>
@@ -265,7 +265,7 @@ function EditPostModal({
               disabled={isBusy}
               className="rounded-lg px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
-              Hủy
+              Cancel
             </button>
             <button
               type="submit"
@@ -275,12 +275,12 @@ function EditPostModal({
               {isBusy ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {isUploadingFiles ? "Đang tải file..." : "Đang lưu..."}
+                  {isUploadingFiles ? "Uploading files..." : "Saving..."}
                 </>
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Lưu thay đổi
+                  Save changes
                 </>
               )}
             </button>

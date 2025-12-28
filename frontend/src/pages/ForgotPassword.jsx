@@ -30,16 +30,16 @@ function ForgotPasswordPage() {
 
   return (
     <TetAuthLayout
-      title="Quên mật khẩu"
-      subtitle="Nhập email của bạn để nhận link đặt lại mật khẩu"
+      title="Forgot Password"
+      subtitle="Enter your email to receive a password reset link"
       footer={
         <span>
-          Đã nhớ lại mật khẩu?{" "}
+          Remember your password?{" "}
           <Link
             to="/login"
             className="font-medium text-red-600 underline-offset-2 hover:text-red-700 transition-colors"
           >
-            Đăng nhập
+            Sign In
           </Link>
         </span>
       }
@@ -49,7 +49,7 @@ function ForgotPasswordPage() {
           name="email"
           label="Email"
           type="email"
-          placeholder="nhap-email@domain.com"
+          placeholder="enter-email@domain.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
@@ -68,11 +68,11 @@ function ForgotPasswordPage() {
           <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-700 animate-slide-in">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 animate-heartbeat" />
-              <span className="font-semibold">Email đã được gửi!</span>
+              <span className="font-semibold">Email sent!</span>
             </div>
             <p className="mt-2 text-xs text-emerald-600 ml-7">
-              Vui lòng kiểm tra hộp thư của bạn và làm theo hướng dẫn để đặt lại mật khẩu.
-              Link sẽ hết hạn sau 15 phút.
+              Please check your inbox and follow the instructions to reset your password.
+              The link will expire in 15 minutes.
             </p>
           </div>
         )}
@@ -86,12 +86,12 @@ function ForgotPasswordPage() {
           {isLoading ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Đang gửi...</span>
+              <span>Sending...</span>
             </>
           ) : (
             <>
               <Mail className="h-5 w-5" />
-              <span>Gửi link đặt lại mật khẩu</span>
+              <span>Send reset link</span>
             </>
           )}
         </button>
@@ -102,14 +102,14 @@ function ForgotPasswordPage() {
             to="/register"
             className="text-amber-600 hover:text-red-600 transition-colors"
           >
-            Chưa có tài khoản? Đăng ký ngay
+            Don't have an account? Sign up now
           </Link>
           <Link
             to="/login"
             className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
           >
             <ArrowLeft className="h-3 w-3" />
-            <span>Quay lại đăng nhập</span>
+            <span>Back to sign in</span>
           </Link>
         </div>
       </form>

@@ -23,7 +23,7 @@ function ChannelJoinRequestsModal({ channelId, onClose, onUpdate }) {
       );
       setRequests(pendingRequests);
     } catch (err) {
-      setError("Không thể tải danh sách yêu cầu");
+      setError("Unable to load join requests");
     } finally {
       setIsLoading(false);
     }
@@ -39,7 +39,7 @@ function ChannelJoinRequestsModal({ channelId, onClose, onUpdate }) {
       setRequests(requests.filter((r) => r.id !== requestId));
       if (onUpdate) onUpdate();
     } catch (err) {
-      alert(err.message || "Lỗi khi chấp nhận yêu cầu");
+      alert(err.message || "Error approving request");
     }
   };
 
@@ -48,7 +48,7 @@ function ChannelJoinRequestsModal({ channelId, onClose, onUpdate }) {
       await rejectChannelJoinRequest(channelId, requestId, authFetch);
       setRequests(requests.filter((r) => r.id !== requestId));
     } catch (err) {
-      alert(err.message || "Lỗi khi từ chối yêu cầu");
+      alert(err.message || "Error rejecting request");
     }
   };
 
@@ -64,7 +64,7 @@ function ChannelJoinRequestsModal({ channelId, onClose, onUpdate }) {
         {/* Header */}
         <div className="flex items-center justify-between bg-[rgb(30,41,59)] px-6 py-4 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white">
-            Yêu cầu tham gia Channel
+            Channel Join Requests
           </h2>
           <button
             onClick={onClose}
@@ -98,7 +98,7 @@ function ChannelJoinRequestsModal({ channelId, onClose, onUpdate }) {
             </div>
           ) : requests.length === 0 ? (
             <div className="rounded-xl border border-gray-200 bg-gray-50 px-4 py-8 text-center text-gray-500">
-              Không có yêu cầu nào.
+              No pending requests.
             </div>
           ) : (
             <ul className="space-y-3">
@@ -129,13 +129,13 @@ function ChannelJoinRequestsModal({ channelId, onClose, onUpdate }) {
                       onClick={() => handleApprove(req.id)}
                       className="rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700 transition"
                     >
-                      Duyệt
+                      Approve
                     </button>
                     <button
                       onClick={() => handleReject(req.id)}
                       className="rounded-lg bg-red-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-red-700 transition"
                     >
-                      Từ chối
+                      Reject
                     </button>
                   </div>
                 </li>

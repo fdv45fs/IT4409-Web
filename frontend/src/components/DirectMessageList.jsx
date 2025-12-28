@@ -103,11 +103,11 @@ function DirectMessageList({ workspaceId, onStartNewConversation }) {
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Vừa xong";
-    if (diffMins < 60) return `${diffMins} phút`;
-    if (diffHours < 24) return `${diffHours} giờ`;
-    if (diffDays < 7) return `${diffDays} ngày`;
-    return date.toLocaleDateString("vi-VN");
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins} minutes`;
+    if (diffHours < 24) return `${diffHours} hours`;
+    if (diffDays < 7) return `${diffDays} days`;
+    return date.toLocaleDateString("en-US");
   };
 
   if (isLoading) {
@@ -147,12 +147,12 @@ function DirectMessageList({ workspaceId, onStartNewConversation }) {
               d="M19 9l-7 7-7-7"
             />
           </svg>
-          Tin nhắn
+          Messages
         </span>
         <button
           onClick={() => setShowNewDMModal(true)}
           className="rounded p-1 text-slate-400 hover:bg-slate-800 hover:text-white"
-          title="Tin nhắn mới"
+          title="New messages"
         >
           <svg
             className="h-4 w-4"
@@ -173,12 +173,12 @@ function DirectMessageList({ workspaceId, onStartNewConversation }) {
       {/* Conversations list */}
       {conversations.length === 0 ? (
         <div className="px-4 py-4 text-center text-sm text-slate-500">
-          <p>Chưa có tin nhắn nào</p>
+          <p>No messages yet</p>
           <button
             onClick={() => setShowNewDMModal(true)}
             className="mt-2 text-indigo-400 hover:text-indigo-300"
           >
-            Bắt đầu trò chuyện mới
+            Start a new conversation
           </button>
         </div>
       ) : (
@@ -239,8 +239,8 @@ function DirectMessageList({ workspaceId, onStartNewConversation }) {
                     }`}
                   >
                     {conv.lastMessage.isDeleted
-                      ? "Tin nhắn đã bị xóa"
-                      : conv.lastMessage.content || "📎 Đính kèm"}
+                      ? "Message has been deleted"
+                      : conv.lastMessage.content || "📎 Attachment"}
                   </p>
                 )}
               </div>
@@ -337,7 +337,7 @@ function NewDMModal({ workspaceId, onClose, onSuccess }) {
       <div className="relative w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-2xl">
         {/* Header */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">Tin nhắn mới</h2>
+          <h2 className="text-xl font-bold text-white">New messages</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
@@ -366,7 +366,7 @@ function NewDMModal({ workspaceId, onClose, onSuccess }) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm kiếm thành viên..."
+              placeholder="Search members..."
               className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 pl-10 text-white placeholder-slate-500 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
             />
             <svg
@@ -388,12 +388,10 @@ function NewDMModal({ workspaceId, onClose, onSuccess }) {
         {/* Members list */}
         <div className="max-h-64 overflow-y-auto rounded-xl border border-slate-800 bg-slate-800/50">
           {isLoading ? (
-            <div className="p-4 text-center text-slate-400">Đang tải...</div>
+            <div className="p-4 text-center text-slate-400">Loading...</div>
           ) : filteredMembers.length === 0 ? (
             <div className="p-4 text-center text-slate-400">
-              {search
-                ? "Không tìm thấy thành viên"
-                : "Không có thành viên khác"}
+              {search ? "No members found" : "No other members"}
             </div>
           ) : (
             filteredMembers.map((member) => (

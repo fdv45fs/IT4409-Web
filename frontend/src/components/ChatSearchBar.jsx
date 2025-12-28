@@ -3,7 +3,7 @@ import { Search, X } from "lucide-react";
 
 export default function ChatSearchBar({
   onSearch,
-  placeholder = "Tìm kiếm tin nhắn...",
+  placeholder = "Search messages...",
   value,
   onValueChange,
   inputRef: externalInputRef,

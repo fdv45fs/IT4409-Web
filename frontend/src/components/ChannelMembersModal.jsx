@@ -29,7 +29,7 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
       const me = membersData.find((m) => m.userId === currentUser?.id);
       if (me) setMyRole(me.roleName || me.role); // Handle roleName if role object not fully populated
     } catch (err) {
-      setError("Không thể tải danh sách thành viên");
+      setError("Unable to load members");
     } finally {
       setIsLoading(false);
     }
@@ -41,7 +41,7 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
 
   const handleRemoveMember = async (memberId) => {
     if (
-      !window.confirm("Bạn có chắc chắn muốn xóa thành viên này khỏi channel?")
+      !window.confirm("Are you sure you want to remove this member from the channel?")
     ) {
       return;
     }
@@ -49,9 +49,9 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
       await removeChannelMember(channelId, memberId, authFetch);
       setMembers(members.filter((m) => m.id !== memberId));
       if (onUpdate) onUpdate();
-      addToast("Đã xóa thành viên", "success");
+      addToast("Member removed", "success");
     } catch (err) {
-      addToast(err.message || "Không thể xóa thành viên", "error");
+      addToast(err.message || "Unable to remove member", "error");
     }
   };
 
@@ -65,9 +65,9 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
         )
       );
       if (onUpdate) onUpdate();
-      addToast("Đã cập nhật quyền thành viên", "success");
+      addToast("Member role updated", "success");
     } catch (err) {
-      addToast(err.message || "Không thể cập nhật quyền", "error");
+      addToast(err.message || "Unable to update role", "error");
     }
   };
 
@@ -142,7 +142,7 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
           <button
             onClick={() => handleRemoveMember(member.id)}
             className="text-red-400 hover:text-red-300 text-sm font-medium px-2 py-1"
-            title="Xóa thành viên"
+            title="Remove member"
           >
             <svg
               className="h-4 w-4"
@@ -174,9 +174,9 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
       <div className="relative w-full max-w-lg rounded-2xl overflow-hidden bg-white shadow-2xl flex flex-col max-h-[80vh]">
         <div className="flex items-center justify-between bg-[rgb(30,41,59)] px-6 py-4 flex-shrink-0">
           <div>
-            <h2 className="text-2xl font-bold text-white">Thành viên Channel</h2>
+            <h2 className="text-2xl font-bold text-white">Channel Members</h2>
             <p className="text-xs text-white/70 mt-0.5">
-              {onlineMembers.length}/{members.length} đang online
+              {onlineMembers.length}/{members.length} online
             </p>
           </div>
           <button
@@ -211,19 +211,19 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
             </div>
           ) : members.length === 0 ? (
             <div className="text-gray-500 text-center p-4">
-              Không có thành viên nào.
+              No members yet.
             </div>
           ) : (
             <div className="space-y-4">
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                    Đang online ({onlineMembers.length})
+                    Online ({onlineMembers.length})
                   </h3>
                 </div>
                 {onlineMembers.length === 0 ? (
                   <div className="text-sm text-gray-500 rounded-lg bg-gray-50 p-3">
-                    Không có ai đang online.
+                    No one is online.
                   </div>
                 ) : (
                   <ul className="space-y-2">{onlineMembers.map(renderMemberItem)}</ul>
@@ -233,12 +233,12 @@ function ChannelMembersModal({ channelId, onlineUsers = [], onClose, onUpdate })
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <h3 className="text-xs font-semibold text-gray-700 uppercase tracking-wide">
-                    Thành viên khác ({offlineMembers.length})
+                    Other members ({offlineMembers.length})
                   </h3>
                 </div>
                 {offlineMembers.length === 0 ? (
                   <div className="text-sm text-gray-500 rounded-lg bg-gray-50 p-3">
-                    Không còn thành viên nào khác.
+                    No other members.
                   </div>
                 ) : (
                   <ul className="space-y-2">{offlineMembers.map(renderMemberItem)}</ul>

@@ -283,7 +283,7 @@ function DirectMessageChat() {
       window.dispatchEvent(
         new CustomEvent("show:toast", {
           detail: {
-            message: "Không thể gửi tin nhắn với file đính kèm",
+            message: "Cant send message with attachments. Please try again.",
             type: "error",
           },
         })
@@ -387,7 +387,7 @@ function DirectMessageChat() {
         window.dispatchEvent(
           new CustomEvent("show:toast", {
             detail: {
-              message: "Không tìm thấy tin nhắn",
+              message: "Message not found",
               type: "error",
             },
           })
@@ -442,7 +442,7 @@ function DirectMessageChat() {
       window.dispatchEvent(
         new CustomEvent("show:toast", {
           detail: {
-            message: "Không thể tải tin nhắn. Vui lòng thử lại.",
+            message: "Cant jump to message. Please try again.",
             type: "error",
           },
         })
@@ -478,11 +478,11 @@ function DirectMessageChat() {
     yesterday.setDate(yesterday.getDate() - 1);
 
     if (date.toDateString() === today.toDateString()) {
-      return "Hôm nay";
+      return "Today";
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return "Hôm qua";
+      return "Yesterday";
     }
-    return date.toLocaleDateString("vi-VN", {
+      return date.toLocaleDateString("en-US", {
       weekday: "long",
       day: "numeric",
       month: "long",
@@ -506,8 +506,8 @@ function DirectMessageChat() {
             d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
           />
         </svg>
-        <p className="text-lg font-medium">Chọn một cuộc trò chuyện</p>
-        <p className="text-sm">hoặc bắt đầu cuộc trò chuyện mới</p>
+        <p className="text-lg font-medium">Select a conversation</p>
+        <p className="text-sm">or start a new chat</p>
       </div>
     );
   }
@@ -566,9 +566,9 @@ function DirectMessageChat() {
                 </h2>
                 <p className="text-xs text-gray-500">
                   {presenceOnline ? (
-                    <span className="text-green-600">Đang hoạt động</span>
+                    <span className="text-green-600">Online</span>
                   ) : (
-                    "Không hoạt động"
+                    "Offline"
                   )}
                 </p>
               </div>
@@ -586,10 +586,10 @@ function DirectMessageChat() {
               });
             }}
             className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
-            title="Tìm kiếm tin nhắn"
+            title="Search messages"
           >
             <Search className="h-5 w-5" />
-            <span>Search tin nhắn</span>
+            <span>Search messages</span>
           </button>
         </div>
       </div>
@@ -631,7 +631,7 @@ function DirectMessageChat() {
               onClick={() => fetchMessageHistory(page + 1, true)}
               className="text-sm text-indigo-600 hover:text-indigo-700"
             >
-              Tải thêm tin nhắn cũ
+              Load older messages
             </button>
           </div>
         )}
@@ -654,8 +654,7 @@ function DirectMessageChat() {
               {otherUser.fullName || otherUser.username}
             </p>
             <p className="mt-1 text-sm text-gray-500">
-              Đây là khởi đầu cuộc trò chuyện với{" "}
-              {otherUser.fullName || otherUser.username}
+              This is the start of your conversation with {otherUser.fullName || otherUser.username}
             </p>
           </div>
         )}
@@ -667,7 +666,7 @@ function DirectMessageChat() {
             <div className="mb-4 flex items-center gap-2">
               <Search className="h-4 w-4 text-gray-400" />
               <span className="text-sm text-gray-600">
-                Kết quả tìm kiếm cho "{searchQuery}"
+                Result for "{searchQuery}"
               </span>
               {isSearching && (
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-gray-300 border-t-indigo-600"></div>
@@ -690,7 +689,7 @@ function DirectMessageChat() {
                     handleSearchResultClick(message.id);
                   }}
                   className="mb-2 block w-full text-left"
-                  title="Nhấp để nhảy đến tin nhắn"
+                  title="Click to jump to message"
                 >
                   <ChatMessage
                     message={message}
@@ -707,7 +706,7 @@ function DirectMessageChat() {
               ))
             ) : !isSearching ? (
               <p className="text-sm text-gray-500">
-                Không tìm thấy tin nhắn nào
+                Don't have any results for "{searchQuery}"
               </p>
             ) : null}
           </div>
@@ -766,7 +765,7 @@ function DirectMessageChat() {
                 />
               </div>
               <span>
-                {typingUser.fullName || typingUser.username} đang nhập...
+                {typingUser.fullName || typingUser.username} is typing...
               </span>
             </div>
           </div>
@@ -780,7 +779,7 @@ function DirectMessageChat() {
         <button
           onClick={scrollToBottom}
           className="absolute bottom-20 left-1/2 z-50 -translate-x-1/2 flex items-center gap-2 rounded-full bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-all hover:bg-indigo-700 hover:shadow-xl"
-          title="Đi đến tin nhắn mới nhất"
+          title="Go to latest message"
         >
           <svg
             className="h-4 w-4"
@@ -795,7 +794,7 @@ function DirectMessageChat() {
               d="M19 14l-7 7m0 0l-7-7m7 7V3"
             />
           </svg>
-          <span>Tin nhắn mới</span>
+          <span>New messages</span>
         </button>
       )}
 
@@ -811,8 +810,8 @@ function DirectMessageChat() {
         disabled={!isConnected}
         placeholder={
           otherUser
-            ? `Nhắn tin cho ${otherUser.fullName || otherUser.username}...`
-            : "Nhập tin nhắn..."
+            ? `Message to ${otherUser.fullName || otherUser.username}...`
+            : "Type a message..."
         }
       />
 
@@ -823,10 +822,10 @@ function DirectMessageChat() {
             setDeleteConfirmModal({ isOpen: false, messageId: null })
           }
           onConfirm={confirmDelete}
-          title="Xóa tin nhắn"
-          message="Bạn có chắc muốn xóa tin nhắn này? Hành động này không thể hoàn tác."
-          confirmText="Xóa"
-          cancelText="Hủy"
+          title="Delete Message"
+          message="Are you sure you want to delete this message? This action cannot be undone."
+          confirmText="Delete"
+          cancelText="Cancel"
           variant="danger"
         />
       </div>

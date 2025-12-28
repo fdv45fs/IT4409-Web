@@ -20,7 +20,7 @@ function ResetPasswordPage() {
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token");
     if (!tokenFromUrl) {
-      setError("Token không hợp lệ. Vui lòng kiểm tra lại link trong email.");
+      setError("Invalid token. Please check the link in your email.");
     } else {
       setToken(tokenFromUrl);
     }
@@ -38,13 +38,13 @@ function ResetPasswordPage() {
 
     // Validate passwords match
     if (formState.newPassword !== formState.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
+      setError("Passwords do not match");
       return;
     }
 
     // Validate password length
     if (formState.newPassword.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setError("Password must be at least 6 characters");
       return;
     }
 
@@ -68,15 +68,15 @@ function ResetPasswordPage() {
   if (!token && !error) {
     return (
       <TetAuthLayout
-        title="Đặt lại mật khẩu"
-        subtitle="Đang tải..."
+        title="Reset Password"
+        subtitle="Loading..."
       >
         <div className="flex flex-col items-center justify-center py-8">
           <div className="relative">
             <Loader2 className="h-12 w-12 text-red-500 animate-spin" />
             <HorseIcon className="absolute inset-0 m-auto h-6 w-6 text-amber-500" />
           </div>
-          <p className="mt-4 text-gray-500">Đang xử lý...</p>
+          <p className="mt-4 text-gray-500">Processing...</p>
         </div>
       </TetAuthLayout>
     );
@@ -84,16 +84,16 @@ function ResetPasswordPage() {
 
   return (
     <TetAuthLayout
-      title="Đặt lại mật khẩu"
-      subtitle="Nhập mật khẩu mới cho tài khoản của bạn"
+      title="Reset Password"
+      subtitle="Enter a new password for your account"
       footer={
         <span>
-          Đã nhớ lại mật khẩu?{" "}
+          Remember your password?{" "}
           <Link
             to="/login"
             className="font-medium text-red-600 underline-offset-2 hover:text-red-700 transition-colors"
           >
-            Đăng nhập
+            Sign In
           </Link>
         </span>
       }
@@ -101,7 +101,7 @@ function ResetPasswordPage() {
       <form className="space-y-5" onSubmit={handleSubmit}>
         <FormField
           name="newPassword"
-          label="Mật khẩu mới"
+          label="New Password"
           type="password"
           placeholder="••••••••"
           value={formState.newPassword}
@@ -112,7 +112,7 @@ function ResetPasswordPage() {
 
         <FormField
           name="confirmPassword"
-          label="Xác nhận mật khẩu"
+          label="Confirm Password"
           type="password"
           placeholder="••••••••"
           value={formState.confirmPassword}
@@ -134,10 +134,10 @@ function ResetPasswordPage() {
           <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-700 animate-slide-in">
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-emerald-600 animate-heartbeat" />
-              <span className="font-semibold">Đặt lại mật khẩu thành công!</span>
+              <span className="font-semibold">Password reset successfully!</span>
             </div>
             <p className="mt-2 text-xs text-emerald-600 ml-7">
-              Đang chuyển hướng đến trang đăng nhập...
+              Redirecting to sign in page...
             </p>
           </div>
         )}
@@ -151,12 +151,12 @@ function ResetPasswordPage() {
           {isLoading ? (
             <>
               <Loader2 className="h-5 w-5 animate-spin" />
-              <span>Đang xử lý...</span>
+              <span>Processing...</span>
             </>
           ) : (
             <>
               <KeyRound className="h-5 w-5" />
-              <span>Đặt lại mật khẩu</span>
+              <span>Reset Password</span>
             </>
           )}
         </button>
@@ -167,14 +167,14 @@ function ResetPasswordPage() {
             to="/forgot-password"
             className="text-amber-600 hover:text-red-600 transition-colors"
           >
-            Gửi lại link đặt lại mật khẩu
+            Resend reset link
           </Link>
           <Link
             to="/login"
             className="flex items-center gap-1 text-gray-500 hover:text-gray-700 transition-colors"
           >
             <ArrowLeft className="h-3 w-3" />
-            <span>Quay lại đăng nhập</span>
+            <span>Back to sign in</span>
           </Link>
         </div>
       </form>

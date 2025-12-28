@@ -24,7 +24,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
         );
         setChannels(adminChannels);
       } catch (err) {
-        addToast(err.message || "Không thể tải danh sách channel", "error");
+        addToast(err.message || "Unable to load channels", "error");
       } finally {
         setIsLoading(false);
       }
@@ -57,7 +57,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedChannelIds.length === 0) {
-      addToast("Vui lòng chọn ít nhất một channel", "error");
+      addToast("Please select at least one channel", "error");
       return;
     }
 
@@ -83,14 +83,14 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
 
     if (successCount > 0) {
       addToast(
-        `Đã thêm ${user.fullName || user.username} vào ${successCount} channel`,
+        `${user.fullName || user.username} added to ${successCount} channel${successCount > 1 ? "s" : ""}`,
         "success"
       );
     }
 
     if (errorCount > 0) {
       addToast(
-        `Không thể thêm vào ${errorCount} channel (có thể user đã là thành viên)`,
+        `Could not add to ${errorCount} channel${errorCount > 1 ? "s" : ""} (user may already be a member)`,
         "error"
       );
     }
@@ -111,11 +111,11 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
         <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 shrink-0">
           <div>
             <h2 className="text-lg font-bold text-gray-900">
-              Thêm {user.fullName || user.username} vào Channel
+              Add {user.fullName || user.username} to channels
             </h2>
             {selectedChannelIds.length > 0 && (
               <p className="mt-1 text-sm text-indigo-600 font-medium">
-                ✓ Đã chọn {selectedChannelIds.length} channel{selectedChannelIds.length > 1 ? "s" : ""}
+                ✓ Selected {selectedChannelIds.length} channel{selectedChannelIds.length > 1 ? "s" : ""}
               </p>
             )}
           </div>
@@ -134,7 +134,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent"></div>
-                  <p className="mt-3 text-sm text-gray-500">Đang tải danh sách channels...</p>
+                  <p className="mt-3 text-sm text-gray-500">Loading channels...</p>
                 </div>
               </div>
             ) : channels.length === 0 ? (
@@ -144,9 +144,9 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                   </svg>
                 </div>
-                <p className="text-sm font-medium text-gray-900">Không có channel nào</p>
+                <p className="text-sm font-medium text-gray-900">No channels available</p>
                 <p className="text-sm text-gray-500 mt-1">
-                  Bạn không có quyền quản lý channel nào để thêm thành viên
+                  You do not manage any channels to add members
                 </p>
               </div>
             ) : (
@@ -158,7 +158,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Tìm kiếm channel..."
+                    placeholder="Search channels..."
                     className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all text-sm"
                   />
                   {searchQuery && (
@@ -175,7 +175,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
                 {/* Info Text */}
                 <div className="flex items-center justify-between text-sm">
                   <p className="text-gray-600">
-                    Chọn các channel bạn muốn thêm người dùng này vào
+                    Select the channels you want to add this user to
                   </p>
                   <p className="text-gray-500">
                     {filteredChannels.length} channel{filteredChannels.length !== 1 ? "s" : ""}
@@ -185,7 +185,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
                 {/* Channel List */}
                 {filteredChannels.length === 0 ? (
                   <div className="py-8 text-center text-sm text-gray-500">
-                    Không tìm thấy channel nào phù hợp với "{searchQuery}"
+                    No channels match "{searchQuery}"
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -218,7 +218,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
                               </span>
                               {isSelected && (
                                 <span className="ml-auto flex-shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-indigo-600 text-white">
-                                  ✓ Đã chọn
+                                  ✓ Selected
                                 </span>
                               )}
                             </div>
@@ -242,10 +242,10 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
             <p className="text-sm text-gray-600">
               {selectedChannelIds.length > 0 ? (
                 <span className="font-medium text-indigo-600">
-                  {selectedChannelIds.length} channel được chọn
+                  {selectedChannelIds.length} channel selected
                 </span>
               ) : (
-                "Chưa chọn channel nào"
+                "No channel selected"
               )}
             </p>
             <div className="flex items-center gap-3">
@@ -254,7 +254,7 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
                 onClick={onClose}
                 className="rounded-lg px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-200 transition-colors"
               >
-                Hủy
+                Cancel
               </button>
               <button
                 type="submit"
@@ -267,10 +267,10 @@ function AddUserToChannelsModal({ user, workspaceId, onClose }) {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                     </svg>
-                    Đang thêm...
+                    Adding...
                   </span>
                 ) : (
-                  `Thêm vào ${selectedChannelIds.length} channel${selectedChannelIds.length > 1 ? "s" : ""}`
+                  `Add to ${selectedChannelIds.length} channel${selectedChannelIds.length > 1 ? "s" : ""}`
                 )}
               </button>
             </div>
