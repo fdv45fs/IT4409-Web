@@ -46,6 +46,13 @@ function PostCard({
 
   // Check if file is an image
   const isImage = (mimeType) => mimeType?.startsWith("image/");
+  const isVideo = (mimeType) => mimeType?.startsWith("video/");
+
+  const imageAttachments = attachments.filter((a) => isImage(a.mimeType));
+  const videoAttachments = attachments.filter((a) => isVideo(a.mimeType));
+  const otherAttachments = attachments.filter(
+    (a) => !isImage(a.mimeType) && !isVideo(a.mimeType)
+  );
 
   const handleReactionClick = (emoji) => {
     onToggleReaction?.(post.id, emoji);
@@ -150,73 +157,92 @@ function PostCard({
 
       {/* Attachments */}
       {attachments.length > 0 && (
-        <div className="px-5 pb-3">
-          {/* Images grid */}
-          {attachments.filter((a) => isImage(a.mimeType)).length > 0 && (
-            <div className="grid grid-cols-2 gap-2 mb-2">
-              {attachments
-                .filter((a) => isImage(a.mimeType))
-                .slice(0, 4)
-                .map((att, idx) => (
-                  <div
-                    key={att.id}
-                    className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
+        <div className="px-5 pb-3 space-y-3">
+          {/* Videos */}
+          {videoAttachments.length > 0 && (
+            <div className="space-y-2">
+              {videoAttachments.map((att) => (
+                <div
+                  key={att.id}
+                  className="relative aspect-video rounded-lg overflow-hidden bg-black/80"
+                >
+                  <video
+                    src={att.fileUrl}
+                    controls
+                    playsInline
+                    className="w-full h-full object-cover"
+                    preload="metadata"
+                  />
+                  <button
+                    type="button"
                     onClick={() => setPreviewFile(att)}
+                    className="absolute top-2 right-2 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white shadow hover:bg-black/80"
                   >
-                    <img
-                      src={att.fileUrl}
-                      alt={att.fileName}
-                      className="w-full h-full object-cover"
-                    />
-                    {idx === 3 &&
-                      attachments.filter((a) => isImage(a.mimeType)).length >
-                      4 && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <span className="text-white text-lg font-semibold">
-                            +
-                            {attachments.filter((a) => isImage(a.mimeType))
-                              .length - 4}
-                          </span>
-                        </div>
-                      )}
-                  </div>
-                ))}
+                    Phóng to
+                  </button>
+                </div>
+              ))}
             </div>
           )}
 
-          {/* Non-image files */}
-          {attachments.filter((a) => !isImage(a.mimeType)).length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {attachments
-                .filter((a) => !isImage(a.mimeType))
-                .map((att) => {
-                  const ext = (att.fileName || att.fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase() || "";
-                  const typeInfo = (() => {
-                    if (ext === "pdf") return { icon: FileText, color: "text-red-600", border: "border-red-200" };
-                    if (["doc", "docx"].includes(ext)) return { icon: FileText, color: "text-blue-600", border: "border-blue-200" };
-                    if (["xls", "xlsx"].includes(ext)) return { icon: FileText, color: "text-green-600", border: "border-green-200" };
-                    if (["ppt", "pptx"].includes(ext)) return { icon: FileText, color: "text-orange-600", border: "border-orange-200" };
-                    if (["zip", "rar"].includes(ext)) return { icon: FileArchive, color: "text-purple-600", border: "border-purple-200" };
-                    if (["mp3", "wav", "m4a"].includes(ext)) return { icon: FileAudio, color: "text-indigo-600", border: "border-indigo-200" };
-                    if (["mp4", "mov", "avi", "mkv"].includes(ext)) return { icon: FileVideo, color: "text-teal-600", border: "border-teal-200" };
-                    return { icon: FileText, color: "text-gray-600", border: "border-gray-200" };
-                  })();
-                  const Icon = typeInfo.icon;
-                  return (
-                    <button
-                      key={att.id}
-                      type="button"
-                      onClick={() => setPreviewFile(att)}
-                      className={`inline-flex items-center gap-2 rounded-lg bg-white ${typeInfo.border} border-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors shadow-sm`}
-                    >
-                      <Icon className={`h-4 w-4 ${typeInfo.color}`} />
-                      <span className="max-w-[150px] truncate">
-                        {att.fileName}
+          {/* Images grid */}
+          {imageAttachments.length > 0 && (
+            <div className="grid grid-cols-2 gap-2">
+              {imageAttachments.slice(0, 4).map((att, idx) => (
+                <div
+                  key={att.id}
+                  className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
+                  onClick={() => setPreviewFile(att)}
+                >
+                  <img
+                    src={att.fileUrl}
+                    alt={att.fileName}
+                    className="w-full h-full object-cover"
+                  />
+                  {idx === 3 && imageAttachments.length > 4 && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <span className="text-white text-lg font-semibold">
+                        +
+                        {imageAttachments.length - 4}
                       </span>
-                      <Download className="h-3.5 w-3.5 text-gray-400" />
-                    </button>
-                  );
-                })}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Other files */}
+          {otherAttachments.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {otherAttachments.map((att) => {
+                const ext = (att.fileName || att.fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase() || "";
+                const typeInfo = (() => {
+                  if (ext === "pdf") return { icon: FileText, color: "text-red-600", border: "border-red-200" };
+                  if (["doc", "docx"].includes(ext)) return { icon: FileText, color: "text-blue-600", border: "border-blue-200" };
+                  if (["xls", "xlsx"].includes(ext)) return { icon: FileText, color: "text-green-600", border: "border-green-200" };
+                  if (["ppt", "pptx"].includes(ext)) return { icon: FileText, color: "text-orange-600", border: "border-orange-200" };
+                  if (["zip", "rar"].includes(ext)) return { icon: FileArchive, color: "text-purple-600", border: "border-purple-200" };
+                  if (["mp3", "wav", "m4a"].includes(ext)) return { icon: FileAudio, color: "text-indigo-600", border: "border-indigo-200" };
+                  if (["mp4", "mov", "avi", "mkv"].includes(ext)) return { icon: FileVideo, color: "text-teal-600", border: "border-teal-200" };
+                  return { icon: FileText, color: "text-gray-600", border: "border-gray-200" };
+                })();
+                const Icon = typeInfo.icon;
+                return (
+                  <button
+                    key={att.id}
+                    type="button"
+                    onClick={() => setPreviewFile(att)}
+                    className={`inline-flex items-center gap-2 rounded-lg bg-white ${typeInfo.border} border-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors shadow-sm`}
+                  >
+                    <Icon className={`h-4 w-4 ${typeInfo.color}`} />
+                    <span className="max-w-[150px] truncate">
+                      {att.fileName}
+                    </span>
+                    <Download className="h-3.5 w-3.5 text-gray-400" />
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>

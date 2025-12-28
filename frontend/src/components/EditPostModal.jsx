@@ -5,6 +5,7 @@ import {
   Loader2,
   Image,
   FileText,
+  FileVideo,
   Download,
   Paperclip,
   Trash2,
@@ -200,6 +201,7 @@ function EditPostModal({
                 <div className="flex flex-wrap gap-2">
                   {newFiles.map((file, index) => {
                     const isImg = file.type.startsWith("image/");
+                    const isVid = file.type.startsWith("video/");
                     return (
                       <div
                         key={index}
@@ -211,6 +213,8 @@ function EditPostModal({
                             alt={file.name}
                             className="h-8 w-8 rounded object-cover"
                           />
+                        ) : isVid ? (
+                          <FileVideo className="h-6 w-6 text-indigo-500" />
                         ) : (
                           <FileText className="h-6 w-6 text-indigo-500" />
                         )}
@@ -237,7 +241,7 @@ function EditPostModal({
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
                 onChange={handleFileSelect}
                 className="hidden"
               />

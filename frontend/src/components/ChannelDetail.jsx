@@ -25,7 +25,7 @@ import UserProfilePage from "./UserProfilePage";
 import PostCard from "./PostCard";
 import PostDetailModal from "./PostDetailModal";
 import EditPostModal from "./EditPostModal";
-import { Copy, FileText, Folder, MessageSquare, Search, Video, PenLine, Image, X, Loader2 } from "lucide-react";
+import { Copy, FileText, FileVideo, Folder, MessageSquare, Search, Video, PenLine, Image, X, Loader2 } from "lucide-react";
 
 function ChannelDetail() {
   const { channelId } = useParams();
@@ -586,6 +586,7 @@ function ChannelDetail() {
                       <div className="flex flex-wrap gap-2">
                         {postFiles.map((file, index) => {
                           const isImage = file.type.startsWith("image/");
+                          const isVideo = file.type.startsWith("video/");
                           return (
                             <div
                               key={index}
@@ -597,6 +598,8 @@ function ChannelDetail() {
                                   alt={file.name}
                                   className="h-10 w-10 rounded object-cover"
                                 />
+                              ) : isVideo ? (
+                                <FileVideo className="h-8 w-8 text-indigo-500" />
                               ) : (
                                 <FileText className="h-8 w-8 text-gray-500" />
                               )}
@@ -623,7 +626,7 @@ function ChannelDetail() {
                           ref={fileInputRef}
                           type="file"
                           multiple
-                          accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
+                          accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx"
                           onChange={handleFileSelect}
                           className="hidden"
                         />

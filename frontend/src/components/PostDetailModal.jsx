@@ -349,9 +349,15 @@ function PostDetailModal({
   };
 
   const isImage = (mimeType) => mimeType?.startsWith("image/");
+  const isVideo = (mimeType) => mimeType?.startsWith("video/");
   const isPostAuthor = post?.author?.id === currentUser?.id;
   const reactions = post?.reactions || [];
   const attachments = post?.attachments || [];
+  const imageAttachments = attachments.filter((a) => isImage(a.mimeType));
+  const videoAttachments = attachments.filter((a) => isVideo(a.mimeType));
+  const otherAttachments = attachments.filter(
+    (a) => !isImage(a.mimeType) && !isVideo(a.mimeType)
+  );
 
   if (isLoading) {
     return (
@@ -449,47 +455,70 @@ function PostDetailModal({
 
           {/* Attachments */}
           {attachments.length > 0 && (
-            <div className="mt-4">
-              {/* Images */}
-              {attachments.filter((a) => isImage(a.mimeType)).length > 0 && (
-                <div className="grid grid-cols-2 gap-2 mb-3">
-                  {attachments
-                    .filter((a) => isImage(a.mimeType))
-                    .map((att) => (
-                      <div
-                        key={att.id}
-                        className="relative group aspect-video rounded-lg overflow-hidden bg-gray-100"
+            <div className="mt-4 space-y-3">
+              {/* Videos */}
+              {videoAttachments.length > 0 && (
+                <div className="space-y-3">
+                  {videoAttachments.map((att) => (
+                    <div
+                      key={att.id}
+                      className="relative aspect-video rounded-xl overflow-hidden bg-black/80"
+                    >
+                      <video
+                        src={att.fileUrl}
+                        controls
+                        playsInline
+                        preload="metadata"
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPreviewFile(att)}
+                        className="absolute top-3 right-3 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white shadow hover:bg-black/80"
                       >
-                        <img
-                          src={att.fileUrl}
-                          alt={att.fileName}
-                          className="w-full h-full object-cover cursor-zoom-in hover:opacity-90"
-                          onClick={() => setPreviewFile(att)}
-                        />
-                      </div>
-                    ))}
+                        Phóng to
+                      </button>
+                    </div>
+                  ))}
                 </div>
               )}
 
-              {/* Files */}
-              {attachments.filter((a) => !isImage(a.mimeType)).length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {attachments
-                    .filter((a) => !isImage(a.mimeType))
-                    .map((att) => (
-                      <button
-                        key={att.id}
-                        type="button"
+              {/* Images */}
+              {imageAttachments.length > 0 && (
+                <div className="grid grid-cols-2 gap-2">
+                  {imageAttachments.map((att) => (
+                    <div
+                      key={att.id}
+                      className="relative group aspect-video rounded-lg overflow-hidden bg-gray-100"
+                    >
+                      <img
+                        src={att.fileUrl}
+                        alt={att.fileName}
+                        className="w-full h-full object-cover cursor-zoom-in hover:opacity-90"
                         onClick={() => setPreviewFile(att)}
-                        className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm hover:bg-gray-100"
-                      >
-                        <FileText className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-700 max-w-[150px] truncate">
-                          {att.fileName}
-                        </span>
-                        <Download className="h-3.5 w-3.5 text-gray-400" />
-                      </button>
-                    ))}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Other files */}
+              {otherAttachments.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {otherAttachments.map((att) => (
+                    <button
+                      key={att.id}
+                      type="button"
+                      onClick={() => setPreviewFile(att)}
+                      className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm hover:bg-gray-100"
+                    >
+                      <FileText className="h-4 w-4 text-gray-500" />
+                      <span className="text-gray-700 max-w-[150px] truncate">
+                        {att.fileName}
+                      </span>
+                      <Download className="h-3.5 w-3.5 text-gray-400" />
+                    </button>
+                  ))}
                 </div>
               )}
             </div>
