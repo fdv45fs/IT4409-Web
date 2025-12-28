@@ -13,6 +13,7 @@ import { PostModule } from './post/post.module';
 import { CommentModule } from './comment/comment.module';
 import { MaterialModule } from './material/material.module';
 import { ChatModule } from './chat/chat.module';
+import { LinkPreviewModule } from './link-preview/link-preview.module';
 
 @Module({
   controllers: [AppController],
@@ -32,6 +33,8 @@ import { ChatModule } from './chat/chat.module';
     CommentModule,
     MaterialModule,
     ChatModule,
+    LinkPreviewModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }
+

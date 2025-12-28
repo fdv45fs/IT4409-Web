@@ -614,3 +614,10 @@ export function searchDirectMessages(workspaceId, conversationId, query, fetcher
   const params = new URLSearchParams({ q: query });
   return fetcher(`/api/workspaces/${workspaceId}/direct-messages/conversations/${conversationId}/search?${params}`);
 }
+
+// Link Preview API
+export function getLinkPreview(url, fetcher = request) {
+  const params = new URLSearchParams({ url });
+  return fetcher(`/api/link-preview?${params}`);
+}
+

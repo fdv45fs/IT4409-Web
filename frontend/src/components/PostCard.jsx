@@ -10,12 +10,14 @@ import {
   Download,
   X,
 } from "lucide-react";
+import LinkPreviews from "./LinkPreview";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "👏"];
 
 function PostCard({
   post,
   currentUser,
+  authFetch,
   onViewDetail,
   onEdit,
   onDelete,
@@ -28,12 +30,12 @@ function PostCard({
   const isAuthor = post.author?.id === currentUser?.id;
   const createdDate = post.createdAt
     ? new Date(post.createdAt).toLocaleString("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : "";
 
   const reactions = post.reactions || [];
@@ -138,6 +140,9 @@ function PostCard({
             Xem thêm...
           </button>
         )}
+
+        {/* Link Previews */}
+        {authFetch && <LinkPreviews text={post.content} authFetch={authFetch} maxPreviews={1} />}
       </div>
 
       {/* Attachments */}
@@ -162,7 +167,7 @@ function PostCard({
                     />
                     {idx === 3 &&
                       attachments.filter((a) => isImage(a.mimeType)).length >
-                        4 && (
+                      4 && (
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                           <span className="text-white text-lg font-semibold">
                             +
@@ -209,11 +214,10 @@ function PostCard({
               key={reaction.emoji}
               onClick={() => handleReactionClick(reaction.emoji)}
               disabled={isReacting}
-              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs transition-all ${
-                reaction.hasReacted
+              className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs transition-all ${reaction.hasReacted
                   ? "bg-indigo-100 text-indigo-700 ring-1 ring-indigo-200"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-              }`}
+                }`}
               title={reaction.users
                 ?.map((u) => u.fullName || u.username)
                 .join(", ")}
@@ -253,9 +257,8 @@ function PostCard({
                     <button
                       key={emoji}
                       onClick={() => handleReactionClick(emoji)}
-                      className={`rounded-full p-1.5 text-lg hover:scale-125 transition-transform ${
-                        hasReacted ? "bg-indigo-100" : "hover:bg-gray-100"
-                      }`}
+                      className={`rounded-full p-1.5 text-lg hover:scale-125 transition-transform ${hasReacted ? "bg-indigo-100" : "hover:bg-gray-100"
+                        }`}
                     >
                       {emoji}
                     </button>

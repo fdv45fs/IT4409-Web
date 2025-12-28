@@ -26,6 +26,7 @@ import {
   toggleCommentReaction,
   uploadCommentFiles,
 } from "../api";
+import LinkPreviews from "./LinkPreview";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "👏"];
 
@@ -416,6 +417,9 @@ function PostDetailModal({
             <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
               {post.content}
             </p>
+
+            {/* Link Previews */}
+            <LinkPreviews text={post.content} authFetch={authFetch} maxPreviews={2} />
           </div>
 
           {/* Attachments */}
@@ -729,6 +733,11 @@ function PostDetailModal({
                                     <p className="mt-0.5 text-sm text-gray-800 whitespace-pre-wrap break-words">
                                       {comment.content}
                                     </p>
+                                  )}
+
+                                  {/* Link Previews in comment */}
+                                  {comment.content && (
+                                    <LinkPreviews text={comment.content} authFetch={authFetch} maxPreviews={1} />
                                   )}
 
                                   {/* Comment attachments */}
