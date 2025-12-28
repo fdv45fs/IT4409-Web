@@ -1,10 +1,10 @@
 function MeetingControls({ onToggleMic, onToggleCamera, onToggleScreenShare, onLeave, isMicOn, isCameraOn, isScreenSharing }) {
   return (
-    <div className="flex items-center justify-center gap-4 bg-gray-800 px-6 py-4">
+    <div className="flex items-center justify-center gap-4 bg-gray-900/80 backdrop-blur-sm px-6 py-4 rounded-full">
       {/* Microphone Toggle */}
       <button
         onClick={onToggleMic}
-        className={`flex flex-col items-center gap-1 px-4 py-3 rounded-lg transition-all ${
+        className={`flex items-center justify-center p-3 rounded-full transition-all ${
           isMicOn
             ? "bg-gray-700 hover:bg-gray-600 text-white"
             : "bg-red-600 hover:bg-red-700 text-white"
@@ -21,13 +21,12 @@ function MeetingControls({ onToggleMic, onToggleCamera, onToggleScreenShare, onL
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
           </svg>
         )}
-        <span className="text-xs font-medium">{isMicOn ? "Mic On" : "Mic Off"}</span>
       </button>
 
       {/* Camera Toggle */}
       <button
         onClick={onToggleCamera}
-        className={`flex flex-col items-center gap-1 px-4 py-3 rounded-lg transition-all ${
+        className={`flex items-center justify-center p-3 rounded-full transition-all ${
           isCameraOn
             ? "bg-gray-700 hover:bg-gray-600 text-white"
             : "bg-red-600 hover:bg-red-700 text-white"
@@ -43,13 +42,12 @@ function MeetingControls({ onToggleMic, onToggleCamera, onToggleScreenShare, onL
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
           </svg>
         )}
-        <span className="text-xs font-medium">{isCameraOn ? "Camera On" : "Camera Off"}</span>
       </button>
 
       {/* Screen Share Toggle */}
       <button
         onClick={onToggleScreenShare}
-        className={`flex flex-col items-center gap-1 px-4 py-3 rounded-lg transition-all ${
+        className={`flex items-center justify-center p-3 rounded-full transition-all ${
           isScreenSharing
             ? "bg-indigo-600 hover:bg-indigo-700 text-white"
             : "bg-gray-700 hover:bg-gray-600 text-white"
@@ -59,19 +57,17 @@ function MeetingControls({ onToggleMic, onToggleCamera, onToggleScreenShare, onL
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
-        <span className="text-xs font-medium">{isScreenSharing ? "Stop Share" : "Share Screen"}</span>
       </button>
 
       {/* Leave Meeting */}
       <button
         onClick={onLeave}
-        className="flex flex-col items-center gap-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all ml-4"
+        className="flex items-center justify-center p-3 bg-red-600 hover:bg-red-700 text-white rounded-full transition-all ml-2"
         title="Leave meeting"
       >
         <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
         </svg>
-        <span className="text-xs font-medium">Leave</span>
       </button>
     </div>
   );

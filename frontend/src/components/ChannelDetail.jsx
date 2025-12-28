@@ -283,8 +283,8 @@ function ChannelDetail() {
               <div className="flex items-center gap-2 min-w-0">
                 {channel.isPrivate ? (
                   <svg
-                    width="20px"
-                    height="20px"
+                    width="32px"
+                    height="32px"
                     viewBox="0 0 16 16"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -311,8 +311,8 @@ function ChannelDetail() {
                     id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
                     xmlnsXlink="http://www.w3.org/1999/xlink"
-                    width="20px"
-                    height="20px"
+                    width="32px"
+                    height="32px"
                     viewBox="0 0 64 64"
                     enableBackground="new 0 0 64 64"
                     xmlSpace="preserve"
@@ -334,22 +334,10 @@ function ChannelDetail() {
                   </svg>
                 )}
 
-                <h2 className="truncate text-xl font-bold text-gray-900 leading-tight">
+                <h2 className="truncate text-2xl font-bold text-gray-900 leading-snug">
                   {channel.name}
                 </h2>
               </div>
-
-              {channel.joinCode && (
-                <div
-                  className="mt-1 flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
-                  onClick={() => {
-                    navigator.clipboard.writeText(channel.joinCode);
-                    addToast("Đã sao chép mã tham gia channel", "success");
-                  }}
-                >
-                  {channel.description}
-                </div>
-              )}
             </div>
 
             <div className="flex items-center gap-2">

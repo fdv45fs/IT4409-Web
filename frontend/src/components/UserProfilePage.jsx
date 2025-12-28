@@ -58,12 +58,14 @@ function UserProfilePage({ user, onClose, workspaceId }) {
 
   return (
     <>
-    <div
-      className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white border-l border-gray-200 shadow-xl overflow-y-auto z-30"
-      style={{
-        animation: 'slide-in-from-right 0.3s ease-out forwards',
-      }}
-    >
+      <div
+        className="absolute right-0 bottom-0 w-full max-w-md bg-white border-l border-gray-200 shadow-xl overflow-y-auto z-30"
+        style={{
+          animation: "slide-in-from-right 0.3s ease-out forwards",
+          top: "64px",
+          height: "calc(100% - 64px)",
+        }}
+      >
         {/* Header */}
         <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-lg font-bold text-gray-900">Hồ sơ</h1>

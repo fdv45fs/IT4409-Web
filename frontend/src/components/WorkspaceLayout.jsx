@@ -17,6 +17,7 @@ import SearchBar from "./SearchBar";
 import WorkspaceSettings from "./WorkspaceSettings";
 import WorkspaceMembers from "./WorkspaceMembers";
 import JoinRequests from "./JoinRequests";
+import "./WorkspaceLayout.css";
 
 function WorkspaceLayout() {
   const { workspaceId } = useParams();
@@ -166,7 +167,7 @@ function WorkspaceLayout() {
           </div>
 
           {/* Channels List */}
-          <div className="flex-1 overflow-y-auto px-2 py-3">
+          <div className="flex-1 overflow-y-auto px-2 py-3 custom-scrollbar">
             {/* Channels Section Header */}
             <div className="mb-2 flex items-center justify-between px-2">
               <button className="flex items-center text-sm font-medium text-slate-400 hover:text-slate-200">

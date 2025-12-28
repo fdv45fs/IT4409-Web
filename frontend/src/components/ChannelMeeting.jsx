@@ -832,7 +832,7 @@ function ChannelMeeting({
 
     return (
       <>
-        <div className="flex flex-col h-full bg-gray-900">
+        <div className="flex flex-col h-full bg-gray-900 relative">
           {/* Header */}
           <div className="flex items-center justify-between bg-gray-800 text-white px-6 py-3 flex-shrink-0 border-b border-gray-700">
             <div className="flex items-center gap-4">
@@ -898,9 +898,9 @@ function ChannelMeeting({
           </div>
 
           {/* Main content area */}
-          <div className="flex-1 flex overflow-hidden">
-            {/* Video grid */}
-            <div className="flex-1 bg-gray-900">
+          <div className="flex-1 flex flex-col overflow-hidden relative">
+            {/* Video grid - fills entire area */}
+            <div className="flex-1 bg-gray-900 overflow-hidden">
               <VideoGrid
                 participants={participants}
                 localParticipant={localParticipant}
@@ -918,16 +918,18 @@ function ChannelMeeting({
             )}
           </div>
 
-          {/* Controls */}
-          <MeetingControls
-            onToggleMic={handleToggleMic}
-            onToggleCamera={handleToggleCamera}
-            onToggleScreenShare={handleToggleScreenShare}
-            onLeave={handleLeaveMeeting}
-            isMicOn={isMicOn}
-            isCameraOn={isCameraOn}
-            isScreenSharing={isScreenSharing}
-          />
+          {/* Controls - Positioned absolutely at bottom of video area */}
+          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+            <MeetingControls
+              onToggleMic={handleToggleMic}
+              onToggleCamera={handleToggleCamera}
+              onToggleScreenShare={handleToggleScreenShare}
+              onLeave={handleLeaveMeeting}
+              isMicOn={isMicOn}
+              isCameraOn={isCameraOn}
+              isScreenSharing={isScreenSharing}
+            />
+          </div>
         </div>
         {toast && (
           <Toast

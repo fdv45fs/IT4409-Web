@@ -60,7 +60,7 @@ function PostCard({
   };
 
   return (
-    <article className="group relative rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-200">
+    <article className="group relative rounded-2xl border border-gray-300 bg-white shadow-sm transition-all duration-200 hover:shadow-md hover:border-gray-500">
       {/* Header */}
       <div className="flex items-start gap-3 px-5 pt-5">
         {/* Avatar */}
