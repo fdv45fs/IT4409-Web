@@ -15,6 +15,9 @@ import {
   Paperclip,
   Loader2,
   Image,
+  FileAudio,
+  FileVideo,
+  FileArchive,
 } from "lucide-react";
 import {
   getPostDetail,
@@ -27,6 +30,7 @@ import {
   uploadCommentFiles,
 } from "../api";
 import LinkPreviews from "./LinkPreview";
+import FilePreviewModal from "./FilePreviewModal";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "👏"];
 
@@ -34,7 +38,7 @@ const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "👏"];
 const NON_IMAGE_EXTENSIONS = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'zip', 'rar', 'mp3', 'mp4', 'avi', 'mov'];
 
 // Component to preview attachment - tries to render as image first, falls back to file link
-function AttachmentPreview({ attachment }) {
+function AttachmentPreview({ attachment, onPreview }) {
   const [isImage, setIsImage] = useState(true);
   const [loaded, setLoaded] = useState(false);
 
@@ -68,12 +72,16 @@ function AttachmentPreview({ attachment }) {
 
   if (isImage) {
     return (
-      <div className="relative rounded-lg overflow-hidden bg-gray-100 max-w-[120px]">
+      <button
+        type="button"
+        onClick={() => (onPreview ? onPreview(attachment) : window.open(attachment.fileUrl, "_blank"))}
+        className="relative rounded-lg overflow-hidden bg-gray-100 w-24 h-24 flex items-center justify-center group"
+        title={attachment.fileName}
+      >
         <img
           src={attachment.fileUrl}
           alt={attachment.fileName}
-          className={`w-full h-auto max-h-[80px] object-cover cursor-pointer hover:opacity-90 ${loaded ? '' : 'min-h-[40px]'}`}
-          onClick={() => window.open(attachment.fileUrl, "_blank")}
+          className={`w-full h-full object-cover ${loaded ? '' : 'opacity-0'}`}
           onLoad={() => setLoaded(true)}
           onError={() => setIsImage(false)}
         />
@@ -82,22 +90,39 @@ function AttachmentPreview({ attachment }) {
             <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
           </div>
         )}
-      </div>
+        <div className="absolute inset-0 border border-gray-300 rounded-lg pointer-events-none" />
+      </button>
     );
   }
 
-  // Fallback to file link
+  // Non-image file card with type badge
+  const ext = (attachment.fileName || attachment.fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase() || "";
+  const typeInfo = (() => {
+    if (ext === "pdf") return { icon: FileText, color: "text-red-600", bg: "bg-red-50", label: "PDF" };
+    if (["doc", "docx"].includes(ext)) return { icon: FileText, color: "text-blue-600", bg: "bg-blue-50", label: ext.toUpperCase() };
+    if (["xls", "xlsx"].includes(ext)) return { icon: FileText, color: "text-green-600", bg: "bg-green-50", label: ext.toUpperCase() };
+    if (["ppt", "pptx"].includes(ext)) return { icon: FileText, color: "text-orange-600", bg: "bg-orange-50", label: ext.toUpperCase() };
+    if (["zip", "rar"].includes(ext)) return { icon: FileArchive, color: "text-purple-600", bg: "bg-purple-50", label: ext.toUpperCase() };
+    if (["mp3", "wav", "m4a"].includes(ext)) return { icon: FileAudio, color: "text-indigo-600", bg: "bg-indigo-50", label: ext.toUpperCase() };
+    if (["mp4", "mov", "avi", "mkv"].includes(ext)) return { icon: FileVideo, color: "text-teal-600", bg: "bg-teal-50", label: ext.toUpperCase() };
+    return { icon: FileText, color: "text-gray-600", bg: "bg-gray-50", label: ext ? ext.toUpperCase() : "FILE" };
+  })();
+
+  const Icon = typeInfo.icon;
+
   return (
-    <a
-      href={attachment.fileUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-1 text-[10px] text-gray-600 hover:bg-gray-200 hover:text-indigo-600"
+    <button
+      type="button"
+      onClick={() => (onPreview ? onPreview(attachment) : window.open(attachment.fileUrl, "_blank"))}
+      className="w-[160px] h-[110px] rounded-lg bg-gray-100 px-3 py-2 flex flex-col items-center justify-center hover:bg-gray-200 transition-colors"
+      title={attachment.fileName}
     >
-      <FileText className="h-3 w-3" />
-      <span className="max-w-[80px] truncate">{attachment.fileName}</span>
-      <Download className="h-2.5 w-2.5" />
-    </a>
+      <div className={`flex items-center gap-1 ${typeInfo.bg} px-2 py-1 rounded-full mb-2`}>
+        <Icon className={`h-4 w-4 ${typeInfo.color}`} />
+        <span className={`text-[11px] font-medium ${typeInfo.color}`}>{typeInfo.label}</span>
+      </div>
+      <span className="text-[12px] text-gray-700 max-w-[140px] truncate text-center">{attachment.fileName}</span>
+    </button>
   );
 }
 
@@ -119,6 +144,7 @@ function PostDetailModal({
   const [isSendingComment, setIsSendingComment] = useState(false);
   const [isReacting, setIsReacting] = useState(false);
   const [isUploadingComment, setIsUploadingComment] = useState(false);
+  const [previewFile, setPreviewFile] = useState(null);
 
   const [newComment, setNewComment] = useState("");
   const [commentFiles, setCommentFiles] = useState([]);
@@ -151,7 +177,6 @@ function PostDetailModal({
       const commentsArray = Array.isArray(data) ? data : [];
       setComments(commentsArray);
 
-      // Khởi tạo reactions từ comments data
       const reactionsMap = {};
       commentsArray.forEach((comment) => {
         if (comment.reactions) {
@@ -356,9 +381,9 @@ function PostDetailModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 backdrop-blur-sm p-4 pt-10 pb-10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       <div
-        className="relative w-full max-w-2xl rounded-2xl bg-white shadow-2xl animate-in slide-in-from-bottom-4 duration-300"
+        className="relative w-full max-w-2xl h-[85vh] overflow-y-auto custom-scrollbar rounded-2xl bg-white shadow-2xl animate-in slide-in-from-bottom-4 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -438,8 +463,8 @@ function PostDetailModal({
                         <img
                           src={att.fileUrl}
                           alt={att.fileName}
-                          className="w-full h-full object-cover cursor-pointer hover:opacity-90"
-                          onClick={() => window.open(att.fileUrl, "_blank")}
+                          className="w-full h-full object-cover cursor-zoom-in hover:opacity-90"
+                          onClick={() => setPreviewFile(att)}
                         />
                       </div>
                     ))}
@@ -452,21 +477,18 @@ function PostDetailModal({
                   {attachments
                     .filter((a) => !isImage(a.mimeType))
                     .map((att) => (
-                      <div
+                      <button
                         key={att.id}
-                        className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm"
+                        type="button"
+                        onClick={() => setPreviewFile(att)}
+                        className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm hover:bg-gray-100"
                       >
                         <FileText className="h-4 w-4 text-gray-500" />
-                        <a
-                          href={att.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-gray-700 hover:text-indigo-600 max-w-[150px] truncate"
-                        >
+                        <span className="text-gray-700 max-w-[150px] truncate">
                           {att.fileName}
-                        </a>
+                        </span>
                         <Download className="h-3.5 w-3.5 text-gray-400" />
-                      </div>
+                      </button>
                     ))}
                 </div>
               )}
@@ -636,8 +658,8 @@ function PostDetailModal({
             </div>
           </form>
 
-          {/* Comments list */}
-          <div className="max-h-80 overflow-y-auto">
+          {/* Comments list - unified scroll with modal */}
+          <div>
             {isCommentsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent"></div>
@@ -680,7 +702,7 @@ function PostDetailModal({
                         <div className="flex-1 min-w-0">
                           {/* Comment content box */}
                           <div className="inline-block max-w-full">
-                            <div className="rounded-2xl bg-gray-100 px-3 py-2">
+                            <div className="rounded-2xl bg-gray-100 px-4 py-3">
                               <div className="flex items-center gap-1.5">
                                 <span className="text-xs font-semibold text-gray-900">
                                   {comment.author?.fullName ||
@@ -730,7 +752,7 @@ function PostDetailModal({
                               ) : (
                                 <>
                                   {comment.content && comment.content.trim() !== " " && (
-                                    <p className="mt-0.5 text-sm text-gray-800 whitespace-pre-wrap break-words">
+                                    <p className="mt-0.5 text-base text-gray-800 whitespace-pre-wrap break-words">
                                       {comment.content}
                                     </p>
                                   )}
@@ -742,11 +764,12 @@ function PostDetailModal({
 
                                   {/* Comment attachments */}
                                   {comment.attachments && comment.attachments.length > 0 && (
-                                    <div className="mt-2 flex flex-wrap gap-1">
+                                    <div className="mt-3 flex flex-wrap gap-2">
                                       {comment.attachments.map((att) => (
                                         <AttachmentPreview
                                           key={att.id}
                                           attachment={att}
+                                          onPreview={(attachment) => setPreviewFile(attachment)}
                                         />
                                       ))}
                                     </div>
@@ -902,15 +925,9 @@ function PostDetailModal({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="rounded-b-2xl border-t border-gray-100 bg-gray-50/50 px-6 py-3">
-          <button
-            onClick={onClose}
-            className="w-full rounded-lg bg-gray-100 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors"
-          >
-            Đóng
-          </button>
-        </div>
+        {previewFile && (
+          <FilePreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />
+        )}
       </div>
     </div>
   );

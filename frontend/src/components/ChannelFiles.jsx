@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import useAuth from "../hooks/useAuth";
 
 function ChannelFiles({ channelId, isChannelAdmin }) {
-  const { authFetch, currentUser } = useAuth();
+  const { authFetch, authFetchRaw, currentUser } = useAuth();
   const [items, setItems] = useState([]);
   const [currentFolder, setCurrentFolder] = useState(null);
   const [breadcrumbs, setBreadcrumbs] = useState([{ id: null, name: "Files" }]);
@@ -198,8 +198,9 @@ function ChannelFiles({ channelId, isChannelAdmin }) {
 
   const handleDownload = async (item) => {
     try {
-      // Tải file từ S3 URL
-      const response = await fetch(item.fileUrl);
+      // Prefer server-streamed download to preserve auth/CORS
+      const downloadPath = `/upload/channels/${channelId}/materials/files/${item.id}/download`;
+      const response = await authFetchRaw(downloadPath);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');

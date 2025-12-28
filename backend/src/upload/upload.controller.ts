@@ -75,6 +75,42 @@ export class UploadController {
     body.pipe(res);
   }
 
+  /**
+   * Stream a material file (channel materials) via backend to preserve auth and avoid CORS/issues.
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('channels/:channelId/materials/files/:fileId/download')
+  async downloadMaterialFile(
+    @Param('channelId') channelId: string,
+    @Param('fileId') fileId: string,
+    @Req() req: any,
+    @Res() res: Response,
+  ) {
+    // Validate file and channel access via MaterialService
+    const file = await this.materialService.getFile(channelId, fileId);
+
+    const { key, result } = await this.uploadService.getObjectByUrl(
+      file.fileUrl,
+    );
+
+    const fileName = decodeURIComponent(key.split('/').pop() || 'file');
+    const encodedFileName = encodeURIComponent(fileName);
+
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileName.replace(/\"/g, '')}"; filename*=UTF-8''${encodedFileName}`,
+    );
+    res.setHeader('Content-Type', result.ContentType || 'application/octet-stream');
+
+    const body: any = result.Body;
+    if (!body || typeof body.pipe !== 'function') {
+      res.status(500).send('Unable to stream file');
+      return;
+    }
+
+    body.pipe(res);
+  }
+
   /** ---------------------------
    *  Avatar cá nhân
    * --------------------------- */

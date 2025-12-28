@@ -41,6 +41,9 @@ function DirectMessageChat() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = useRef(null);
+  const [searchFocusSignal, setSearchFocusSignal] = useState(0);
+  const [isSearchOpen, setIsSearchOpen] = useState(true);
 
   const {
     isConnected,
@@ -80,6 +83,14 @@ function DirectMessageChat() {
     window.addEventListener("presence:user:update", handler);
     return () => window.removeEventListener("presence:user:update", handler);
   }, [otherUser]);
+
+  // When search is closed, reset search state so the main timeline is visible.
+  useEffect(() => {
+    if (isSearchOpen) return;
+    if (searchQuery) setSearchQuery("");
+    if (searchResults.length) setSearchResults([]);
+    if (isSearching) setIsSearching(false);
+  }, [isSearchOpen, searchQuery, searchResults.length, isSearching]);
 
   // Reset local state when switching conversations
   useEffect(() => {
@@ -326,6 +337,16 @@ function DirectMessageChat() {
     [workspaceId, conversationId, authFetch]
   );
 
+  const handleSearchResultClick = (messageId) => {
+    if (!messageId) return;
+    // Clear the search view and jump to message
+    setSearchQuery("");
+    setSearchResults([]);
+    setTimeout(() => {
+      handleJumpToMessage(messageId);
+    }, 0);
+  };
+
   const handleJumpToMessage = async (messageId) => {
     if (!messageId) return;
 
@@ -554,10 +575,36 @@ function DirectMessageChat() {
             </>
           )}
         </div>
+        <div className="flex items-center">
+          <button
+            type="button"
+            onClick={() => {
+              setIsSearchOpen((open) => {
+                const next = !open;
+                if (next) setSearchFocusSignal((v) => v + 1);
+                return next;
+              });
+            }}
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-800"
+            title="Tìm kiếm tin nhắn"
+          >
+            <Search className="h-5 w-5" />
+            <span>Search tin nhắn</span>
+          </button>
+        </div>
       </div>
 
       {/* Search bar */}
-      <ChatSearchBar onSearch={handleSearch} />
+      {isSearchOpen && (
+        <ChatSearchBar
+          onSearch={handleSearch}
+          value={searchQuery}
+          onValueChange={setSearchQuery}
+          inputRef={searchInputRef}
+          focusSignal={searchFocusSignal}
+          isSearching={isSearching}
+        />
+      )}
 
       {/* Error message */}
       {error && (
@@ -628,7 +675,23 @@ function DirectMessageChat() {
             </div>
             {searchResults.length > 0 ? (
               searchResults.map((message) => (
-                <div key={message.id} className="mb-2">
+                <div
+                  key={message.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={(e) => {
+                    if (e.target.closest("button")) return;
+                    handleSearchResultClick(message.id);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    if (e.target.closest("button")) return;
+                    e.preventDefault();
+                    handleSearchResultClick(message.id);
+                  }}
+                  className="mb-2 block w-full text-left"
+                  title="Nhấp để nhảy đến tin nhắn"
+                >
                   <ChatMessage
                     message={message}
                     currentUserId={currentUser?.id}

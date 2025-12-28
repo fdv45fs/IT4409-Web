@@ -338,6 +338,14 @@ export class MaterialService {
     return { message: 'Folder deleted' };
   }
 
+  // Get single file record and validate channel access
+  async getFile(channelId: string, fileId: string) {
+    const file = await this.prisma.file.findUnique({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
+    if (file.channelId !== channelId) throw new ForbiddenException('File does not belong to this channel');
+    return file;
+  }
+
   // ============================================================
   // ENSURE SYSTEM FOLDER (for Chat Uploads)
   // ============================================================

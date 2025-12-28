@@ -11,6 +11,8 @@ import {
   X,
 } from "lucide-react";
 import LinkPreviews from "./LinkPreview";
+import { FileText, FileArchive, FileAudio, FileVideo } from "lucide-react";
+import FilePreviewModal from "./FilePreviewModal";
 
 const REACTION_EMOJIS = ["👍", "❤️", "😂", "😮", "😢", "👏"];
 
@@ -26,6 +28,7 @@ function PostCard({
 }) {
   const [showMenu, setShowMenu] = useState(false);
   const [showReactionPicker, setShowReactionPicker] = useState(false);
+  const [previewFile, setPreviewFile] = useState(null);
 
   const isAuthor = post.author?.id === currentUser?.id;
   const createdDate = post.createdAt
@@ -158,7 +161,7 @@ function PostCard({
                   <div
                     key={att.id}
                     className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
-                    onClick={() => window.open(att.fileUrl, "_blank")}
+                    onClick={() => setPreviewFile(att)}
                   >
                     <img
                       src={att.fileUrl}
@@ -186,21 +189,34 @@ function PostCard({
             <div className="flex flex-wrap gap-2">
               {attachments
                 .filter((a) => !isImage(a.mimeType))
-                .map((att) => (
-                  <a
-                    key={att.id}
-                    href={att.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    <FileText className="h-4 w-4 text-gray-500" />
-                    <span className="max-w-[150px] truncate">
-                      {att.fileName}
-                    </span>
-                    <Download className="h-3.5 w-3.5 text-gray-400" />
-                  </a>
-                ))}
+                .map((att) => {
+                  const ext = (att.fileName || att.fileUrl || "").split("?")[0].split(".").pop()?.toLowerCase() || "";
+                  const typeInfo = (() => {
+                    if (ext === "pdf") return { icon: FileText, color: "text-red-600", border: "border-red-200" };
+                    if (["doc", "docx"].includes(ext)) return { icon: FileText, color: "text-blue-600", border: "border-blue-200" };
+                    if (["xls", "xlsx"].includes(ext)) return { icon: FileText, color: "text-green-600", border: "border-green-200" };
+                    if (["ppt", "pptx"].includes(ext)) return { icon: FileText, color: "text-orange-600", border: "border-orange-200" };
+                    if (["zip", "rar"].includes(ext)) return { icon: FileArchive, color: "text-purple-600", border: "border-purple-200" };
+                    if (["mp3", "wav", "m4a"].includes(ext)) return { icon: FileAudio, color: "text-indigo-600", border: "border-indigo-200" };
+                    if (["mp4", "mov", "avi", "mkv"].includes(ext)) return { icon: FileVideo, color: "text-teal-600", border: "border-teal-200" };
+                    return { icon: FileText, color: "text-gray-600", border: "border-gray-200" };
+                  })();
+                  const Icon = typeInfo.icon;
+                  return (
+                    <button
+                      key={att.id}
+                      type="button"
+                      onClick={() => setPreviewFile(att)}
+                      className={`inline-flex items-center gap-2 rounded-lg bg-white ${typeInfo.border} border-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors shadow-sm`}
+                    >
+                      <Icon className={`h-4 w-4 ${typeInfo.color}`} />
+                      <span className="max-w-[150px] truncate">
+                        {att.fileName}
+                      </span>
+                      <Download className="h-3.5 w-3.5 text-gray-400" />
+                    </button>
+                  );
+                })}
             </div>
           )}
         </div>
@@ -297,6 +313,9 @@ function PostCard({
           Xem chi tiết
         </button>
       </div>
+      {previewFile && (
+        <FilePreviewModal file={previewFile} onClose={() => setPreviewFile(null)} />
+      )}
     </article>
   );
 }
