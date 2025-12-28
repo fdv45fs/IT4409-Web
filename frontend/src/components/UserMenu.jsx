@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../hooks/useAuth.js";
 
 function UserMenu() {
@@ -7,6 +7,26 @@ function UserMenu() {
   const { currentUser, logout } = useAuth();
   const menuRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isWorkspaceList = location.pathname === "/workspaces";
+
+  const theme = isWorkspaceList
+    ? {
+        container: "border-amber-500 bg-amber-50 shadow-xl",
+        divider: "border-amber-200",
+        textMain: "text-amber-900",
+        textSub: "text-amber-600",
+        item: "text-amber-800 hover:bg-amber-100 hover:text-amber-900",
+        danger: "text-red-600 hover:bg-amber-100 hover:text-red-700",
+      }
+    : {
+        container: "border-slate-700 bg-slate-800 shadow-xl",
+        divider: "border-slate-700",
+        textMain: "text-white",
+        textSub: "text-slate-400",
+        item: "text-slate-300 hover:bg-slate-700 hover:text-white",
+        danger: "text-red-400 hover:bg-slate-700 hover:text-red-300",
+      };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -62,7 +82,7 @@ function UserMenu() {
         navigate("/workspaces");
         break;
       case "profile":
-        navigate("/profile");
+        navigate("/profile", { state: { from: location.pathname } });
         break;
       case "logout":
         logout();
@@ -84,13 +104,13 @@ function UserMenu() {
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 origin-top-right rounded-lg border border-slate-700 bg-slate-800 shadow-xl">
+        <div className={`absolute right-0 mt-2 w-56 origin-top-right rounded-lg border ${theme.container} z-50`}>
           {/* User Info */}
-          <div className="border-b border-slate-700 px-4 py-3">
-            <p className="text-sm font-semibold text-white">
+          <div className={`border-b ${theme.divider} px-4 py-3`}>
+            <p className={`text-sm font-semibold ${theme.textMain}`}>
               {currentUser?.fullName || currentUser?.username}
             </p>
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className={`mt-0.5 text-xs ${theme.textSub}`}>
               @{currentUser?.username}
             </p>
           </div>
@@ -99,7 +119,7 @@ function UserMenu() {
           <div className="py-1">
             <button
               onClick={() => handleMenuClick("home")}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-300 transition hover:bg-slate-700 hover:text-white"
+              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${theme.item}`}
             >
               <svg
                 className="h-5 w-5"
@@ -119,7 +139,7 @@ function UserMenu() {
 
             <button
               onClick={() => handleMenuClick("profile")}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-slate-300 transition hover:bg-slate-700 hover:text-white"
+              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${theme.item}`}
             >
               <svg
                 className="h-5 w-5"
@@ -137,11 +157,11 @@ function UserMenu() {
               Hồ sơ
             </button>
 
-            <div className="my-1 border-t border-slate-700"></div>
+            <div className={`my-1 border-t ${theme.divider}`}></div>
 
             <button
               onClick={() => handleMenuClick("logout")}
-              className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-red-400 transition hover:bg-slate-700 hover:text-red-300"
+              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition ${theme.danger}`}
             >
               <svg
                 className="h-5 w-5"

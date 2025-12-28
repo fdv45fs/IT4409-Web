@@ -3,6 +3,7 @@ import { API_URL } from "../api";
 import useAuth from "../hooks/useAuth";
 import UserProfileModal from "./UserProfileModal";
 import { useUserProfile } from "../contexts/UserProfileContext";
+import FilePreviewModal from "./FilePreviewModal";
 
 const EMOJI_LIST = ["👍", "❤️", "😂", "😮", "😢", "🎉", "🔥", "👏"];
 
@@ -23,6 +24,7 @@ function ChatMessage({
   const [showActions, setShowActions] = useState(false);
   const [showUserProfile, setShowUserProfile] = useState(false);
   const [profilePosition, setProfilePosition] = useState({ x: 0, y: 0 });
+  const [previewFile, setPreviewFile] = useState(null);
   const emojiPickerRef = useRef(null);
   const profileTimeoutRef = useRef(null);
 
@@ -255,24 +257,44 @@ function ChatMessage({
                 const isPdf = urlWithoutQuery.match(/\.pdf$/i);
 
                 if (isImage) {
+                  // Determine specific image mime type
+                  const ext = urlWithoutQuery.match(/\.(jpeg|jpg|gif|png|webp)$/i)?.[1].toLowerCase();
+                  const mimeType = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' 
+                    : ext === 'png' ? 'image/png'
+                    : ext === 'gif' ? 'image/gif'
+                    : ext === 'webp' ? 'image/webp'
+                    : 'image/jpeg';
+                  
                   return (
                     <div key={attachment.id} className="flex-shrink-0">
                       <img
                         src={attachment.fileUrl}
                         alt={fileName}
                         className="h-48 w-auto max-w-xs rounded-lg object-cover border border-gray-200 cursor-pointer hover:opacity-90 transition"
-                        onClick={() => window.open(attachment.fileUrl, '_blank')}
+                        onClick={() => setPreviewFile({ fileUrl: attachment.fileUrl, fileName: fileName, mimeType })}
                       />
                     </div>
                   );
                 } else if (isVideo) {
+                  // Determine specific video mime type
+                  const ext = urlWithoutQuery.match(/\.(mp4|webm|ogg)$/i)?.[1].toLowerCase();
+                  const mimeType = ext === 'mp4' ? 'video/mp4'
+                    : ext === 'webm' ? 'video/webm'
+                    : ext === 'ogg' ? 'video/ogg'
+                    : 'video/mp4';
+                  
                   return (
-                    <div key={attachment.id} className="flex-shrink-0">
+                    <div key={attachment.id} className="flex-shrink-0 relative group">
                       <video
                         src={attachment.fileUrl}
-                        controls
-                        className="h-48 w-auto max-w-xs rounded-lg border border-gray-200"
+                        className="h-48 w-auto max-w-xs rounded-lg border border-gray-200 cursor-pointer"
+                        onClick={() => setPreviewFile({ fileUrl: attachment.fileUrl, fileName: fileName, mimeType })}
                       />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                        <svg className="h-12 w-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </div>
                     </div>
                   );
                 } else {
@@ -475,6 +497,14 @@ function ChatMessage({
           user={message.sender}
           onClose={() => setShowUserProfile(false)}
           position={profilePosition}
+        />
+      )}
+
+      {/* File Preview Modal */}
+      {previewFile && (
+        <FilePreviewModal
+          file={previewFile}
+          onClose={() => setPreviewFile(null)}
         />
       )}
     </div>
