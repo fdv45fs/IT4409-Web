@@ -47,7 +47,7 @@ export default function ChatSearchBar({
   };
 
   return (
-    <div className="relative flex items-center gap-2 px-4 py-1.5 border-b border-gray-100 bg-white">
+    <div className="relative flex items-center gap-3 px-4 py-3 border-b border-gray-300 bg-white">
       <Search className="h-4 w-4 text-gray-400" />
       <input
         ref={inputRef}

@@ -283,8 +283,8 @@ function ChannelDetail() {
               <div className="flex items-center gap-2 min-w-0">
                 {channel.isPrivate ? (
                   <svg
-                    width="20px"
-                    height="20px"
+                    width="32px"
+                    height="32px"
                     viewBox="0 0 16 16"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
@@ -311,8 +311,8 @@ function ChannelDetail() {
                     id="Layer_1"
                     xmlns="http://www.w3.org/2000/svg"
                     xmlnsXlink="http://www.w3.org/1999/xlink"
-                    width="20px"
-                    height="20px"
+                    width="32px"
+                    height="32px"
                     viewBox="0 0 64 64"
                     enableBackground="new 0 0 64 64"
                     xmlSpace="preserve"
@@ -334,22 +334,10 @@ function ChannelDetail() {
                   </svg>
                 )}
 
-                <h2 className="truncate text-xl font-bold text-gray-900 leading-tight">
+                <h2 className="truncate text-2xl font-bold text-gray-900 leading-snug">
                   {channel.name}
                 </h2>
               </div>
-
-              {channel.joinCode && (
-                <div
-                  className="mt-1 flex items-center gap-2 text-xs text-gray-400 hover:text-gray-600 cursor-pointer"
-                  onClick={() => {
-                    navigator.clipboard.writeText(channel.joinCode);
-                    addToast("Đã sao chép mã tham gia channel", "success");
-                  }}
-                >
-                  {channel.description}
-                </div>
-              )}
             </div>
 
             <div className="flex items-center gap-2">
@@ -358,7 +346,7 @@ function ChannelDetail() {
                 onClick={() => setIsMembersModalOpen(true)}
                 className="text-sm font-medium text-gray-600 hover:underline"
               >
-                {onlineUsersCount}/{members.length} thành viên đang online
+                Thành viên ({onlineUsersCount}/{members.length} đang online)
               </button>
 
               <button
@@ -471,24 +459,7 @@ function ChannelDetail() {
         {/* Tabs */}
         {!hideChrome && (
           <div className="border-b border-gray-200">
-            <nav className="flex -mb-px px-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setActiveTab("posts");
-                  if (isInMeeting && !isMeetingMinimized)
-                    setIsMeetingMinimized(true);
-                }}
-                className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "posts"
-                    ? "border-indigo-500 text-indigo-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-              >
-                <span className="inline-flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Bài đăng
-                </span>
-              </button>
+            <nav className="flex -mb-px">
               <button
                 type="button"
                 onClick={() => {
@@ -496,12 +467,12 @@ function ChannelDetail() {
                   if (isInMeeting && !isMeetingMinimized)
                     setIsMeetingMinimized(true);
                 }}
-                className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "chat"
+                className={`flex-1 py-2.5 px-4 text-sm font-medium border-b-2 transition-colors text-center ${activeTab === "chat"
                     ? "border-indigo-500 text-indigo-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
               >
-                <span className="inline-flex items-center gap-2">
+                <span className="inline-flex items-center justify-center gap-2 w-full">
                   <MessageSquare className="h-4 w-4" />
                   Chat
                 </span>
@@ -509,17 +480,18 @@ function ChannelDetail() {
               <button
                 type="button"
                 onClick={() => {
-                  setActiveTab("meeting");
-                  setIsMeetingMinimized(false);
+                  setActiveTab("posts");
+                  if (isInMeeting && !isMeetingMinimized)
+                    setIsMeetingMinimized(true);
                 }}
-                className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "meeting"
+                className={`flex-1 py-2.5 px-4 text-sm font-medium border-b-2 transition-colors text-center ${activeTab === "posts"
                     ? "border-indigo-500 text-indigo-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
               >
-                <span className="inline-flex items-center gap-2">
-                  <Video className="h-4 w-4" />
-                  Meeting
+                <span className="inline-flex items-center justify-center gap-2 w-full">
+                  <FileText className="h-4 w-4" />
+                  Bài đăng
                 </span>
               </button>
               <button
@@ -529,14 +501,30 @@ function ChannelDetail() {
                   if (isInMeeting && !isMeetingMinimized)
                     setIsMeetingMinimized(true);
                 }}
-                className={`py-2.5 px-4 text-sm font-medium border-b-2 transition-colors ${activeTab === "files"
+                className={`flex-1 py-2.5 px-4 text-sm font-medium border-b-2 transition-colors text-center ${activeTab === "files"
                     ? "border-indigo-500 text-indigo-600"
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                   }`}
               >
-                <span className="inline-flex items-center gap-2">
+                <span className="inline-flex items-center justify-center gap-2 w-full">
                   <Folder className="h-4 w-4" />
                   Files & Materials
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab("meeting");
+                  setIsMeetingMinimized(false);
+                }}
+                className={`flex-1 py-2.5 px-4 text-sm font-medium border-b-2 transition-colors text-center ${activeTab === "meeting"
+                    ? "border-indigo-500 text-indigo-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }`}
+              >
+                <span className="inline-flex items-center justify-center gap-2 w-full">
+                  <Video className="h-4 w-4" />
+                  Meeting
                 </span>
               </button>
             </nav>
