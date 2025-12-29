@@ -659,7 +659,11 @@ export class ChatService {
     channelId: string,
     messageId: string,
     dto: AddReactionDto,
-  ): Promise<{ message: string; action: 'added' | 'removed' | 'replaced' }> {
+  ): Promise<{
+    message: string;
+    action: 'added' | 'removed' | 'replaced';
+    removedEmojis?: string[];
+  }> {
     // 1. Kiểm tra channel tồn tại
     const channel = await this.prisma.channel.findUnique({
       where: { id: channelId },
@@ -699,7 +703,7 @@ export class ChatService {
       throw new BadRequestException('Không thể reaction tin nhắn đã xóa');
     }
 
-    // 4. Tìm tất cả reactions của user này cho message
+    // 4. Enforce: mỗi user chỉ có 1 reaction trên 1 message
     const existingReactions = await this.prisma.reaction.findMany({
       where: {
         reactableId: message.reactableId,
@@ -707,16 +711,21 @@ export class ChatService {
       },
     });
 
-    // Kiểm tra xem đã react emoji này chưa
-    const sameEmojiReaction = existingReactions.find(
-      (r) => r.emoji === dto.emoji,
+    const existingEmojis = Array.from(
+      new Set(existingReactions.map((r) => r.emoji)),
     );
 
-    // 5. Toggle reaction
-    if (sameEmojiReaction) {
-      // User đã react emoji này -> xóa nó (un-react)
-      await this.prisma.reaction.delete({
-        where: { id: sameEmojiReaction.id },
+    const hasSameEmoji = existingEmojis.includes(dto.emoji);
+
+    // 5. Toggle behavior
+    if (hasSameEmoji) {
+      // Un-react: idempotent delete (handles duplicates)
+      await this.prisma.reaction.deleteMany({
+        where: {
+          reactableId: message.reactableId,
+          userId,
+          emoji: dto.emoji,
+        },
       });
 
       return {
@@ -725,20 +734,19 @@ export class ChatService {
       };
     }
 
-    // User chưa react emoji này
-    // Xóa tất cả reactions cũ của user (nếu có)
-    let action: 'added' | 'replaced' = 'added';
-    if (existingReactions.length > 0) {
+    // React new emoji: remove all existing reactions (if any), then add new
+    const removedEmojis = existingEmojis;
+    const action: 'added' | 'replaced' = removedEmojis.length > 0 ? 'replaced' : 'added';
+
+    if (removedEmojis.length > 0) {
       await this.prisma.reaction.deleteMany({
         where: {
           reactableId: message.reactableId,
           userId,
         },
       });
-      action = 'replaced';
     }
 
-    // Tạo reaction mới
     await this.prisma.reaction.create({
       data: {
         reactableId: message.reactableId,
@@ -748,8 +756,10 @@ export class ChatService {
     });
 
     return {
-      message: action === 'replaced' ? 'Đã thay thế reaction' : 'Đã thêm reaction thành công',
+      message:
+        action === 'replaced' ? 'Đã thay thế reaction' : 'Đã thêm reaction thành công',
       action,
+      removedEmojis: action === 'replaced' ? removedEmojis : [],
     };
   }
 
@@ -787,23 +797,13 @@ export class ChatService {
       throw new BadRequestException('Tin nhắn không thuộc channel này');
     }
 
-    // 3. Tìm và xóa reaction
-    const reaction = await this.prisma.reaction.findUnique({
+    // 3. Xóa reaction theo kiểu idempotent (không throw nếu đã bị xóa trước đó)
+    await this.prisma.reaction.deleteMany({
       where: {
-        reactableId_userId_emoji: {
-          reactableId: message.reactableId,
-          userId,
-          emoji,
-        },
+        reactableId: message.reactableId,
+        userId,
+        emoji,
       },
-    });
-
-    if (!reaction) {
-      throw new NotFoundException('Không tìm thấy reaction');
-    }
-
-    await this.prisma.reaction.delete({
-      where: { id: reaction.id },
     });
 
     return {
@@ -1748,7 +1748,11 @@ export class ChatService {
     conversationId: string,
     messageId: string,
     dto: AddReactionDto,
-  ): Promise<{ message: string; action: 'added' | 'removed' | 'replaced' }> {
+  ): Promise<{
+    message: string;
+    action: 'added' | 'removed' | 'replaced';
+    removedEmojis?: string[];
+  }> {
     // 1. Kiểm tra conversation tồn tại
     const conversation = await this.prisma.conversation.findUnique({
       where: { id: conversationId },
@@ -1798,7 +1802,7 @@ export class ChatService {
       throw new BadRequestException('Không thể reaction tin nhắn đã xóa');
     }
 
-    // 4. Tìm tất cả reactions của user này cho message
+    // 4. Enforce: mỗi user chỉ có 1 reaction trên 1 message
     const existingReactions = await this.prisma.reaction.findMany({
       where: {
         reactableId: message.reactableId,
@@ -1806,16 +1810,19 @@ export class ChatService {
       },
     });
 
-    // Kiểm tra xem đã react emoji này chưa
-    const sameEmojiReaction = existingReactions.find(
-      (r) => r.emoji === dto.emoji,
+    const existingEmojis = Array.from(
+      new Set(existingReactions.map((r) => r.emoji)),
     );
+    const hasSameEmoji = existingEmojis.includes(dto.emoji);
 
     // 5. Toggle reaction
-    if (sameEmojiReaction) {
-      // User đã react emoji này -> xóa nó (un-react)
-      await this.prisma.reaction.delete({
-        where: { id: sameEmojiReaction.id },
+    if (hasSameEmoji) {
+      await this.prisma.reaction.deleteMany({
+        where: {
+          reactableId: message.reactableId,
+          userId,
+          emoji: dto.emoji,
+        },
       });
 
       return {
@@ -1824,20 +1831,18 @@ export class ChatService {
       };
     }
 
-    // User chưa react emoji này
-    // Xóa tất cả reactions cũ của user (nếu có)
-    let action: 'added' | 'replaced' = 'added';
-    if (existingReactions.length > 0) {
+    const removedEmojis = existingEmojis;
+    const action: 'added' | 'replaced' = removedEmojis.length > 0 ? 'replaced' : 'added';
+
+    if (removedEmojis.length > 0) {
       await this.prisma.reaction.deleteMany({
         where: {
           reactableId: message.reactableId,
           userId,
         },
       });
-      action = 'replaced';
     }
 
-    // Tạo reaction mới
     await this.prisma.reaction.create({
       data: {
         reactableId: message.reactableId,
@@ -1847,8 +1852,10 @@ export class ChatService {
     });
 
     return {
-      message: action === 'replaced' ? 'Đã thay thế reaction' : 'Đã thêm reaction thành công',
+      message:
+        action === 'replaced' ? 'Đã thay thế reaction' : 'Đã thêm reaction thành công',
       action,
+      removedEmojis: action === 'replaced' ? removedEmojis : [],
     };
   }
 
@@ -1904,23 +1911,13 @@ export class ChatService {
       throw new BadRequestException('Tin nhắn không thuộc conversation này');
     }
 
-    // 4. Tìm và xóa reaction
-    const reaction = await this.prisma.reaction.findUnique({
+    // 4. Xóa reaction theo kiểu idempotent (không throw nếu đã bị xóa trước đó)
+    await this.prisma.reaction.deleteMany({
       where: {
-        reactableId_userId_emoji: {
-          reactableId: message.reactableId,
-          userId,
-          emoji,
-        },
+        reactableId: message.reactableId,
+        userId,
+        emoji,
       },
-    });
-
-    if (!reaction) {
-      throw new NotFoundException('Không tìm thấy reaction');
-    }
-
-    await this.prisma.reaction.delete({
-      where: { id: reaction.id },
     });
 
     return {

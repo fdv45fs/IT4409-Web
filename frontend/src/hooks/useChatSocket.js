@@ -118,7 +118,19 @@ export function useChatSocket(token, channelId) {
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id !== messageId) return m;
-          const reactions = [...(m.reactions || [])];
+          // Enforce: mỗi user chỉ có 1 reaction trên 1 message
+          const reactions = (m.reactions || [])
+            .map((r) => {
+              if (!r?.userIds?.includes(user.id)) return r;
+              if (r.emoji === emoji) return r;
+              return {
+                ...r,
+                count: Math.max(0, (r.count || 0) - 1),
+                userIds: (r.userIds || []).filter((id) => id !== user.id),
+              };
+            })
+            .filter((r) => (r?.count || 0) > 0);
+
           const existingReaction = reactions.find((r) => r.emoji === emoji);
           if (existingReaction) {
             if (!existingReaction.userIds.includes(user.id)) {
@@ -140,9 +152,11 @@ export function useChatSocket(token, channelId) {
           const reactions = (m.reactions || [])
             .map((r) => {
               if (r.emoji !== emoji) return r;
+              // Idempotent: ignore if this user wasn't in userIds
+              if (!r.userIds?.includes(user.id)) return r;
               return {
                 ...r,
-                count: r.count - 1,
+                count: Math.max(0, r.count - 1),
                 userIds: r.userIds.filter((id) => id !== user.id),
               };
             })

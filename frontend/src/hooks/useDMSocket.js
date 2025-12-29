@@ -144,7 +144,19 @@ export function useDMSocket(token, conversationId, workspaceId) {
       setMessages((prev) =>
         prev.map((m) => {
           if (m.id !== messageId) return m;
-          const reactions = [...(m.reactions || [])];
+          // Enforce: mỗi user chỉ có 1 reaction trên 1 message
+          const reactions = (m.reactions || [])
+            .map((r) => {
+              if (!r?.userIds?.includes(user.id)) return r;
+              if (r.emoji === emoji) return r;
+              return {
+                ...r,
+                count: Math.max(0, (r.count || 0) - 1),
+                userIds: (r.userIds || []).filter((id) => id !== user.id),
+              };
+            })
+            .filter((r) => (r?.count || 0) > 0);
+
           const existingReaction = reactions.find((r) => r.emoji === emoji);
           if (existingReaction) {
             if (!existingReaction.userIds.includes(user.id)) {

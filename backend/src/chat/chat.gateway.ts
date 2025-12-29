@@ -490,6 +490,32 @@ export class ChatGateway
             username: user.username,
           },
         });
+      } else if (result.action === 'replaced') {
+        const removedEmojis = (result.removedEmojis || []).filter(
+          (e) => e && e !== reaction.emoji,
+        );
+
+        for (const oldEmoji of removedEmojis) {
+          this.server.to(`channel:${channelId}`).emit('reaction:removed', {
+            channelId,
+            messageId,
+            emoji: oldEmoji,
+            user: {
+              id: user.id,
+              username: user.username,
+            },
+          });
+        }
+
+        this.server.to(`channel:${channelId}`).emit('reaction:added', {
+          channelId,
+          messageId,
+          emoji: reaction.emoji,
+          user: {
+            id: user.id,
+            username: user.username,
+          },
+        });
       } else {
         this.server.to(`channel:${channelId}`).emit('reaction:added', {
           channelId,
@@ -1041,6 +1067,32 @@ export class ChatGateway
       // Broadcast reaction to conversation based on action
       if (result.action === 'removed') {
         this.server.to(`dm:${conversationId}`).emit('dm:reaction:removed', {
+          conversationId,
+          messageId,
+          emoji: reaction.emoji,
+          user: {
+            id: user.id,
+            username: user.username,
+          },
+        });
+      } else if (result.action === 'replaced') {
+        const removedEmojis = (result.removedEmojis || []).filter(
+          (e) => e && e !== reaction.emoji,
+        );
+
+        for (const oldEmoji of removedEmojis) {
+          this.server.to(`dm:${conversationId}`).emit('dm:reaction:removed', {
+            conversationId,
+            messageId,
+            emoji: oldEmoji,
+            user: {
+              id: user.id,
+              username: user.username,
+            },
+          });
+        }
+
+        this.server.to(`dm:${conversationId}`).emit('dm:reaction:added', {
           conversationId,
           messageId,
           emoji: reaction.emoji,

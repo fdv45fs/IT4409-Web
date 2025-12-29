@@ -67,6 +67,77 @@ function ChannelChat({
     updateMessage,
   } = useChatSocket(accessToken, channelId);
 
+  const handleAddReaction = useCallback(
+    (messageId, emoji) => {
+      const userId = currentUser?.id;
+      if (userId) {
+        // Optimistic UI update
+        setInitialMessages((prev) =>
+          (prev || []).map((m) => {
+            if (m.id !== messageId) return m;
+            // Enforce: mỗi user chỉ có 1 reaction trên 1 message
+            const cleaned = (m.reactions || [])
+              .map((r) => {
+                if (!r?.userIds?.includes(userId)) return r;
+                return {
+                  ...r,
+                  count: Math.max(0, (r.count || 0) - 1),
+                  userIds: (r.userIds || []).filter((id) => id !== userId),
+                };
+              })
+              .filter((r) => (r?.count || 0) > 0);
+
+            const reactions = [...cleaned];
+            let reaction = reactions.find((r) => r.emoji === emoji);
+            if (!reaction) {
+              reaction = { emoji, count: 0, userIds: [] };
+              reactions.push(reaction);
+            }
+
+            if (!reaction.userIds?.includes(userId)) {
+              reaction.count += 1;
+              reaction.userIds = [...(reaction.userIds || []), userId];
+            }
+
+            return { ...m, reactions };
+          })
+        );
+      }
+
+      addReaction(messageId, emoji);
+    },
+    [addReaction, currentUser?.id, setInitialMessages]
+  );
+
+  const handleRemoveReaction = useCallback(
+    (messageId, emoji) => {
+      const userId = currentUser?.id;
+      if (userId) {
+        // Optimistic UI update
+        setInitialMessages((prev) =>
+          (prev || []).map((m) => {
+            if (m.id !== messageId) return m;
+            const reactions = (m.reactions || [])
+              .map((r) => {
+                if (r.emoji !== emoji) return r;
+                if (!r.userIds?.includes(userId)) return r;
+                return {
+                  ...r,
+                  count: Math.max(0, (r.count || 0) - 1),
+                  userIds: (r.userIds || []).filter((id) => id !== userId),
+                };
+              })
+              .filter((r) => (r.count || 0) > 0);
+            return { ...m, reactions };
+          })
+        );
+      }
+
+      removeReaction(messageId, emoji);
+    },
+    [currentUser?.id, removeReaction, setInitialMessages]
+  );
+
   useEffect(() => {
     if (typeof onOnlineUsersChange !== "function") return;
     onOnlineUsersChange(onlineUsers);
@@ -536,8 +607,8 @@ function ChannelChat({
                     message={message}
                     currentUserId={currentUser?.id}
                     onDelete={handleDelete}
-                    onAddReaction={addReaction}
-                    onRemoveReaction={removeReaction}
+                    onAddReaction={handleAddReaction}
+                    onRemoveReaction={handleRemoveReaction}
                     onReply={handleReply}
                     onJumpToMessage={handleJumpToMessage}
                     isHighlighted={false}
@@ -574,8 +645,8 @@ function ChannelChat({
                     message={message}
                     currentUserId={currentUser?.id}
                     onDelete={handleDelete}
-                    onAddReaction={addReaction}
-                    onRemoveReaction={removeReaction}
+                    onAddReaction={handleAddReaction}
+                    onRemoveReaction={handleRemoveReaction}
                     onReply={handleReply}
                     onJumpToMessage={handleJumpToMessage}
                     isHighlighted={highlightMessageId === message.id}
