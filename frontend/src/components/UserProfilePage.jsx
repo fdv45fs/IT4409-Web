@@ -4,13 +4,11 @@ import { useNavigate } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { getOrCreateDirectConversation } from "../api";
 import { useToast } from "../contexts/ToastContext";
-import AddUserToChannelsModal from "./AddUserToChannelsModal";
 
 function UserProfilePage({ user, onClose, workspaceId }) {
   const { currentUser, authFetch } = useAuth();
   const navigate = useNavigate();
   const { addToast } = useToast();
-  const [isAddToChannelsModalOpen, setIsAddToChannelsModalOpen] = useState(false);
   const [isCreatingConversation, setIsCreatingConversation] = useState(false);
 
   useEffect(() => {
@@ -52,10 +50,6 @@ function UserProfilePage({ user, onClose, workspaceId }) {
     }
   };
 
-  const handleAddToChannelsClick = () => {
-    setIsAddToChannelsModalOpen(true);
-  };
-
   return (
     <>
       <div
@@ -94,7 +88,8 @@ function UserProfilePage({ user, onClose, workspaceId }) {
               </div>
             )}
 
-            <div className="mt-4 space-y-2">
+            {/* Name and status */}
+            <div className="mt-4 space-y-1">
               <div className="flex items-center justify-center gap-2">
                 <h2 className="text-2xl font-bold text-gray-900">
                   {user.fullName || user.username}
@@ -105,12 +100,26 @@ function UserProfilePage({ user, onClose, workspaceId }) {
                   </span>
                 )}
               </div>
-
-              <div className="flex items-center justify-center gap-2 text-sm">
-                <div className="h-2.5 w-2.5 rounded-full bg-green-500"></div>
-                <span className="text-green-600 font-medium">Active</span>
+              <div className="flex items-center justify-center gap-1.5 text-sm text-green-600">
+                <div className="h-2 w-2 rounded-full bg-green-500"></div>
+                <span className="font-medium">Active</span>
               </div>
             </div>
+
+            {/* Message Button - below name, full width */}
+            {!isCurrentUser && (
+              <button
+                type="button"
+                onClick={handleMessageClick}
+                disabled={isCreatingConversation}
+                className="mt-4 w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-500/30 hover:shadow-xl hover:shadow-slate-500/40 hover:from-slate-700 hover:to-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-500/50 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                {isCreatingConversation ? "Loading..." : "Message"}
+              </button>
+            )}
           </div>
 
           {/* Contact Information */}
@@ -214,45 +223,8 @@ function UserProfilePage({ user, onClose, workspaceId }) {
               </div>
             </div>
           </div>
-
-          {/* Actions */}
-          {!isCurrentUser && (
-            <div className="space-y-3 pt-4 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={handleMessageClick}
-                disabled={isCreatingConversation}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-slate-600 to-slate-700 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-500/30 hover:shadow-xl hover:shadow-slate-500/40 hover:from-slate-700 hover:to-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-500/50 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                {isCreatingConversation ? "Loading..." : "Message"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleAddToChannelsClick}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-xl border-2 border-gray-300 bg-white px-5 py-3 text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-300/50 active:scale-[0.98] transition-all duration-200"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Add to Channel
-              </button>
-            </div>
-          )}
         </div>
       </div>
-
-      {/* Add to Channels Modal */}
-      {isAddToChannelsModalOpen && (
-        <AddUserToChannelsModal
-          user={user}
-          workspaceId={workspaceId}
-          onClose={() => setIsAddToChannelsModalOpen(false)}
-        />
-      )}
     </>
   );
 }

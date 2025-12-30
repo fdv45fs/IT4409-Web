@@ -151,8 +151,9 @@ function Profile() {
       await authFetch("/api/users/me/change-password", {
         method: "PATCH",
         body: JSON.stringify({
-          currentPassword: passwordForm.currentPassword,
+          oldPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
+          confirmPassword: passwordForm.confirmPassword,
         }),
       });
 
